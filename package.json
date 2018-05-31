@@ -1,0 +1,8 @@
+{
+    "name" : "mauri870-blog",
+    "scripts": { 
+        "dev" : "hugo server -D",
+        "build": "hugo",
+        "publish": "git add public && git commit -m \"Build blog\" && git subtree push --prefix public origin master" 
+    }
+}

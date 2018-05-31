@@ -3,17 +3,17 @@
 Development with live reload:
 
 ```bash
-hugo server -D
+yarn run dev
 ```
 
 Build with minification:
 
 ```bash
-hugo
+yarn run build
 ```
 
 Publish:
 
 ```bash
-git add public && git commit -m \"Build blog\" && git subtree push --prefix public origin master
+yarn run publish
 ```
