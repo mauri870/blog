@@ -53,7 +53,7 @@
                     </h1>
                     <h2 class="headline">
                     May 31, 2018 20:55
-                    · 582 words
+                    · 587 words
                     · 3 minute read
                       <span class="tags">
                       
@@ -112,14 +112,14 @@
 <pre><code class="language-bash">mkfs.vfat -n 'PLAN9' -I /dev/sdc
 </code></pre>
 
-<p>Download the plan9 image and write to your sdcard:</p>
+<p>Download the plan9 image and write to your sdcard or save it somewhere:</p>
 
 <blockquote>
 <p><strong>Remember to change your device!</strong></p>
 </blockquote>
 
 <pre><code>wget -O - http://plan9.bell-labs.com/sources/contrib/miller/9pi.img.gz | \
-  gunzip -c &gt; dd bs=4M of=/dev/sdc
+  gunzip -c | dd bs=4M of=/dev/null status=progress
 </code></pre>
 
 <p>Now you are ready to boot Plan9 on raspberry pi!</p>
