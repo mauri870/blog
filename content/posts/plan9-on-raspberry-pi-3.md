@@ -32,13 +32,13 @@ Format the device to FAT32:
 mkfs.vfat -n 'PLAN9' -I /dev/sdc
 ```
 
-Download the plan9 image and write to your sdcard:
+Download the plan9 image and write to your sdcard or save it somewhere:
 
 > **Remember to change your device!**
 
 ```
 wget -O - http://plan9.bell-labs.com/sources/contrib/miller/9pi.img.gz | \
-  gunzip -c > dd bs=4M of=/dev/sdc
+  gunzip -c | dd bs=4M of=/dev/null status=progress
 ```
 
 Now you are ready to boot Plan9 on raspberry pi!
