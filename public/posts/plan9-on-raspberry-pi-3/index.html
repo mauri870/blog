@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+    <meta name="author" content="Mauri de Souza Nunes">
+    <meta name="description" content="Plan9 is a research operating system from the same group who created UNIX at Bell Labs Computing Sciences Research Center (CSRC). It emerged in the 80s, and its early development coincided with continuing development of the later versions of Research UNIX. Let&rsquo;s install it in the raspberry pi 3!
+
+">
+		<meta name="generator" content="Hugo 0.40.3" />
+		<title>Plan9 on raspberry pi 3 &middot; Mauri870&#39;s dev blog</title>
+		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
+		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
+		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://mauri870.github.io/blog/index.xml" rel="alternate" type="application/rss+xml" title="Mauri870&#39;s dev blog" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+  <a href='/'>Home</a>
+	
+	
+		<a href='https://mauri870.github.io/blog/'> <span class="arrow">←</span>Blog</a>
+	
+	<a href='https://mauri870.github.io/blog/posts'>Archive</a>
+	<a href='https://mauri870.github.io/blog/tags'>Tags</a>
+	<a href='https://mauri870.github.io/blog/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://mauri870.github.io/blog/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Plan9 on raspberry pi 3
+                    </h1>
+                    <h2 class="headline">
+                    May 31, 2018 20:55
+                    · 582 words
+                    · 3 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a style="padding-left: 1em;" href="https://mauri870.github.io/blog/tags/plan9">Plan9</a>
+                          
+                              <a style="padding-left: 1em;" href="https://mauri870.github.io/blog/tags/raspberry-pi-3">Raspberry Pi 3</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                  
+                    <div id="toc">
+                      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#1-installing-plan9">1. Installing Plan9</a></li>
+<li><a href="#3-first-steps">3. First steps</a></li>
+<li><a href="#3-installing-git">3. Installing Git</a></li>
+<li><a href="#2-installing-golang">2. Installing Golang</a></li>
+</ul></li>
+</ul>
+</nav>
+                    </div>
+                  
+                
+                <section id="post-body">
+                    <p>Plan9 is a research operating system from the same group who created UNIX at Bell Labs Computing Sciences Research Center (CSRC). It emerged in the 80s, and its early development coincided with continuing development of the later versions of Research UNIX. Let&rsquo;s install it in the raspberry pi 3!</p>
+
+<p></p>
+
+<h2 id="1-installing-plan9">1. Installing Plan9</h2>
+
+<p>To install the plan9 os you need a micro sdcard with at least 2GB (I use a 4GB one).</p>
+
+<blockquote>
+<p><strong>You probably need to log in as root in order to run the following commands</strong></p>
+</blockquote>
+
+<p>Check the name of your sd card:</p>
+
+<pre><code class="language-bash">fdisk -l
+</code></pre>
+
+<blockquote>
+<p>For me it&rsquo;s <code>/dev/sdc</code>.</p>
+</blockquote>
+
+<p>Format the device to FAT32:</p>
+
+<pre><code class="language-bash">mkfs.vfat -n 'PLAN9' -I /dev/sdc
+</code></pre>
+
+<p>Download the plan9 image and write to your sdcard:</p>
+
+<blockquote>
+<p><strong>Remember to change your device!</strong></p>
+</blockquote>
+
+<pre><code>wget -O - http://plan9.bell-labs.com/sources/contrib/miller/9pi.img.gz | \
+  gunzip -c &gt; dd bs=4M of=/dev/sdc
+</code></pre>
+
+<p>Now you are ready to boot Plan9 on raspberry pi!</p>
+
+<h2 id="3-first-steps">3. First steps</h2>
+
+<p>Since the plan9 image you just downloaded is a fully bootable one, it not require the installation step.</p>
+
+<p>When the pi boots up, you get into the Plan9 graphical interface, <a href="http://man.cat-v.org/plan_9/1/rio">rio(1)</a>. Rio is a minimalist window manager, it&rsquo;s just a bunch of rectangles that you draw in the screen 😄.</p>
+
+<p><img src="../../images/posts/plan9.png" alt="Plan9 Rio" /></p>
+
+<p>To use Plan9 you definitely need a three button mouse. Hold the right button, hover <code>New</code> and release. Again hold the right button, drag a rectangle big enough and release. Now you have a shell, <a href="http://man.cat-v.org/plan_9/1/rc">rc(1)</a>. First of all check your internet connection:</p>
+
+<blockquote>
+<p>I&rsquo;m using ethernet, probably wifi only work on plan9 forks like 9front.</p>
+</blockquote>
+
+<pre><code class="language-bash">ndb/dns # start the dns resolver
+ip/ipconfig # configure interfaces and get ip address with dhcp
+ip/ping google.com # check internet connection
+</code></pre>
+
+<blockquote>
+<p>In rc <code>Ctrl + c</code> not work, try <code>Del</code> to stop the ping.</p>
+</blockquote>
+
+<p>As you can see, some of the commands are similar with the UNIX ones, but Plan9 is an entirely different operating system in several ways. You can also note the concept of namespaces, all ip related commands are in <code>ip/</code>, disk in <code>disk/</code> and so on.</p>
+
+<blockquote>
+<p>If you receive an error about dns resolution, try to reboot and run DNSSERVER=8.8.8.8 before the commands above.</p>
+</blockquote>
+
+<p>Now let&rsquo;s try to use a web browser. You are thinking about Chrome? Firefox? Nop. Plan9 has it&rsquo;s own web browser, <a href="http://man.cat-v.org/plan_9/1/abaco">abaco(1)</a></p>
+
+<pre><code class="language-bash">webfs # start a filesystem that handle urls
+abaco 'http://google.com/search?q=plan9'
+</code></pre>
+
+<p>It&rsquo;s pretty ugly I know, no css, no js, <em>but it works</em>!</p>
+
+<blockquote>
+<p>The network settings are not persisted if you reboot, so just like your <code>.profile</code> in bash, add the commands to <code>$home/lib/profile</code>.</p>
+</blockquote>
+
+<h2 id="3-installing-git">3. Installing Git</h2>
+
+<p>Unfortunately git is not ported to Plan9, but David du Colombier wrote a rc script to mimic the original git commands:</p>
+
+<pre><code class="language-bash">hget -o $home/bin/rc/git http://9legacy.org/9legacy/tools/git
+chmod +x $home/bin/rc/git
+</code></pre>
+
+<p>The rc scripts are stored in the <code>$home/bin/rc</code> directory and automatically appended to /bin, so you can run then in the global namespace.</p>
+
+<h2 id="2-installing-golang">2. Installing Golang</h2>
+
+<pre><code class="language-bash">hget -o go1.10.tbz http://www.9legacy.org/download/go/go1.10-plan9-arm7-bootstrap.tbz
+tar xvf go1.10.tbz &amp;&amp; mv go-* go
+
+# Go configs
+mkdir -p gopath/bin
+GOPATH=$home/gopath
+GOBIN=$GOPATH/bin
+GOROOT=$home/go
+bind -a $GOROOT/bin /bin # append the go binaries to the end of the /bin entries
+bind -a $GOBIN /bin
+</code></pre>
+
+<blockquote>
+<p>Don&rsquo;t forget to add the binds and envs to <code>$home/lib/profile</code> too</p>
+</blockquote>
+
+<p>Let&rsquo;s check:</p>
+
+<pre><code class="language-bash">go env
+</code></pre>
+
+<hr />
+
+<p>I&rsquo;m in love with Plan9, it&rsquo;s such a cool operating system to learn. If you are interested too check the following resources:</p>
+
+<ul>
+<li><a href="http://fqa.9front.org">9front</a></li>
+<li><a href="https://9p.io/plan9/">9p.io</a></li>
+<li><a href="http://www.9legacy.org">9legacy.org</a></li>
+<li>Book: <a href="https://lsub.org/who/nemo/9.intro.pdf">Introduction to Operating System Abstractions with Plan9</a></li>
+<li>Book: <a href="http://www.r-5.org/files/books/computers/internals/unix/Francisco_Ballesteros-Notes_on_the_Plan_9_Kernel_Source-EN.pdf">Notes on the Plan 9 Kernel Source</a></li>
+</ul>
+
+<p>Expect more posts in the future. See you again next time 😄.</p>
+                </section>
+            </article>
+
+            
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.github.com/mauri870">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2018 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+    
+    </p>
+    
+    <p class="small">
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0; width: auto; height: auto" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+    </p>
+
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://mauri870.github.io/blog/js/jquery-3.3.1.min.js"></script>
+<script src="https://mauri870.github.io/blog/js/main.js"></script>
+<script src="https://mauri870.github.io/blog/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>
