@@ -6,10 +6,21 @@
     <description>Recent content on Mauri870&#39;s dev blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 31 May 2018 20:55:00 -0300</lastBuildDate>
+    <lastBuildDate>Sun, 10 Jun 2018 13:00:00 -0300</lastBuildDate>
     
 	<atom:link href="https://mauri870.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Telephony and High Availability with Kubernetes</title>
+      <link>https://mauri870.github.io/blog/posts/high-availability-telephony/</link>
+      <pubDate>Sun, 10 Jun 2018 13:00:00 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/posts/high-availability-telephony/</guid>
+      <description>&lt;p&gt;Kubernetes ingress is designed with layer 7 in mind. Services that needs to expose hundreads of ports and operate at lower levels, like SIP and RTP over UDP struggle to scale in kubernetes out of the box.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Plan9 on raspberry pi 3</title>

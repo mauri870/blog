@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+    <meta name="author" content="Mauri de Souza Nunes">
+    <meta name="description" content="Kubernetes ingress is designed with layer 7 in mind. Services that needs to expose hundreads of ports and operate at lower levels, like SIP and RTP over UDP struggle to scale in kubernetes out of the box.
+
+">
+		<meta name="generator" content="Hugo 0.42.2" />
+		<title>Telephony and High Availability with Kubernetes &middot; Mauri870&#39;s dev blog</title>
+		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
+		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
+		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://mauri870.github.io/blog/index.xml" rel="alternate" type="application/rss+xml" title="Mauri870&#39;s dev blog" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+  <a href='/'>Home</a>
+	
+	
+		<a href='https://mauri870.github.io/blog/'> <span class="arrow">←</span>Blog</a>
+	
+	<a href='https://mauri870.github.io/blog/posts'>Archive</a>
+	<a href='https://mauri870.github.io/blog/tags'>Tags</a>
+	<a href='https://mauri870.github.io/blog/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://mauri870.github.io/blog/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Telephony and High Availability with Kubernetes
+                    </h1>
+                    <h2 class="headline">
+                    Jun 10, 2018 13:00
+                    · 484 words
+                    · 3 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a style="padding-left: 1em;" href="https://mauri870.github.io/blog/tags/kubernetes">Kubernetes</a>
+                          
+                              <a style="padding-left: 1em;" href="https://mauri870.github.io/blog/tags/sip">SIP</a>
+                          
+                              <a style="padding-left: 1em;" href="https://mauri870.github.io/blog/tags/asterisk">Asterisk</a>
+                          
+                              <a style="padding-left: 1em;" href="https://mauri870.github.io/blog/tags/kamailio">Kamailio</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                  
+                    <div id="toc">
+                      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#1-running-telephony-systems-on-kubernetes">1. Running telephony systems on kubernetes</a></li>
+</ul></li>
+</ul>
+</nav>
+                    </div>
+                  
+                
+                <section id="post-body">
+                    <p>Kubernetes ingress is designed with layer 7 in mind. Services that needs to expose hundreads of ports and operate at lower levels, like SIP and RTP over UDP struggle to scale in kubernetes out of the box.</p>
+
+<p></p>
+
+<p>Protoc
+ols used in telephony systems are commonly based on session (like SIP), others need to expose a large number of ports for clients to connect (e.g. RTP for voice and video).</p>
+
+<p>If you use a cloud provider, probably you have a UDP load balancer with session affinity available, which simplifies the arquitecture a bit. But for bare metal clusters we need to handle it manually.</p>
+
+<h2 id="1-running-telephony-systems-on-kubernetes">1. Running telephony systems on kubernetes</h2>
+
+<p>Here at <a href="http://fluxoti.com">FluxoTi</a> we begin the migration of our services to  a kubernetes cluster, which includes our telephony infraestructure. Since we are running in bare metal servers, we don&rsquo;t have a load balancer implementation out of the box (ok I can still use the rancher haproxy ingress, but the k8s ingress spec doesn&rsquo;t support UDP either).</p>
+
+<p>Our goals are to achieve High Availability and Horizontal Scalability, for this we choose the sip proxy and load balancer Kamailio, which stays in front of the main Asterisk servers. The ARI Manager, which talks to the Asterisks, distributes the load between then, handle calls, agents and so on. But soon we realize that Kamailio was a <a href="https://en.wikipedia.org/wiki/Single_point_of_failure">SPOF</a> in this architecture. If, for any reason, the Kamailio instance goes down the underlying Asterisks becomes unreachable for external clients. The solution was simply to run multiple Kamailio instances behind another load balancer, this time Nginx.</p>
+
+<p>Nginx support UDP load balancing since version 1.9.13 and are pretty stable. Then we keep 2 or 3 kamailios behind it to achieve High Availability. Since SIP packages are not guaranteed to be delivered to the same Kamailio that started the session, we must ensure that the same client packages always end up in the same kamailio server. This can be easily acomplished using session persistence like below:</p>
+
+<pre><code class="language-nginx">stream {
+    upstream kamailio_pods {
+        hash   $remote_addr;
+        server kamailio1_podIp:5060;
+        server kamailio2_podIp:5060;
+        server kamailio3_podIp:5060;
+        # and so on...
+    }
+
+    server {
+        listen      5060 udp;
+        proxy_pass  kamailio_pods;
+        # ...
+    }
+}
+</code></pre>
+
+<p>Quoted from the <a href="https://docs.nginx.com/nginx/admin-guide/load-balancer/tcp-udp-load-balancer/">nginx load balancing guide</a>:</p>
+
+<blockquote>
+<p>The Hash load‑balancing method is also used to configure session persistence. As the hash function is based on client IP address, connections from a given client are always passed to the same server unless the server is down or otherwise unavailable. Specify an optional consistent parameter to apply the ketama consistent hashing method.</p>
+</blockquote>
+
+<p>You can also use the <a href="https://github.com/kubernetes/ingress-nginx">Kubernetes Nginx Ingress</a>, it can expose UDP services too. Don&rsquo;t know if it can handle session persistence this way out of the box.</p>
+
+<blockquote>
+<p>Kamailio Sidecar to update the rtpproxies list</p>
+
+<p>RTPproxy exposed on host because of the large number of ports mapped (10k).</p>
+
+<p>RTPproxy hostNetwork: true and dnsPolicy: ClusterFirstWithHostNet to access the asterisks running internally.</p>
+
+<p>Sipsak examples.</p>
+</blockquote>
+
+<p>See you again next time 😄.</p>
+                </section>
+            </article>
+
+            
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.github.com/mauri870">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2018 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+    
+    </p>
+    
+    <p class="small">
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0; width: auto; height: auto" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+    </p>
+
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://mauri870.github.io/blog/js/jquery-3.3.1.min.js"></script>
+<script src="https://mauri870.github.io/blog/js/main.js"></script>
+<script src="https://mauri870.github.io/blog/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>
