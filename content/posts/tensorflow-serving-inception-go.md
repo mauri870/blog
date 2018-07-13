@@ -29,13 +29,13 @@ Tensorflow Serving is written in C++, exposing a gRPC server that talks Protobuf
 First of all clone the tensorflow serving repository:
 
 ```bash
-git clone https://github.com/tensorflow/serving.git
+git clone -b r1.7 https://github.com/tensorflow/serving.git
 ```
 
 Since the serving proto files depends on the tensorflow ones, clone the tensorflow repo too:
 
 ```bash
-git clone https://github.com/tensorflow/tensorflow.git
+git clone -b r1.7 https://github.com/tensorflow/tensorflow.git
 ```
 
 > Maybe using bazel you don't need to do these steps manually, but who uses bazel?? Probably only Google...
