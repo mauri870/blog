@@ -2,7 +2,8 @@
     "name" : "mauri870-blog",
     "scripts": { 
         "dev" : "hugo server -D",
-        "build": "hugo",
+        "build": "yarn run clean && hugo",
+        "clean": "rm -r public || true",
         "publish": "git add public && git commit -m \"Build blog\" && git subtree push --prefix public origin master" 
     }
 }
