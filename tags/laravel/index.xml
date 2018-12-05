@@ -17,9 +17,7 @@
       <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/posts/opentracing-jaeger-laravel/</guid>
-      <description>&lt;p&gt;Microservices become the new standard for scalable and maintanable arquitectures. Monolithic aplications are splited into smaller pieces to keep things simple and decoupled. Tracing comes in hand when you need to aggregate the events during the request lifecycle between a single or multiple services.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;Microservices become the new standard for scalable and maintanable arquitectures. Monolithic aplications are splited into smaller pieces to keep things simple and decoupled. Tracing comes in hand when you need to aggregate the events during the request lifecycle between a single or multiple services.&lt;/p&gt;</description>
     </item>
     
   </channel>
