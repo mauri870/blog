@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://mauri870.github.io/blog/posts/gsutil-leak/</loc>
+    <lastmod>2018-12-05T08:00:00-03:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://mauri870.github.io/blog/posts/plan9-on-raspberry-pi-3/</loc>
     <lastmod>2018-05-31T20:55:00-03:00</lastmod>
   </url>
@@ -50,6 +55,12 @@
   </url>
   
   <url>
+    <loc>https://mauri870.github.io/blog/tags/asterisk/</loc>
+    <lastmod>2018-12-05T08:00:00-03:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://mauri870.github.io/blog/categories/</loc>
     <priority>0</priority>
   </url>
@@ -67,14 +78,38 @@
   </url>
   
   <url>
+    <loc>https://mauri870.github.io/blog/tags/gke/</loc>
+    <lastmod>2018-12-05T08:00:00-03:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://mauri870.github.io/blog/tags/go/</loc>
     <lastmod>2018-05-19T12:35:00-03:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
+    <loc>https://mauri870.github.io/blog/tags/golang/</loc>
+    <lastmod>2018-12-05T08:00:00-03:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mauri870.github.io/blog/tags/google-storage/</loc>
+    <lastmod>2018-12-05T08:00:00-03:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://mauri870.github.io/blog/tags/jaeger/</loc>
     <lastmod>2018-05-13T22:26:06-03:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mauri870.github.io/blog/tags/kubernetes/</loc>
+    <lastmod>2018-12-05T08:00:00-03:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -92,13 +127,19 @@
   
   <url>
     <loc>https://mauri870.github.io/blog/</loc>
-    <lastmod>2018-05-31T20:55:00-03:00</lastmod>
+    <lastmod>2018-12-05T08:00:00-03:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>https://mauri870.github.io/blog/tags/opentracing/</loc>
     <lastmod>2018-05-13T22:26:06-03:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://mauri870.github.io/blog/tags/optimization/</loc>
+    <lastmod>2018-12-05T08:00:00-03:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -110,7 +151,7 @@
   
   <url>
     <loc>https://mauri870.github.io/blog/posts/</loc>
-    <lastmod>2018-05-31T20:55:00-03:00</lastmod>
+    <lastmod>2018-12-05T08:00:00-03:00</lastmod>
     <priority>0</priority>
   </url>
   
