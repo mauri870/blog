@@ -6,10 +6,19 @@
     <description>Recent content on Mauri870&#39;s dev blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 31 May 2018 20:55:00 -0300</lastBuildDate>
+    <lastBuildDate>Tue, 04 Dec 2018 12:35:00 -0300</lastBuildDate>
     
 	<atom:link href="https://mauri870.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Asterisk leaking resources? No, it&#39;s gsutil :&#39;(</title>
+      <link>https://mauri870.github.io/blog/posts/gsutil-leak/</link>
+      <pubDate>Tue, 04 Dec 2018 12:35:00 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/posts/gsutil-leak/</guid>
+      <description>&lt;p&gt;This week we solved a resource leak in our asterisk images reserved for call handling. Here&amp;rsquo;s the path we follow to mitigate the issue, which we find out to be related with the gsutil command line tool.&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Plan9 on raspberry pi 3</title>
@@ -17,9 +26,7 @@
       <pubDate>Thu, 31 May 2018 20:55:00 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/posts/plan9-on-raspberry-pi-3/</guid>
-      <description>&lt;p&gt;Plan9 is a research operating system from the same group who created UNIX at Bell Labs Computing Sciences Research Center (CSRC). It emerged in the 80s, and its early development coincided with continuing development of the later versions of Research UNIX. Let&amp;rsquo;s install it in the raspberry pi 3!&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;Plan9 is a research operating system from the same group who created UNIX at Bell Labs Computing Sciences Research Center (CSRC). It emerged in the 80s, and its early development coincided with continuing development of the later versions of Research UNIX. Let&amp;rsquo;s install it in the raspberry pi 3!&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -28,9 +35,7 @@
       <pubDate>Thu, 24 May 2018 00:05:00 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/posts/audio-spectrograms-in-tensorflow/</guid>
-      <description>&lt;p&gt;A Spectrogram is a picture of sound. A common approach for audio classification tasks is to use spectrograms as input and simply treat the audio as an image. After several tries I finally got an optimized way to integrate the spectrogram generation pipeline into the tensorflow computational graph.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;A Spectrogram is a picture of sound. A common approach for audio classification tasks is to use spectrograms as input and simply treat the audio as an image. After several tries I finally got an optimized way to integrate the spectrogram generation pipeline into the tensorflow computational graph.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -39,9 +44,7 @@
       <pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/posts/exporting-cifar10-to-tensorflow-serving/</guid>
-      <description>&lt;p&gt;The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. In this blog post I&amp;rsquo;ll cover how to export a trained CIFAR-10 tensorflow model to Tensorflow Serving.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. In this blog post I&amp;rsquo;ll cover how to export a trained CIFAR-10 tensorflow model to Tensorflow Serving.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -50,9 +53,7 @@
       <pubDate>Sat, 19 May 2018 12:35:00 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/posts/tensorflow-serving-inception-go/</guid>
-      <description>&lt;p&gt;Tensorflow Serving is the most optimized way to serve a Tensorflow machine learning model in production. The official tutorials only cover the python client, so lets implement a Go/Golang one.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;Tensorflow Serving is the most optimized way to serve a Tensorflow machine learning model in production. The official tutorials only cover the python client, so lets implement a Go/Golang one.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -61,9 +62,7 @@
       <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/posts/opentracing-jaeger-laravel/</guid>
-      <description>&lt;p&gt;Microservices become the new standard for scalable and maintanable arquitectures. Monolithic aplications are splited into smaller pieces to keep things simple and decoupled. Tracing comes in hand when you need to aggregate the events during the request lifecycle between a single or multiple services.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;Microservices become the new standard for scalable and maintanable arquitectures. Monolithic aplications are splited into smaller pieces to keep things simple and decoupled. Tracing comes in hand when you need to aggregate the events during the request lifecycle between a single or multiple services.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -72,9 +71,7 @@
       <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/posts/assembly-linux-x64-part-1/</guid>
-      <description>&lt;p&gt;I&amp;rsquo;m a person that loves to learn new things, and assembly is one of the most recent topics I decide to dig into.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;I&amp;rsquo;m a person that loves to learn new things, and assembly is one of the most recent topics I decide to dig into.&lt;/p&gt;</description>
     </item>
     
   </channel>
