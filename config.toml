@@ -25,5 +25,7 @@ hasCJKLanguage = false
 
 	iconFont = "font-awesome"
 
+	enableDisqus = true
+	disqusShortname = "mauri870"
 [social]
 	github-square = "https://www.github.com/mauri870"
