@@ -12,4 +12,4 @@ clean:
 	@rm -r public ||:
 
 release: build
-	@git add public && git commit -m \"Build blog\" && git subtree push --prefix public origin master
+	@git add public && git commit -m 'Build blog' && git subtree push --prefix public origin master
