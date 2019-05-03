@@ -3,17 +3,17 @@
 Development with live reload:
 
 ```bash
-yarn run dev
+make dev
 ```
 
 Build with minification:
 
 ```bash
-yarn run build
+make
 ```
 
 Publish:
 
 ```bash
-yarn run publish
+make release
 ```
