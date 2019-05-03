@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+    <meta name="author" content="Mauri de Souza Nunes">
+    <meta name="description" content="Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust?">
+		<meta name="generator" content="Hugo 0.55.3" />
+		<title>Writing an Asterisk PBX module in Rust and C &middot; Mauri870&#39;s dev blog</title>
+		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
+		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
+		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://mauri870.github.io/blog/index.xml" rel="alternate" type="application/rss+xml" title="Mauri870&#39;s dev blog" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+  <a href='/'>Home</a>
+	
+	
+		<a href='https://mauri870.github.io/blog/'> <span class="arrow">←</span>Blog</a>
+	
+	<a href='https://mauri870.github.io/blog/posts'>Archive</a>
+	<a href='https://mauri870.github.io/blog/tags'>Tags</a>
+	<a href='https://mauri870.github.io/blog/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://mauri870.github.io/blog/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Writing an Asterisk PBX module in Rust and C
+                    </h1>
+                    <h2 class="headline">
+                    May 3, 2019 13:00
+                    · 1193 words
+                    · 6 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a style="padding-left: 1em;" href="https://mauri870.github.io/blog/tags/rust">Rust</a>
+                          
+                              <a style="padding-left: 1em;" href="https://mauri870.github.io/blog/tags/asterisk">Asterisk</a>
+                          
+                              <a style="padding-left: 1em;" href="https://mauri870.github.io/blog/tags/c">C</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                  
+                    <div id="toc">
+                      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#1-agi-to-the-rescue">1. AGI to the rescue</a></li>
+<li><a href="#2-rust-ffi">2. Rust FFI</a></li>
+<li><a href="#3-loading-and-testing-the-module">3. Loading and testing the module</a></li>
+</ul></li>
+</ul>
+</nav>
+                    </div>
+                  
+                
+                <section id="post-body">
+                    <p>Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust?</p>
+
+<hr />
+
+<p>As I&rsquo;ve already explained in an <a href="/blog/posts/audio-spectrograms-in-tensorflow">older post</a>, we have a Deep Learning microservice responsible for <a href="https://en.wikipedia.org/wiki/Auto_dialer#Answering_machine_detection">Answering Machine Detection(AMD)</a>. The problem is how to integrate this external service and make it accessible whitin an Asterisk dialplan.</p>
+
+<h2 id="1-agi-to-the-rescue">1. AGI to the rescue</h2>
+
+<p>Our first attempt was to invoke a program acting as a client for the external service. Using the AGI application we&rsquo;re able to spawn our client within the dialplan, which is just a golang program.</p>
+
+<p>The client just sends a HTTP request to the AMD service with the initial recorded audio of the outbound call and some metadata and receives back a json response containing the prediction results. The relevant dialplan configuration looks like this:</p>
+
+<pre><code>; ommitted
+same =&gt;		n,Set(recording_amd=/var/spool/asterisk/monitor/${EXTEN}-${UNIQUEID}_amd-in) ; Set a variable containing the recording path
+ same =&gt;	n,Wait(0.3)
+ same =&gt;	n,MixMonitor(${recording_amd}.gsm) ; Start recording the call
+ same =&gt;	n,Playback(silence/2) ; Play 2s silence
+ same =&gt;	n,StopMixMonitor() ; Stop the recording
+ same =&gt;	n,AGI(amd-client,${recording_amd}.gsm) ; Invoke our client
+ same =&gt;	n,NoOp(${amd_result}) ; Does nothing. The variable amd_result contains the prediction result.
+; omitted
+</code></pre>
+
+<p>This works well, but since the migration of our architecture to Kubernetes (also described <a href="/blog/posts/gsutil-leak">in this post</a>) we started to face some problems, mainly involving <a href="https://en.wikipedia.org/wiki/Out_of_memory">OOM</a> scenarios in our Kubernetes nodes. After much research and debug we find out that when the OOM errors occurs the pods have a lot of zombie processes of the amd-client. Since we can&rsquo;t found the root cause and I was already thinking of writing a native module, we decide to go ahead and give Rust a try.</p>
+
+<h2 id="2-rust-ffi">2. Rust FFI</h2>
+
+<p>The problem of adopting the Rust language for this project is that Rust doesn&rsquo;t have a stabilized ABI and does not support <a href="https://en.wikipedia.org/wiki/C_preprocessor">CPP</a> stuff, like macros and define. Then we have no choice but to write some C code to glue things together along with a library in Rust that export(<code>#[no_mangle]</code>) the functions and structs(<code>#[repr(C)]</code>) needed as a shared or static lib.</p>
+
+<p>The following resources helped me a lot:</p>
+
+<ul>
+<li><a href="http://jakegoulding.com/rust-ffi-omnibus">Rust FFI Omnibus</a></li>
+<li><a href="https://doc.rust-lang.org/beta/nomicon/ffi.html">Rust Nomicon</a></li>
+</ul>
+
+<p>For example our prediction struct looks like this:</p>
+
+<pre><code class="language-rust">/// A struct that wraps the code and confidence for a prediction
+#[derive(Debug, Serialize, Deserialize)]
+#[repr(C)]
+pub struct AmdPrediction {
+    code: u32,       // The integer prediction code
+    confidence: f32, // The confidence of the prediction
+    // ...
+}
+</code></pre>
+
+<p>As you can see, <code>serde</code> is beeing used to serialize / deserialize the json response returned by the server.</p>
+
+<p>And we also have a function to lookup the string label for a given prediction code:</p>
+
+<pre><code class="language-rust">/// Retrieve the label corresponding to an amd status code
+#[no_mangle]
+pub extern &quot;C&quot; fn amd_label_name(code: u32) -&gt; *const c_char {
+    let label: &amp;[u8] = match code {
+        AMD_STATUS_MACHINE =&gt; b&quot;machine\0&quot;,
+        AMD_STATUS_HUMAN =&gt; b&quot;human\0&quot;,
+        AMD_STATUS_SILENCE =&gt; b&quot;silence\0&quot;,
+        AMD_STATUS_ERROR =&gt; b&quot;error\0&quot;,
+        _ =&gt; b&quot;unknown\0&quot;,
+    };
+    label.as_ptr() as *const c_char
+}
+</code></pre>
+
+<p>An interesting fact is that Rust do not accept null values, but it can in fact create a null raw pointer using <code>std::ptr::null</code>:</p>
+
+<pre><code class="language-rust">/// Performs the inference for a given file and return a pointer to an `AmdPrediction`
+#[no_mangle]
+pub extern &quot;C&quot; fn amd_inference(file: *const c_char) -&gt; *mut AmdPrediction {
+    if file.is_null() {
+        return std::ptr::null_mut();
+    }
+
+    let file = unsafe { CStr::from_ptr(file).to_str() }.unwrap();
+
+    let prediction = match amd_do_inference(file) {
+        Ok(pred) =&gt; pred,
+        Err(e) =&gt; {
+            error::set_last_error(e);
+            return std::ptr::null_mut();
+        }
+    };
+
+    Box::into_raw(Box::new(prediction))
+}
+</code></pre>
+
+<p>The memory that is allocated by Rust, should be freed by Rust. So we also need to export a function to free up the allocated memory.</p>
+
+<pre><code class="language-rust">/// Free an `AmdPrediction` pointer
+#[no_mangle]
+pub extern &quot;C&quot; fn amd_prediction_free(ptr: *mut AmdPrediction) {
+    if ptr.is_null() {
+        return;
+    }
+
+    unsafe {
+        Box::from_raw(ptr);
+    }
+}
+</code></pre>
+
+<p>By creating a Box using a raw pointer, we bring it back to the rust land so it&rsquo;ll be freed when they reach the end of the scope at the end of the unsafe block.</p>
+
+<p>Another interesting topic is how to handle errors in a rust library. Since we need to expose those errors to C, a common approach is to use a thread local variable to keep track of the last error that occured in the library, exposing a function to retrieve the error, something like this:</p>
+
+<pre><code class="language-rust">use std::cell::RefCell;
+use std::ffi::CString;
+use std::error::Error as StdError;
+use libc::c_char;
+
+thread_local! {
+    /// An `errno`-like thread-local variable which keeps track of the most
+    /// recent error to occur in the library.
+    static LAST_ERROR: RefCell&lt;Option&lt;LastError&gt;&gt; = RefCell::new(None);
+}
+
+/// Keeps track of the latest error
+#[derive(Debug)]
+struct LastError {
+    error: Box&lt;StdError&gt;,
+    c_string: CString,
+}
+
+/// A C friendly struct to hold the latest error message
+#[derive(Debug, PartialEq)]
+#[repr(C)]
+pub struct MyLibError {
+    msg: *const c_char,
+}
+
+// A default error for when no error has actually occurred
+impl Default for MyLibError {
+    fn default() -&gt; MyLibError {
+        MyLibError {
+            msg: std::ptr::null(),
+        }
+    }
+}
+
+/// Change LAST_ERROR with the last error that occured in the library
+pub (crate) fn set_last_error(err: Box&lt;StdError&gt;) {
+    LAST_ERROR.with(|l| {
+        let c_string = CString::new(err.to_string()).unwrap_or_default();
+
+        let new_error = LastError {
+            error: err,
+            c_string,
+        };
+
+        *l.borrow_mut() = Some(new_error);
+    });
+}
+
+/// Retrieve the most recent error
+#[no_mangle]
+pub unsafe extern &quot;C&quot; fn mylib_last_error() -&gt; AmdError {
+    LAST_ERROR.with(|l| match l.borrow().as_ref() {
+        Some(err) =&gt; MyLibError {
+            msg: err.c_string.as_ptr(),
+        },
+        None =&gt; MyLibError::default(),
+    })
+}
+
+/// Clear the last error
+#[no_mangle]
+pub extern &quot;C&quot; fn mylib_clear_last_error() {
+    LAST_ERROR.with(|l| l.borrow_mut().take());
+}
+</code></pre>
+
+<p>This makes it easy to set errors (by using the <code>set_last_error</code>) and to retrieve then in C, using the <code>mylib_last_error</code> function. The memory of the error is also freed when another error occurs.</p>
+
+<p>In order to automate the library header generation we use cbindgen by invoking it in our build.rs file so Cargo can generate it  when building our library. We still need make tho in order to compile the asterisk module since the rust part is just the library. Our project was based on <a href="https://github.com/zaf/Asterisk-eSpeak">this module</a> as an initial template.</p>
+
+<h2 id="3-loading-and-testing-the-module">3. Loading and testing the module</h2>
+
+<p>In order to load the module in asterisk we need to put the rust library shared object into the <code>$LD_LIBRARY_PATH</code>, run <code>ldconfig</code> and put the path to the shared object file of the module in the asterisk <code>modules.conf</code> file.</p>
+
+<p>Then we&rsquo;re ready to load the module:</p>
+
+<pre><code class="language-bash">root@e3b75b6f6141:/# asterisk -x &quot;module load app_3cplus_amd&quot;
+Loaded app_3cplus_amd
+root@e3b75b6f6141:/# asterisk -x &quot;module show like app_3cplus_amd&quot;
+Module                         Description                              Use Count  Status      Support Level
+app_3cplus_amd.so              AMD interface for the 3cplus/amd project 0          Running           unknown
+1 modules loaded
+</code></pre>
+
+<p>And the dialplan config:</p>
+
+<pre><code>; ommitted
+same =&gt;		n,Set(recording_amd=/var/spool/asterisk/monitor/${EXTEN}-${UNIQUEID}_amd-in) ; Set a variable containing the recording path
+ same =&gt;	n,Wait(0.3)
+ same =&gt;	n,MixMonitor(${recording_amd}.gsm) ; Start recording the call
+ same =&gt;	n,Playback(silence/2) ; Play 2s silence
+ same =&gt;	n,StopMixMonitor() ; Stop the recording
+ 
+ ; Easy peasy
+ same =&gt;	n,3cplusAMD(${recording_amd}.gsm) ; Invoke our native application
+ 
+ same =&gt;	n,NoOp(${amd_result}) ; Does nothing. The variable amd_result contains the prediction result.
+; omitted
+</code></pre>
+
+<p>We&rsquo;re running this module in production for 2 weeks now. The OOM problems ceased, the resource usage is lower and we are pretty happy to put all together and this is the first project ever using Rust at our company and it won&rsquo;t be the last for sure.</p>
+
+<p>That&rsquo;s it for now, see you again next time.</p>
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'mauri870'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.github.com/mauri870">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2019 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+    
+    </p>
+    
+    <p class="small">
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0; width: auto; height: auto" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+    </p>
+
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://mauri870.github.io/blog/js/jquery-3.3.1.min.js"></script>
+<script src="https://mauri870.github.io/blog/js/main.js"></script>
+<script src="https://mauri870.github.io/blog/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>
