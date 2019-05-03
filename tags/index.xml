@@ -6,28 +6,10 @@
     <description>Recent content in Tags on Mauri870&#39;s dev blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 24 May 2018 00:05:00 -0300</lastBuildDate>
+    <lastBuildDate>Wed, 05 Dec 2018 10:00:00 -0300</lastBuildDate>
     
 	<atom:link href="https://mauri870.github.io/blog/tags/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>Ai</title>
-      <link>https://mauri870.github.io/blog/tags/ai/</link>
-      <pubDate>Thu, 24 May 2018 00:05:00 -0300</pubDate>
-      
-      <guid>https://mauri870.github.io/blog/tags/ai/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Assembly</title>
-      <link>https://mauri870.github.io/blog/tags/assembly/</link>
-      <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
-      
-      <guid>https://mauri870.github.io/blog/tags/assembly/</guid>
-      <description></description>
-    </item>
     
     <item>
       <title>Asterisk</title>
@@ -39,38 +21,11 @@
     </item>
     
     <item>
-      <title>Cifar10</title>
-      <link>https://mauri870.github.io/blog/tags/cifar10/</link>
-      <pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
-      
-      <guid>https://mauri870.github.io/blog/tags/cifar10/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Distributed Tracing</title>
-      <link>https://mauri870.github.io/blog/tags/distributed-tracing/</link>
-      <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
-      
-      <guid>https://mauri870.github.io/blog/tags/distributed-tracing/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Gke</title>
+      <title>GKE</title>
       <link>https://mauri870.github.io/blog/tags/gke/</link>
       <pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/tags/gke/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Go</title>
-      <link>https://mauri870.github.io/blog/tags/go/</link>
-      <pubDate>Sat, 19 May 2018 12:35:00 -0300</pubDate>
-      
-      <guid>https://mauri870.github.io/blog/tags/go/</guid>
       <description></description>
     </item>
     
@@ -93,47 +48,11 @@
     </item>
     
     <item>
-      <title>Jaeger</title>
-      <link>https://mauri870.github.io/blog/tags/jaeger/</link>
-      <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
-      
-      <guid>https://mauri870.github.io/blog/tags/jaeger/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>Kubernetes</title>
       <link>https://mauri870.github.io/blog/tags/kubernetes/</link>
       <pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/tags/kubernetes/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Laravel</title>
-      <link>https://mauri870.github.io/blog/tags/laravel/</link>
-      <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
-      
-      <guid>https://mauri870.github.io/blog/tags/laravel/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Linux</title>
-      <link>https://mauri870.github.io/blog/tags/linux/</link>
-      <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
-      
-      <guid>https://mauri870.github.io/blog/tags/linux/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Opentracing</title>
-      <link>https://mauri870.github.io/blog/tags/opentracing/</link>
-      <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
-      
-      <guid>https://mauri870.github.io/blog/tags/opentracing/</guid>
       <description></description>
     </item>
     
@@ -156,20 +75,20 @@
     </item>
     
     <item>
-      <title>Python</title>
-      <link>https://mauri870.github.io/blog/tags/python/</link>
-      <pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
-      
-      <guid>https://mauri870.github.io/blog/tags/python/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>Raspberry Pi 3</title>
       <link>https://mauri870.github.io/blog/tags/raspberry-pi-3/</link>
       <pubDate>Thu, 31 May 2018 20:55:00 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/tags/raspberry-pi-3/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>AI</title>
+      <link>https://mauri870.github.io/blog/tags/ai/</link>
+      <pubDate>Thu, 24 May 2018 00:05:00 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/tags/ai/</guid>
       <description></description>
     </item>
     
@@ -192,6 +111,24 @@
     </item>
     
     <item>
+      <title>CIFAR10</title>
+      <link>https://mauri870.github.io/blog/tags/cifar10/</link>
+      <pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/tags/cifar10/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Python</title>
+      <link>https://mauri870.github.io/blog/tags/python/</link>
+      <pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/tags/python/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Tensorflow Serving</title>
       <link>https://mauri870.github.io/blog/tags/tensorflow-serving/</link>
       <pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
@@ -201,7 +138,70 @@
     </item>
     
     <item>
-      <title>X64</title>
+      <title>Go</title>
+      <link>https://mauri870.github.io/blog/tags/go/</link>
+      <pubDate>Sat, 19 May 2018 12:35:00 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/tags/go/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Distributed Tracing</title>
+      <link>https://mauri870.github.io/blog/tags/distributed-tracing/</link>
+      <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/tags/distributed-tracing/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Jaeger</title>
+      <link>https://mauri870.github.io/blog/tags/jaeger/</link>
+      <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/tags/jaeger/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Laravel</title>
+      <link>https://mauri870.github.io/blog/tags/laravel/</link>
+      <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/tags/laravel/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Opentracing</title>
+      <link>https://mauri870.github.io/blog/tags/opentracing/</link>
+      <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/tags/opentracing/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>assembly</title>
+      <link>https://mauri870.github.io/blog/tags/assembly/</link>
+      <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/tags/assembly/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>linux</title>
+      <link>https://mauri870.github.io/blog/tags/linux/</link>
+      <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/tags/linux/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>x64</title>
       <link>https://mauri870.github.io/blog/tags/x64/</link>
       <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
       
@@ -210,7 +210,7 @@
     </item>
     
     <item>
-      <title>Yasm</title>
+      <title>yasm</title>
       <link>https://mauri870.github.io/blog/tags/yasm/</link>
       <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
       
