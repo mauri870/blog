@@ -6,10 +6,19 @@
     <description>Recent content in Tags on Mauri870&#39;s dev blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 03 May 2019 13:00:00 -0300</lastBuildDate>
+    <lastBuildDate>Thu, 09 May 2019 21:00:00 -0300</lastBuildDate>
     
 	<atom:link href="https://mauri870.github.io/blog/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Plan9</title>
+      <link>https://mauri870.github.io/blog/tags/plan9/</link>
+      <pubDate>Thu, 09 May 2019 21:00:00 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/tags/plan9/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Asterisk</title>
@@ -80,15 +89,6 @@
       <pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/tags/optimization/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Plan9</title>
-      <link>https://mauri870.github.io/blog/tags/plan9/</link>
-      <pubDate>Thu, 31 May 2018 20:55:00 -0300</pubDate>
-      
-      <guid>https://mauri870.github.io/blog/tags/plan9/</guid>
       <description></description>
     </item>
     
