@@ -6,9 +6,9 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
     <meta name="author" content="Mauri de Souza Nunes">
-    <meta name="description" content="Working with Devops, AI, Go and microservices. Never stop learning new techs, also loves kubernetes and linux.">
+    <meta name="description" content="This is a quick post about a new Plan9 keyboard map, supporting the brazilian ABNT2 layout.">
 		<meta name="generator" content="Hugo 0.55.5" />
-		<title>About &middot; Mauri870&#39;s dev blog</title>
+		<title>Plan9 br-abnt2 keyboard map &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/highlight.css">
@@ -24,8 +24,8 @@
 		
 	</head>
 
-<body>
-<nav class="main-nav">
+    <body>
+       <nav class="main-nav">
   <a href='/'>Home</a>
 	
 	
@@ -42,26 +42,52 @@
 	
 </nav>
 
-<div class="profile">
-    <section id="wrapper">
-        <header id="header">
-            <a href='https://mauri870.github.io/blog/about'>
-                <img id="avatar" class="2x" src="https://mauri870.github.io/blog/images/avatar.png"/>
-            </a>
-            <h1>Mauri870&#39;s dev blog</h1>
-            <h2>Software engineering, AI, web and devops stuff</h2>
-        </header>
-    </section>
-</div>
 
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Plan9 br-abnt2 keyboard map
+                    </h1>
+                    <h2 class="headline">
+                    May 9, 2019 21:00
+                    · 105 words
+                    · 1 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a style="padding-left: 1em;" href="https://mauri870.github.io/blog/tags/plan9">Plan9</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                  
+                
+                <section id="post-body">
+                    <p>This is a quick post about a new Plan9 keyboard map, supporting the brazilian ABNT2 layout.</p>
 
-<section id="wrapper" class="home">
-    <p>Working with Devops, AI, Go and microservices. Never stop learning new techs, also loves kubernetes and linux.</p>
+<hr />
 
+<p>In order to use the new keyboard layout, just copy the following file (with a trailing newline!) to <code>/sys/lib/kbmap/br-abnt2</code> and run <a href="http://man.cat-v.org/plan_9/1/kbmap">kbmap(1)</a>. The new layout should appear in the list. Since it&rsquo;s based on the ascii layout, select the ascii first to make sure that this layout loads on top of it.</p>
 
-    
-        
-            <div id="disqus_thread"></div>
+<script src="https://gist.github.com/mauri870/8ef952b83c44479262460e0330bfa1f1.js"></script>
+
+<blockquote>
+<p>NOTE: Unfortunatelly I could&rsquo;t figure out how to make the acentuation work, hence the 0 value in line 1, 4, 9 and 12.</p>
+</blockquote>
+
+<p>If you have any thoughts in how to improve the configuration, let me know.</p>
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
 <script type="text/javascript">
     var disqus_shortname = 'mauri870'; 
 
@@ -75,10 +101,11 @@
 <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
 
-        
-    
+            
 
-    <footer id="footer">
+            
+
+            <footer id="footer">
     
         <div id="social">
 
@@ -108,9 +135,9 @@
     </p>
 </footer>
 
-</section>
+        </section>
 
-<script src="https://mauri870.github.io/blog/js/jquery-3.3.1.min.js"></script>
+        <script src="https://mauri870.github.io/blog/js/jquery-3.3.1.min.js"></script>
 <script src="https://mauri870.github.io/blog/js/main.js"></script>
 <script src="https://mauri870.github.io/blog/js/highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
@@ -121,4 +148,5 @@
 
 
 
-</body>
+    </body>
+</html>
