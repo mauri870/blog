@@ -51,7 +51,7 @@
                     </h1>
                     <h2 class="headline">
                     May 9, 2019 21:00
-                    · 105 words
+                    · 125 words
                     · 1 minute read
                       <span class="tags">
                       
@@ -75,6 +75,8 @@
 <p>In order to use the new keyboard layout, just copy the following file (with a trailing newline!) to <code>/sys/lib/kbmap/br-abnt2</code> and run <a href="http://man.cat-v.org/plan_9/1/kbmap">kbmap(1)</a>. The new layout should appear in the list. Since it&rsquo;s based on the ascii layout, select the ascii first to make sure that this layout loads on top of it.</p>
 
 <script src="https://gist.github.com/mauri870/8ef952b83c44479262460e0330bfa1f1.js"></script>
+
+<p>Also put <code>cat /sys/lib/kbmap/br-abnt2 &gt; /dev/kbmap</code> into your <code>$home/lib/profile</code> under the <code>case 'terminal'</code> to apply the keyboard map at startup.</p>
 
 <blockquote>
 <p>NOTE: Unfortunatelly I could&rsquo;t figure out how to make the acentuation work, hence the 0 value in line 1, 4, 9 and 12.</p>
