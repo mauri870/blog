@@ -16,6 +16,8 @@ In order to use the new keyboard layout, just copy the following file (with a tr
 
 <script src="https://gist.github.com/mauri870/8ef952b83c44479262460e0330bfa1f1.js"></script>
 
+Also put `cat /sys/lib/kbmap/br-abnt2 > /dev/kbmap` into your `$home/lib/profile` under the `case 'terminal'` to apply the keyboard map at startup.
+
 > NOTE: Unfortunatelly I could't figure out how to make the acentuation work, hence the 0 value in line 1, 4, 9 and 12.
 
 If you have any thoughts in how to improve the configuration, let me know.
