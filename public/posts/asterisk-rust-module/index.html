@@ -6,8 +6,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
     <meta name="author" content="Mauri de Souza Nunes">
-    <meta name="description" content="Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust?">
-		<meta name="generator" content="Hugo 0.55.5" />
+    <meta name="description" content="Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust? Let&rsquo;s find out.">
+		<meta name="generator" content="Hugo 0.58.1" />
 		<title>Writing an Asterisk PBX module in Rust and C &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -51,7 +51,7 @@
                     </h1>
                     <h2 class="headline">
                     May 3, 2019 13:00
-                    · 1193 words
+                    · 1220 words
                     · 6 minute read
                       <span class="tags">
                       
@@ -85,7 +85,7 @@
                   
                 
                 <section id="post-body">
-                    <p>Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust?</p>
+                    <p>Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust? Let&rsquo;s find out.</p>
 
 <hr />
 
@@ -121,7 +121,8 @@ same =&gt;		n,Set(recording_amd=/var/spool/asterisk/monitor/${EXTEN}-${UNIQUEID}
 <li><a href="https://doc.rust-lang.org/beta/nomicon/ffi.html">Rust Nomicon</a></li>
 </ul>
 
-<p>For example our prediction struct looks like this:</p>
+<p>For example our prediction struct looks like this:
+// TODO: Talk about the From trait for conversions in order to allow repr&copy;</p>
 
 <pre><code class="language-rust">/// A struct that wraps the code and confidence for a prediction
 #[derive(Debug, Serialize, Deserialize)]
@@ -133,9 +134,11 @@ pub struct AmdPrediction {
 }
 </code></pre>
 
-<p>As you can see, <code>serde</code> is beeing used to serialize / deserialize the json response returned by the server.</p>
+<p>// TODO: Use protobuf here
+As you can see, <code>serde</code> is beeing used to serialize / deserialize the json response returned by the server.</p>
 
-<p>And we also have a function to lookup the string label for a given prediction code:</p>
+<p>//TODO: Use pb here too
+And we also have a function to lookup the string label for a given prediction code:</p>
 
 <pre><code class="language-rust">/// Retrieve the label corresponding to an amd status code
 #[no_mangle]
