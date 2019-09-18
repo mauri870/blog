@@ -52,64 +52,89 @@ But sox isn't perfect... Segfaults happen randomly and the api cpu usage is high
 
 Reading about the tensorflow contrib package I found some interesting ops, including a `audio_spectrogram`. With some work I replaced the entire sox pipeline by using the tensorflow computations, the api no longer deal with the preprocessing stuff. The only downside is that the ffmpeg ops don't support gsm, however it's ok for us to use wav instead.
 
-Here's an adapted example that you can run by itself:
+Here's the source code for a program to test the spectrogram generation:
 
 ```python
 import tensorflow as tf
+# FIXME: audio_ops is deprecated, use tensorflow_io.IOTensor.from_audio
 from tensorflow.contrib.framework.python.ops import audio_ops
 
-# Wav file name
-wav_file = tf.placeholder(tf.string)
+# Enable eager execution for a more interactive frontend.
+# If using the default graph mode, you'll probably need to run in a session.
+tf.enable_eager_execution()
 
-# Read the wav file
-audio_binary = tf.read_file(wav_file)
-
-# Decode the wav mono into a 2D tensor with time in dimension 0
-# and channel along dimension 1
-waveform = audio_ops.decode_wav(audio_binary, file_format='wav', desired_channels=1)
-
-# Compute the spectrogram
-spectrogram = audio_ops.audio_spectrogram(
-        waveform.audio,
+@tf.function
+def audio_to_spectrogram(
+        audio_contents,
+        width,
+        height,
+        channels=1,
         window_size=1024,
-        stride=64)
+        stride=64,
+        brightness=100.):
+    """Decode and build a spectrogram using a wav string tensor.
 
-# Custom brightness
-brightness = tf.placeholder(tf.float32, shape=[])
-mul = tf.multiply(spectrogram, brightness)
+    Args:
+      audio_contents: String tensor of the wav audio contents.
+      width: Spectrogram width.
+      height: Spectrogram height.
+      channels: Audio channel count.
+      window_size: Size of the spectrogram window.
+      stride: Size of the spectrogram stride.
+      brightness: Brightness of the spectrogram.
 
-# Normalize pixels
-min_const = tf.constant(255.)
-minimum =  tf.minimum(mul, min_const)
+    Returns:
+      3-D encoded PNG Tensor with the spectrogram contents.
+    """
+	# Decode the wav mono into a 2D tensor with time in dimension 0
+	# and channel along dimension 1
+        waveform = audio_ops.decode_wav(
+        	audio_contents, desired_channels=channels)
+	
+	# Compute the spectrogram
+        spectrogram = audio_ops.audio_spectrogram(
+        	waveform.audio,
+        	window_size=window_size,
+        	stride=stride)
 
-# Expand dims so we get the proper shape
-expand_dims = tf.expand_dims(minimum, -1)
+	# Adjust brightness
+        brightness = tf.constant(brightness)
 
-# Resize the spectrogram to input size of the model
-resize = tf.image.resize_bilinear(expand_dims, [128, 128])
+	# Normalize pixels
+        mul = tf.multiply(spectrogram, brightness)
+        min_const = tf.constant(255.)
+        minimum = tf.minimum(mul, min_const)
 
-# Remove the trailing dimension
-squeeze = tf.squeeze(resize, 0)
+	# Expand dims so we get the proper shape
+        expand_dims = tf.expand_dims(minimum, -1)
 
-# Tensorflow spectrogram has time along y axis and frequencies along x axis
-# so we fix that
-flip = tf.image.flip_left_right(squeeze)
-transpose = tf.image.transpose_image(flip)
+	# Resize the spectrogram to input size of the model
+        resize = tf.image.resize(expand_dims, [width, height])
 
-# Convert image to 3 channels, it's still a grayscale image however
-grayscale = tf.image.grayscale_to_rgb(transpose)
+	# Remove the trailing dimension
+        squeeze = tf.squeeze(resize, 0)
 
-# Cast to uint8 and encode as png
-cast = tf.cast(grayscale, tf.uint8)
-png = tf.image.encode_png(cast)
+	# Tensorflow spectrogram has time along y axis and frequencies along x axis
+	# so we fix that
+        flip_left_right = tf.image.flip_left_right(squeeze)
+        transposed = tf.image.transpose(flip_left_right)
 
-with tf.Session() as sess:
-    # Run the computation graph and save the png encoded image to a file
-    image = sess.run(png, feed_dict={
-      wav_file: 'your_file.wav', brightness: 100})
+	# Cast to uint8 and encode as png
+        cast = tf.cast(transposed, tf.uint8)
 
-    with open('output.png', 'wb') as f:
-        f.write(image)
+	# Encode tensor as a png image
+        return tf.image.encode_png(cast)
+
+if __name__ == '__main__':
+	input_file = tf.constant('input.wav')
+	output_file = tf.constant('spectrogram.png')
+
+	# Generage the spectrogram
+	audio = tf.io.read_file(input_file)
+	image = audio_to_spectrogram(audio, 224, 224)
+
+	# Write the png encoded image to a file
+	tf.io.write(output_file, image)
 ```
 
 And it's pretty fast too, we reach about **30 to 50 milliseconds** including the preprocessing stuff and the model inference, that's pretty cool.
