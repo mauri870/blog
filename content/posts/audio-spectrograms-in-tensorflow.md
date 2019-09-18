@@ -61,7 +61,7 @@ from tensorflow.contrib.framework.python.ops import audio_ops
 
 # Enable eager execution for a more interactive frontend.
 # If using the default graph mode, you'll probably need to run in a session.
-tf.enable_eager_execution()
+tf.executing_eagerly()
 
 @tf.function
 def audio_to_spectrogram(
