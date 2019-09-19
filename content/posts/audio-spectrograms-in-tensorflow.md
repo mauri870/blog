@@ -52,16 +52,16 @@ But sox isn't perfect... Segfaults happen randomly and the api cpu usage is high
 
 Reading about the tensorflow contrib package I found some interesting ops, including a `audio_spectrogram`. With some work I replaced the entire sox pipeline by using the tensorflow computations, the api no longer deal with the preprocessing stuff. The only downside is that the ffmpeg ops don't support gsm, however it's ok for us to use wav instead.
 
-Here's the source code for a program to test the spectrogram generation:
+Here's the source code for a program to test the spectrogram generation in  tensorflow 1.14:
 
 ```python
 import tensorflow as tf
-# FIXME: audio_ops is deprecated, use tensorflow_io.IOTensor.from_audio
+# FIXME: audio_ops.decode_wav is deprecated, use tensorflow_io.IOTensor.from_audio
 from tensorflow.contrib.framework.python.ops import audio_ops
 
 # Enable eager execution for a more interactive frontend.
 # If using the default graph mode, you'll probably need to run in a session.
-tf.executing_eagerly()
+tf.enable_eager_execution()
 
 @tf.function
 def audio_to_spectrogram(
@@ -92,6 +92,9 @@ def audio_to_spectrogram(
         	audio_contents, desired_channels=channels)
 	
 	# Compute the spectrogram
+	# FIXME: Seems like this is deprecated in tensorflow 2.0 and
+	# the operation only works on CPU. Change this to tf.signal.stft 
+	# and  friends to take advantage of GPU kernels.
         spectrogram = audio_ops.audio_spectrogram(
         	waveform.audio,
         	window_size=window_size,
