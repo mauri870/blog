@@ -7,7 +7,7 @@
 		
     <meta name="author" content="Mauri de Souza Nunes">
     <meta name="description" content="A Spectrogram is a picture of sound. A common approach for audio classification tasks is to use spectrograms as input and simply treat the audio as an image. After several tries I finally got an optimized way to integrate the spectrogram generation pipeline into the tensorflow computational graph.">
-		<meta name="generator" content="Hugo 0.58.1" />
+		<meta name="generator" content="Hugo 0.58.2" />
 		<title>Audio Spectrograms in Tensorflow &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -51,7 +51,7 @@
                     </h1>
                     <h2 class="headline">
                     May 24, 2018 00:05
-                    · 876 words
+                    · 910 words
                     · 5 minute read
                       <span class="tags">
                       
@@ -125,15 +125,15 @@
 
 <p>Reading about the tensorflow contrib package I found some interesting ops, including a <code>audio_spectrogram</code>. With some work I replaced the entire sox pipeline by using the tensorflow computations, the api no longer deal with the preprocessing stuff. The only downside is that the ffmpeg ops don&rsquo;t support gsm, however it&rsquo;s ok for us to use wav instead.</p>
 
-<p>Here&rsquo;s the source code for a program to test the spectrogram generation:</p>
+<p>Here&rsquo;s the source code for a program to test the spectrogram generation in  tensorflow 1.14:</p>
 
 <pre><code class="language-python">import tensorflow as tf
-# FIXME: audio_ops is deprecated, use tensorflow_io.IOTensor.from_audio
+# FIXME: audio_ops.decode_wav is deprecated, use tensorflow_io.IOTensor.from_audio
 from tensorflow.contrib.framework.python.ops import audio_ops
 
 # Enable eager execution for a more interactive frontend.
 # If using the default graph mode, you'll probably need to run in a session.
-tf.executing_eagerly()
+tf.enable_eager_execution()
 
 @tf.function
 def audio_to_spectrogram(
@@ -164,6 +164,9 @@ def audio_to_spectrogram(
         	audio_contents, desired_channels=channels)
 	
 	# Compute the spectrogram
+	# FIXME: Seems like this is deprecated in tensorflow 2.0 and
+	# the operation only works on CPU. Change this to tf.signal.stft 
+	# and  friends to take advantage of GPU kernels.
         spectrogram = audio_ops.audio_spectrogram(
         	waveform.audio,
         	window_size=window_size,
