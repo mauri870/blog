@@ -84,7 +84,7 @@ def audio_to_spectrogram(
       brightness: Brightness of the spectrogram.
 
     Returns:
-      3-D encoded PNG Tensor with the spectrogram contents.
+      0-D string Tensor with the image contents.
     """
 	# Decode the wav mono into a 2D tensor with time in dimension 0
 	# and channel along dimension 1
