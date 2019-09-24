@@ -7,7 +7,7 @@
 		
     <meta name="author" content="Mauri de Souza Nunes">
     <meta name="description" content="A Spectrogram is a picture of sound. A common approach for audio classification tasks is to use spectrograms as input and simply treat the audio as an image. After several tries I finally got an optimized way to integrate the spectrogram generation pipeline into the tensorflow computational graph.">
-		<meta name="generator" content="Hugo 0.58.2" />
+		<meta name="generator" content="Hugo 0.58.3" />
 		<title>Audio Spectrograms in Tensorflow &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -51,7 +51,7 @@
                     </h1>
                     <h2 class="headline">
                     May 24, 2018 00:05
-                    · 910 words
+                    · 909 words
                     · 5 minute read
                       <span class="tags">
                       
@@ -156,7 +156,7 @@ def audio_to_spectrogram(
       brightness: Brightness of the spectrogram.
 
     Returns:
-      3-D encoded PNG Tensor with the spectrogram contents.
+      0-D string Tensor with the image contents.
     &quot;&quot;&quot;
 	# Decode the wav mono into a 2D tensor with time in dimension 0
 	# and channel along dimension 1
