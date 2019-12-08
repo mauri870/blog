@@ -6,8 +6,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
     <meta name="author" content="Mauri de Souza Nunes">
-    <meta name="description" content="The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. In this blog post I&rsquo;ll cover how to export a trained CIFAR-10 tensorflow model to Tensorflow Serving.">
-		<meta name="generator" content="Hugo 0.58.3" />
+    <meta name="description" content="The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. In this blog post I&#39;ll cover how to export a trained CIFAR-10 tensorflow model to Tensorflow Serving.">
+		<meta name="generator" content="Hugo 0.60.1" />
 		<title>How to export the CIFAR10 model to Tensorflow Serving &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -51,7 +51,7 @@
                     </h1>
                     <h2 class="headline">
                     May 21, 2018 23:26
-                    · 559 words
+                    · 558 words
                     · 3 minute read
                       <span class="tags">
                       
@@ -76,201 +76,186 @@
                   
                     <div id="toc">
                       <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#1-training-the-cifar-10-model">1. Training the CIFAR-10 model</a></li>
-<li><a href="#2-exporting-the-model">2. Exporting the model</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#1-training-the-cifar10-model">1. Training the CIFAR-10 model</a></li>
+    <li><a href="#2-exporting-the-model">2. Exporting the model</a></li>
+  </ul>
 </nav>
                     </div>
                   
                 
                 <section id="post-body">
-                    <p>The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. In this blog post I&rsquo;ll cover how to export a trained CIFAR-10 tensorflow model to Tensorflow Serving.</p>
-
-<hr />
-
-<h2 id="1-training-the-cifar-10-model">1. Training the CIFAR-10 model</h2>
-
+                    <p>The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. In this blog post I'll cover how to export a trained CIFAR-10 tensorflow model to Tensorflow Serving.</p>
+<hr>
+<h2 id="1-training-the-cifar10-model">1. Training the CIFAR-10 model</h2>
 <p>Tensorflow already have a really nice tutorial about the CIFAR10 model, so go ahead and <a href="https://www.tensorflow.org/tutorials/deep_cnn#cifar-10_model">read it first</a>.</p>
-
 <p>When you finish this tutorial, you probably have a trained CIFAR-10 model and a good understanding of how a Convolutional Neural Network works.</p>
-
 <h2 id="2-exporting-the-model">2. Exporting the model</h2>
-
 <p>In order to export the trained model to tensorflow serving, we first need to modify our computational graph to use the tensorflow serving signature.</p>
-
 <p>Save this file as <code>cifar10_saved_model.py</code> in the same directory as the cifar10 files.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#e6db74"></span><span style="color:#e6db74">&#34;&#34;&#34;</span><span style="color:#e6db74">Tensorflow Serving export script for cifar10</span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+<span style="color:#f92672">from</span> __future__ <span style="color:#f92672">import</span> absolute_import
+<span style="color:#f92672">from</span> __future__ <span style="color:#f92672">import</span> division
+<span style="color:#f92672">from</span> __future__ <span style="color:#f92672">import</span> print_function
 
-<pre><code class="language-python">&quot;&quot;&quot;Tensorflow Serving export script for cifar10
-&quot;&quot;&quot;
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+<span style="color:#f92672">import</span> os
+<span style="color:#f92672">import</span> tensorflow <span style="color:#f92672">as</span> tf
 
-import os
-import tensorflow as tf
+<span style="color:#f92672">import</span> cifar10
+<span style="color:#f92672">import</span> cifar10_input
 
-import cifar10
-import cifar10_input
+IMAGE_SIZE <span style="color:#f92672">=</span> cifar10_input<span style="color:#f92672">.</span>IMAGE_SIZE
+NUM_CLASSES <span style="color:#f92672">=</span> cifar10_input<span style="color:#f92672">.</span>NUM_CLASSES
 
-IMAGE_SIZE = cifar10_input.IMAGE_SIZE
-NUM_CLASSES = cifar10_input.NUM_CLASSES
+FLAGS <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>app<span style="color:#f92672">.</span>flags<span style="color:#f92672">.</span>FLAGS
 
-FLAGS = tf.app.flags.FLAGS
+tf<span style="color:#f92672">.</span>app<span style="color:#f92672">.</span>flags<span style="color:#f92672">.</span>DEFINE_string(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">checkpoint_dir</span><span style="color:#e6db74">&#39;</span>, <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">/tmp/cifar10_train</span><span style="color:#e6db74">&#39;</span>,
+                           <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;&#34;&#34;</span><span style="color:#e6db74">Directory where to read training checkpoints.</span><span style="color:#e6db74">&#34;&#34;&#34;</span>)
+tf<span style="color:#f92672">.</span>app<span style="color:#f92672">.</span>flags<span style="color:#f92672">.</span>DEFINE_string(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">output_dir</span><span style="color:#e6db74">&#39;</span>, <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">/tmp/cifar10_export</span><span style="color:#e6db74">&#39;</span>,
+                           <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;&#34;&#34;</span><span style="color:#e6db74">Directory where to export the model.</span><span style="color:#e6db74">&#34;&#34;&#34;</span>)
+tf<span style="color:#f92672">.</span>app<span style="color:#f92672">.</span>flags<span style="color:#f92672">.</span>DEFINE_integer(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">model_version</span><span style="color:#e6db74">&#39;</span>, <span style="color:#ae81ff">1</span>,
+                            <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;&#34;&#34;</span><span style="color:#e6db74">Version number of the model.</span><span style="color:#e6db74">&#34;&#34;&#34;</span>)
 
-tf.app.flags.DEFINE_string('checkpoint_dir', '/tmp/cifar10_train',
-                           &quot;&quot;&quot;Directory where to read training checkpoints.&quot;&quot;&quot;)
-tf.app.flags.DEFINE_string('output_dir', '/tmp/cifar10_export',
-                           &quot;&quot;&quot;Directory where to export the model.&quot;&quot;&quot;)
-tf.app.flags.DEFINE_integer('model_version', 1,
-                            &quot;&quot;&quot;Version number of the model.&quot;&quot;&quot;)
-
-def export():
-  with tf.Graph().as_default():
-    # Input transformation.
-    # Receive a string scalar with the binary contents of the image.
-    serialized_tf_example = tf.placeholder(tf.string, name='tf_example')
-    feature_configs = {
-        'image/encoded': tf.FixedLenFeature(
-            shape=[], dtype=tf.string),
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">export</span>():
+  <span style="color:#66d9ef">with</span> tf<span style="color:#f92672">.</span>Graph()<span style="color:#f92672">.</span>as_default():
+    <span style="color:#75715e"># Input transformation.</span>
+    <span style="color:#75715e"># Receive a string scalar with the binary contents of the image.</span>
+    serialized_tf_example <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>placeholder(tf<span style="color:#f92672">.</span>string, name<span style="color:#f92672">=</span><span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">tf_example</span><span style="color:#e6db74">&#39;</span>)
+    feature_configs <span style="color:#f92672">=</span> {
+        <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">image/encoded</span><span style="color:#e6db74">&#39;</span>: tf<span style="color:#f92672">.</span>FixedLenFeature(
+            shape<span style="color:#f92672">=</span>[], dtype<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>string),
     }
-    tf_example = tf.parse_single_example(serialized_tf_example, feature_configs)
-    encoded_image = tf_example['image/encoded']
+    tf_example <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>parse_single_example(serialized_tf_example, feature_configs)
+    encoded_image <span style="color:#f92672">=</span> tf_example[<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">image/encoded</span><span style="color:#e6db74">&#39;</span>]
 
-    # Decode the image as a 3D tensor ([width, height, channels])
-    image = tf.image.decode_image(encoded_image, channels=3)
+    <span style="color:#75715e"># Decode the image as a 3D tensor ([width, height, channels])</span>
+    image <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>image<span style="color:#f92672">.</span>decode_image(encoded_image, channels<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span>)
 
-    # Crop or pad the image to be 24x24x3
-    image = tf.image.resize_image_with_crop_or_pad(image, IMAGE_SIZE, IMAGE_SIZE)
+    <span style="color:#75715e"># Crop or pad the image to be 24x24x3</span>
+    image <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>image<span style="color:#f92672">.</span>resize_image_with_crop_or_pad(image, IMAGE_SIZE, IMAGE_SIZE)
 
-    # Cast the image to float32
-    image = tf.cast(image, tf.float32)
+    <span style="color:#75715e"># Cast the image to float32</span>
+    image <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>cast(image, tf<span style="color:#f92672">.</span>float32)
 
-    # expand dims so we get a 4D tensor [1, 24, 24, 3]
-    images = tf.expand_dims(image, 0)
+    <span style="color:#75715e"># expand dims so we get a 4D tensor [1, 24, 24, 3]</span>
+    images <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>expand_dims(image, <span style="color:#ae81ff">0</span>)
 
-    # Run the tensor through the model (a.k.a inference)
-    logits = cifar10.inference(images)
+    <span style="color:#75715e"># Run the tensor through the model (a.k.a inference)</span>
+    logits <span style="color:#f92672">=</span> cifar10<span style="color:#f92672">.</span>inference(images)
 
-    # Transform output to topK results.
-    values, indices = tf.nn.top_k(logits, NUM_CLASSES)
+    <span style="color:#75715e"># Transform output to topK results.</span>
+    values, indices <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>nn<span style="color:#f92672">.</span>top_k(logits, NUM_CLASSES)
 
-    # Apply softmax so we get normalized values
-    normalized_values = tf.nn.softmax(values)
+    <span style="color:#75715e"># Apply softmax so we get normalized values</span>
+    normalized_values <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>nn<span style="color:#f92672">.</span>softmax(values)
 
-    # Add human readable labels to the integer indices.
-    class_descriptions = [
-        'airplane',
-        'automobile',
-        'bird',
-        'cat',
-        'deer',
-        'dog',
-        'frog',
-        'horse',
-        'ship',
-        'truck'
+    <span style="color:#75715e"># Add human readable labels to the integer indices.</span>
+    class_descriptions <span style="color:#f92672">=</span> [
+        <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">airplane</span><span style="color:#e6db74">&#39;</span>,
+        <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">automobile</span><span style="color:#e6db74">&#39;</span>,
+        <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">bird</span><span style="color:#e6db74">&#39;</span>,
+        <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">cat</span><span style="color:#e6db74">&#39;</span>,
+        <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">deer</span><span style="color:#e6db74">&#39;</span>,
+        <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">dog</span><span style="color:#e6db74">&#39;</span>,
+        <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">frog</span><span style="color:#e6db74">&#39;</span>,
+        <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">horse</span><span style="color:#e6db74">&#39;</span>,
+        <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">ship</span><span style="color:#e6db74">&#39;</span>,
+        <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">truck</span><span style="color:#e6db74">&#39;</span>
     ]
-    class_tensor = tf.constant(class_descriptions)
-    table = tf.contrib.lookup.index_to_string_table_from_tensor(class_tensor)
-    classes = table.lookup(tf.to_int64(indices))
+    class_tensor <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>constant(class_descriptions)
+    table <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>contrib<span style="color:#f92672">.</span>lookup<span style="color:#f92672">.</span>index_to_string_table_from_tensor(class_tensor)
+    classes <span style="color:#f92672">=</span> table<span style="color:#f92672">.</span>lookup(tf<span style="color:#f92672">.</span>to_int64(indices))
 
-    # Restore variables from training checkpoint.
-    variable_averages = tf.train.ExponentialMovingAverage(
-        cifar10.MOVING_AVERAGE_DECAY)
-    variables_to_restore = variable_averages.variables_to_restore()
-    saver = tf.train.Saver(variables_to_restore)
+    <span style="color:#75715e"># Restore variables from training checkpoint.</span>
+    variable_averages <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>ExponentialMovingAverage(
+        cifar10<span style="color:#f92672">.</span>MOVING_AVERAGE_DECAY)
+    variables_to_restore <span style="color:#f92672">=</span> variable_averages<span style="color:#f92672">.</span>variables_to_restore()
+    saver <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>Saver(variables_to_restore)
 
-    with tf.Session() as sess:
-      # get checkpoint state from checkpoint dir.
-      ckpt = tf.train.get_checkpoint_state(FLAGS.checkpoint_dir)
-      if ckpt and ckpt.model_checkpoint_path:
-        # Restores from checkpoint
-        saver.restore(sess, ckpt.model_checkpoint_path)
-        # Assuming model_checkpoint_path looks something like:
-        #   /my-favorite-path/cifar10_train/model.ckpt-0,
-        # extract global_step from it.
-        global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
-      else:
-        print('No checkpoint file found')
-        return
+    <span style="color:#66d9ef">with</span> tf<span style="color:#f92672">.</span>Session() <span style="color:#66d9ef">as</span> sess:
+      <span style="color:#75715e"># get checkpoint state from checkpoint dir.</span>
+      ckpt <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>train<span style="color:#f92672">.</span>get_checkpoint_state(FLAGS<span style="color:#f92672">.</span>checkpoint_dir)
+      <span style="color:#66d9ef">if</span> ckpt <span style="color:#f92672">and</span> ckpt<span style="color:#f92672">.</span>model_checkpoint_path:
+        <span style="color:#75715e"># Restores from checkpoint</span>
+        saver<span style="color:#f92672">.</span>restore(sess, ckpt<span style="color:#f92672">.</span>model_checkpoint_path)
+        <span style="color:#75715e"># Assuming model_checkpoint_path looks something like:</span>
+        <span style="color:#75715e">#   /my-favorite-path/cifar10_train/model.ckpt-0,</span>
+        <span style="color:#75715e"># extract global_step from it.</span>
+        global_step <span style="color:#f92672">=</span> ckpt<span style="color:#f92672">.</span>model_checkpoint_path<span style="color:#f92672">.</span>split(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">/</span><span style="color:#e6db74">&#39;</span>)[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>split(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">-</span><span style="color:#e6db74">&#39;</span>)[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
+      <span style="color:#66d9ef">else</span>:
+        <span style="color:#66d9ef">print</span>(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">No checkpoint file found</span><span style="color:#e6db74">&#39;</span>)
+        <span style="color:#66d9ef">return</span>
 
-      # Export inference model.
-      output_path = os.path.join(
-          tf.compat.as_bytes(FLAGS.output_dir),
-          tf.compat.as_bytes('cifar10'),
-          tf.compat.as_bytes(str(FLAGS.model_version)))
-      builder = tf.saved_model.builder.SavedModelBuilder(output_path)
+      <span style="color:#75715e"># Export inference model.</span>
+      output_path <span style="color:#f92672">=</span> os<span style="color:#f92672">.</span>path<span style="color:#f92672">.</span>join(
+          tf<span style="color:#f92672">.</span>compat<span style="color:#f92672">.</span>as_bytes(FLAGS<span style="color:#f92672">.</span>output_dir),
+          tf<span style="color:#f92672">.</span>compat<span style="color:#f92672">.</span>as_bytes(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">cifar10</span><span style="color:#e6db74">&#39;</span>),
+          tf<span style="color:#f92672">.</span>compat<span style="color:#f92672">.</span>as_bytes(str(FLAGS<span style="color:#f92672">.</span>model_version)))
+      builder <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>builder<span style="color:#f92672">.</span>SavedModelBuilder(output_path)
 
-      # Build the classification and prediction signatures.
-      classify_inputs_tensor_info = tf.saved_model.utils.build_tensor_info(
+      <span style="color:#75715e"># Build the classification and prediction signatures.</span>
+      classify_inputs_tensor_info <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>utils<span style="color:#f92672">.</span>build_tensor_info(
           serialized_tf_example)
-      classes_output_tensor_info = tf.saved_model.utils.build_tensor_info(
+      classes_output_tensor_info <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>utils<span style="color:#f92672">.</span>build_tensor_info(
           classes)
-      scores_output_tensor_info = tf.saved_model.utils.build_tensor_info(normalized_values)
+      scores_output_tensor_info <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>utils<span style="color:#f92672">.</span>build_tensor_info(normalized_values)
 
-      classification_signature = (
-          tf.saved_model.signature_def_utils.build_signature_def(
-              inputs={
-                  tf.saved_model.signature_constants.CLASSIFY_INPUTS:
+      classification_signature <span style="color:#f92672">=</span> (
+          tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>signature_def_utils<span style="color:#f92672">.</span>build_signature_def(
+              inputs<span style="color:#f92672">=</span>{
+                  tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>signature_constants<span style="color:#f92672">.</span>CLASSIFY_INPUTS:
                       classify_inputs_tensor_info
               },
-              outputs={
-                  tf.saved_model.signature_constants.CLASSIFY_OUTPUT_CLASSES:
+              outputs<span style="color:#f92672">=</span>{
+                  tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>signature_constants<span style="color:#f92672">.</span>CLASSIFY_OUTPUT_CLASSES:
                       classes_output_tensor_info,
-                  tf.saved_model.signature_constants.CLASSIFY_OUTPUT_SCORES:
+                  tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>signature_constants<span style="color:#f92672">.</span>CLASSIFY_OUTPUT_SCORES:
                       scores_output_tensor_info
               },
-              method_name=tf.saved_model.signature_constants.
+              method_name<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>signature_constants<span style="color:#f92672">.</span>
               CLASSIFY_METHOD_NAME))
 
-      predict_inputs_tensor_info = tf.saved_model.utils.build_tensor_info(encoded_image)
-      prediction_signature = (
-          tf.saved_model.signature_def_utils.build_signature_def(
-              inputs={'images': predict_inputs_tensor_info},
-              outputs={
-                  'classes': classes_output_tensor_info,
-                  'scores': scores_output_tensor_info
+      predict_inputs_tensor_info <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>utils<span style="color:#f92672">.</span>build_tensor_info(encoded_image)
+      prediction_signature <span style="color:#f92672">=</span> (
+          tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>signature_def_utils<span style="color:#f92672">.</span>build_signature_def(
+              inputs<span style="color:#f92672">=</span>{<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">images</span><span style="color:#e6db74">&#39;</span>: predict_inputs_tensor_info},
+              outputs<span style="color:#f92672">=</span>{
+                  <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">classes</span><span style="color:#e6db74">&#39;</span>: classes_output_tensor_info,
+                  <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">scores</span><span style="color:#e6db74">&#39;</span>: scores_output_tensor_info
               },
-              method_name=tf.saved_model.signature_constants.PREDICT_METHOD_NAME
+              method_name<span style="color:#f92672">=</span>tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>signature_constants<span style="color:#f92672">.</span>PREDICT_METHOD_NAME
           ))
 
-      # Add the freezed variables and signatures
-      legacy_init_op = tf.group(
-          tf.tables_initializer(), name='legacy_init_op')
-      builder.add_meta_graph_and_variables(
-          sess, [tf.saved_model.tag_constants.SERVING],
-          signature_def_map={
-              'predict_images':
+      <span style="color:#75715e"># Add the freezed variables and signatures</span>
+      legacy_init_op <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>group(
+          tf<span style="color:#f92672">.</span>tables_initializer(), name<span style="color:#f92672">=</span><span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">legacy_init_op</span><span style="color:#e6db74">&#39;</span>)
+      builder<span style="color:#f92672">.</span>add_meta_graph_and_variables(
+          sess, [tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>tag_constants<span style="color:#f92672">.</span>SERVING],
+          signature_def_map<span style="color:#f92672">=</span>{
+              <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">predict_images</span><span style="color:#e6db74">&#39;</span>:
                   prediction_signature,
-              tf.saved_model.signature_constants.
+              tf<span style="color:#f92672">.</span>saved_model<span style="color:#f92672">.</span>signature_constants<span style="color:#f92672">.</span>
               DEFAULT_SERVING_SIGNATURE_DEF_KEY:
                   classification_signature,
           },
-          legacy_init_op=legacy_init_op)
+          legacy_init_op<span style="color:#f92672">=</span>legacy_init_op)
 
-      builder.save()
-      print('Successfully exported model to %s' % output_path)
+      builder<span style="color:#f92672">.</span>save()
+      <span style="color:#66d9ef">print</span>(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">Successfully exported model to </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> output_path)
 
-def main(argv=None):  # pylint: disable=unused-argument
-  if tf.gfile.Exists(FLAGS.output_dir):
-    tf.gfile.DeleteRecursively(FLAGS.output_dir)
-  tf.gfile.MakeDirs(FLAGS.output_dir)
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">main</span>(argv<span style="color:#f92672">=</span>None):  <span style="color:#75715e"># pylint: disable=unused-argument</span>
+  <span style="color:#66d9ef">if</span> tf<span style="color:#f92672">.</span>gfile<span style="color:#f92672">.</span>Exists(FLAGS<span style="color:#f92672">.</span>output_dir):
+    tf<span style="color:#f92672">.</span>gfile<span style="color:#f92672">.</span>DeleteRecursively(FLAGS<span style="color:#f92672">.</span>output_dir)
+  tf<span style="color:#f92672">.</span>gfile<span style="color:#f92672">.</span>MakeDirs(FLAGS<span style="color:#f92672">.</span>output_dir)
   export()
 
-if __name__ == '__main__':
-  tf.app.run()
-</code></pre>
-
-<blockquote>
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">__main__</span><span style="color:#e6db74">&#39;</span>:
+  tf<span style="color:#f92672">.</span>app<span style="color:#f92672">.</span>run()
+</code></pre></div><blockquote>
 <p>Your exported CIFAR10 model will be saved at <code>/tmp/cifar10_export</code>.</p>
 </blockquote>
-
 <p>Now you are ready to serve your model with <a href="https://www.tensorflow.org/serving/">Tensorflow Serving</a>. You can follow the inception tutorial <a href="https://www.tensorflow.org/serving/serving_inception#part_0_create_a_docker_image">here</a>, just change your model name to <code>cifar10</code> and adjust the exported folder.</p>
-
 <p>See you again next time 😄.</p>
                 </section>
             </article>

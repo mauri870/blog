@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>yasm on Mauri870&#39;s dev blog</title>
@@ -17,7 +17,7 @@
       <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/posts/assembly-linux-x64-part-1/</guid>
-      <description>&lt;p&gt;I&amp;rsquo;m a person that loves to learn new things, and assembly is one of the most recent topics I decide to dig into.&lt;/p&gt;</description>
+      <description>&lt;p&gt;I&#39;m a person that loves to learn new things, and assembly is one of the most recent topics I decide to dig into.&lt;/p&gt;</description>
     </item>
     
   </channel>
