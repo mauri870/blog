@@ -8,7 +8,7 @@ tags: [
 ]
 ---
 
-Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust?
+Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust? Let's find out.
 
 <!--more-->
 
@@ -49,7 +49,6 @@ For example our prediction struct looks like this:
 
 ```rust
 /// A struct that wraps the code and confidence for a prediction
-#[derive(Debug, Serialize, Deserialize)]
 #[repr(C)]
 pub struct AmdPrediction {
     code: u32,       // The integer prediction code
@@ -58,9 +57,7 @@ pub struct AmdPrediction {
 }
 ```
 
-As you can see, `serde` is beeing used to serialize / deserialize the json response returned by the server.
-
-And we also have a function to lookup the string label for a given prediction code:
+As you can see, we use `repr(C)` to allow this struct to be called from C code. We also have a function to lookup the string label for a given prediction code:
 
 ```rust
 /// Retrieve the label corresponding to an amd status code
