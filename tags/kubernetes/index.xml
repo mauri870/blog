@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Kubernetes on Mauri870&#39;s dev blog</title>
@@ -17,7 +17,7 @@
       <pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/posts/gsutil-leak/</guid>
-      <description>&lt;p&gt;This week we solved a resource leak in our asterisk images reserved for call handling. Here&amp;rsquo;s the path we follow to mitigate the issue, which we find out to be related with the gsutil command line tool.&lt;/p&gt;</description>
+      <description>&lt;p&gt;This week we solved a resource leak in our asterisk images reserved for call handling. Here&#39;s the path we follow to mitigate the issue, which we find out to be related with the gsutil command line tool.&lt;/p&gt;</description>
     </item>
     
   </channel>

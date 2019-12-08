@@ -7,7 +7,7 @@
 		
     <meta name="author" content="Mauri de Souza Nunes">
     <meta name="description" content="A Spectrogram is a picture of sound. A common approach for audio classification tasks is to use spectrograms as input and simply treat the audio as an image. After several tries I finally got an optimized way to integrate the spectrogram generation pipeline into the tensorflow computational graph.">
-		<meta name="generator" content="Hugo 0.58.3" />
+		<meta name="generator" content="Hugo 0.60.1" />
 		<title>Audio Spectrograms in Tensorflow &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -51,7 +51,7 @@
                     </h1>
                     <h2 class="headline">
                     May 24, 2018 00:05
-                    · 909 words
+                    · 898 words
                     · 5 minute read
                       <span class="tags">
                       
@@ -72,148 +72,122 @@
                   
                     <div id="toc">
                       <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#1-the-naive-approach">1. The naive approach</a></li>
-<li><a href="#2-improving-the-spectrogram-generation">2. Improving the spectrogram generation</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#1-the-naive-approach">1. The naive approach</a></li>
+    <li><a href="#2-improving-the-spectrogram-generation">2. Improving the spectrogram generation</a></li>
+  </ul>
 </nav>
                     </div>
                   
                 
                 <section id="post-body">
                     <p>A Spectrogram is a picture of sound. A common approach for audio classification tasks is to use spectrograms as input and simply treat the audio as an image. After several tries I finally got an optimized way to integrate the spectrogram generation pipeline into the tensorflow computational graph.</p>
-
-<hr />
-
+<hr>
 <p>We have a model for audio classification here at <a href="http://fluxoti.com">FluxoTi</a> running in production about 100 thousand times a day for about one and a half year now. As we started researching about audio classification, we see that several people have achieved good results using <a href="http://cs231n.github.io/convolutional-networks">Convolutional Neural Networks</a> applied to audio spectrograms. Our only problem was how to generate those spectrograms prior to feed then to the model 🤔.</p>
-
 <h2 id="1-the-naive-approach">1. The naive approach</h2>
-
 <p>In the first release of the project we have basically two applications: the tfrecords / train / eval tensorflow pipeline written in python and the production api written in Go.</p>
-
 <p>Yes, we do serve the tensorflow exported model from Go, using CGO&hellip; <strong>What a mistake.</strong></p>
-
-<p>I mean, using Go was not a mistake, it&rsquo;s an incredible language and I love it. But serving the tensorflow model from Go (using the tensorflow CGO wrapper) use a LOT of ram after some weeks, reaching about 1GB each instance&hellip; Probably was a sort of memory leak, I tried to debug it but CGO is always on the way&hellip;</p>
-
-<p>To generate the spectrogram in this first release we decided to use sox, it&rsquo;s a common command line utility for audio conversion and manipulation. Basically what we did was get the audio in the API and then save on disk, run the sox on the received sample, saving the generated spectrogram and then load the image bytes into a Tensorflow Tensor that we feed into the model.</p>
-
+<p>I mean, using Go was not a mistake, it's an incredible language and I love it. But serving the tensorflow model from Go (using the tensorflow CGO wrapper) use a LOT of ram after some weeks, reaching about 1GB each instance&hellip; Probably was a sort of memory leak, I tried to debug it but CGO is always on the way&hellip;</p>
+<p>To generate the spectrogram in this first release we decided to use sox, it's a common command line utility for audio conversion and manipulation. Basically what we did was get the audio in the API and then save on disk, run the sox on the received sample, saving the generated spectrogram and then load the image bytes into a Tensorflow Tensor that we feed into the model.</p>
 <p>Something like this:</p>
-
-<pre><code class="language-bash">sox audio.gsm -n spectrogram -x 128 -y 128 -A -z 50 -Z -20 -r -o spectrogram.png
-</code></pre>
-
-<p>However tests in production showed that we are hitting storage too hard. Storing and reading from disk about 2 or 3 times per request was pretty bad, so we cut out storage usage by using <a href="http://www.linfo.org/pipes.html">pipes</a> everywhere:</p>
-
-<pre><code class="language-bash"> # In Go we fill the sox stdin with a buffer containing the gsm audio bytes
- # readed directly from request.
- sox -t gsm - -n spectrogram -x 128 -y 128 -A -z 50 -Z -20 -r -o -
- # PNG encoded image is contained in stdout buffer.
-</code></pre>
-
-<blockquote>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sox audio.gsm -n spectrogram -x <span style="color:#ae81ff">128</span> -y <span style="color:#ae81ff">128</span> -A -z <span style="color:#ae81ff">50</span> -Z -20 -r -o spectrogram.png
+</code></pre></div><p>However tests in production showed that we are hitting storage too hard. Storing and reading from disk about 2 or 3 times per request was pretty bad, so we cut out storage usage by using <a href="http://www.linfo.org/pipes.html">pipes</a> everywhere:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"> <span style="color:#75715e"># In Go we fill the sox stdin with a buffer containing the gsm audio bytes</span>
+ <span style="color:#75715e"># readed directly from request.</span>
+ sox -t gsm - -n spectrogram -x <span style="color:#ae81ff">128</span> -y <span style="color:#ae81ff">128</span> -A -z <span style="color:#ae81ff">50</span> -Z -20 -r -o -
+ <span style="color:#75715e"># PNG encoded image is contained in stdout buffer.</span>
+</code></pre></div><blockquote>
 <p>We also found a known <a href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=823417">sox bug</a> with input/output pipes on Debian, which we solve compiling from source.</p>
 </blockquote>
-
 <h2 id="2-improving-the-spectrogram-generation">2. Improving the spectrogram generation</h2>
+<p>A couple of months ago I begin to refactor the project to use <a href="https://www.tensorflow.org/serving/">Tensorflow Serving</a>. The api was also lightweight now, it talks Protobuf through gRPC to the serving service and we don't have more memory leaks to worry about 😅. Each serving pod uses around 50MB of ram and the api 20MB. We keep the same sox approach as described above.</p>
+<p>But sox isn't perfect&hellip; Segfaults happen randomly and the api cpu usage is higher bacause of the encoding / decoding operations.</p>
+<p>Reading about the tensorflow contrib package I found some interesting ops, including a <code>audio_spectrogram</code>. With some work I replaced the entire sox pipeline by using the tensorflow computations, the api no longer deal with the preprocessing stuff. The only downside is that the ffmpeg ops don't support gsm, however it's ok for us to use wav instead.</p>
+<p>Here's the source code for a program to test the spectrogram generation in  tensorflow 1.14:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> tensorflow <span style="color:#f92672">as</span> tf
+<span style="color:#75715e"># FIXME: audio_ops.decode_wav is deprecated, use tensorflow_io.IOTensor.from_audio</span>
+<span style="color:#f92672">from</span> tensorflow.contrib.framework.python.ops <span style="color:#f92672">import</span> audio_ops
 
-<p>A couple of months ago I begin to refactor the project to use <a href="https://www.tensorflow.org/serving/">Tensorflow Serving</a>. The api was also lightweight now, it talks Protobuf through gRPC to the serving service and we don&rsquo;t have more memory leaks to worry about 😅. Each serving pod uses around 50MB of ram and the api 20MB. We keep the same sox approach as described above.</p>
+<span style="color:#75715e"># Enable eager execution for a more interactive frontend.</span>
+<span style="color:#75715e"># If using the default graph mode, you&#39;ll probably need to run in a session.</span>
+tf<span style="color:#f92672">.</span>enable_eager_execution()
 
-<p>But sox isn&rsquo;t perfect&hellip; Segfaults happen randomly and the api cpu usage is higher bacause of the encoding / decoding operations.</p>
-
-<p>Reading about the tensorflow contrib package I found some interesting ops, including a <code>audio_spectrogram</code>. With some work I replaced the entire sox pipeline by using the tensorflow computations, the api no longer deal with the preprocessing stuff. The only downside is that the ffmpeg ops don&rsquo;t support gsm, however it&rsquo;s ok for us to use wav instead.</p>
-
-<p>Here&rsquo;s the source code for a program to test the spectrogram generation in  tensorflow 1.14:</p>
-
-<pre><code class="language-python">import tensorflow as tf
-# FIXME: audio_ops.decode_wav is deprecated, use tensorflow_io.IOTensor.from_audio
-from tensorflow.contrib.framework.python.ops import audio_ops
-
-# Enable eager execution for a more interactive frontend.
-# If using the default graph mode, you'll probably need to run in a session.
-tf.enable_eager_execution()
-
-@tf.function
-def audio_to_spectrogram(
+<span style="color:#a6e22e">@tf.function</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">audio_to_spectrogram</span>(
         audio_contents,
         width,
         height,
-        channels=1,
-        window_size=1024,
-        stride=64,
-        brightness=100.):
-    &quot;&quot;&quot;Decode and build a spectrogram using a wav string tensor.
-
-    Args:
-      audio_contents: String tensor of the wav audio contents.
-      width: Spectrogram width.
-      height: Spectrogram height.
-      channels: Audio channel count.
-      window_size: Size of the spectrogram window.
-      stride: Size of the spectrogram stride.
-      brightness: Brightness of the spectrogram.
-
-    Returns:
-      0-D string Tensor with the image contents.
-    &quot;&quot;&quot;
-	# Decode the wav mono into a 2D tensor with time in dimension 0
-	# and channel along dimension 1
-        waveform = audio_ops.decode_wav(
-        	audio_contents, desired_channels=channels)
+        channels<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>,
+        window_size<span style="color:#f92672">=</span><span style="color:#ae81ff">1024</span>,
+        stride<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span>,
+        brightness<span style="color:#f92672">=</span><span style="color:#ae81ff">100.</span>):
+    <span style="color:#e6db74"></span><span style="color:#e6db74">&#34;&#34;&#34;</span><span style="color:#e6db74">Decode and build a spectrogram using a wav string tensor.</span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">    Args:</span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">      audio_contents: String tensor of the wav audio contents.</span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">      width: Spectrogram width.</span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">      height: Spectrogram height.</span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">      channels: Audio channel count.</span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">      window_size: Size of the spectrogram window.</span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">      stride: Size of the spectrogram stride.</span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">      brightness: Brightness of the spectrogram.</span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">    Returns:</span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">      0-D string Tensor with the image contents.</span><span style="color:#e6db74">
+</span><span style="color:#e6db74"></span><span style="color:#e6db74">    </span><span style="color:#e6db74">&#34;&#34;&#34;</span>
+	<span style="color:#75715e"># Decode the wav mono into a 2D tensor with time in dimension 0</span>
+	<span style="color:#75715e"># and channel along dimension 1</span>
+        waveform <span style="color:#f92672">=</span> audio_ops<span style="color:#f92672">.</span>decode_wav(
+        	audio_contents, desired_channels<span style="color:#f92672">=</span>channels)
 	
-	# Compute the spectrogram
-	# FIXME: Seems like this is deprecated in tensorflow 2.0 and
-	# the operation only works on CPU. Change this to tf.signal.stft 
-	# and  friends to take advantage of GPU kernels.
-        spectrogram = audio_ops.audio_spectrogram(
-        	waveform.audio,
-        	window_size=window_size,
-        	stride=stride)
+	<span style="color:#75715e"># Compute the spectrogram</span>
+	<span style="color:#75715e"># FIXME: Seems like this is deprecated in tensorflow 2.0 and</span>
+	<span style="color:#75715e"># the operation only works on CPU. Change this to tf.signal.stft </span>
+	<span style="color:#75715e"># and  friends to take advantage of GPU kernels.</span>
+        spectrogram <span style="color:#f92672">=</span> audio_ops<span style="color:#f92672">.</span>audio_spectrogram(
+        	waveform<span style="color:#f92672">.</span>audio,
+        	window_size<span style="color:#f92672">=</span>window_size,
+        	stride<span style="color:#f92672">=</span>stride)
 
-	# Adjust brightness
-        brightness = tf.constant(brightness)
+	<span style="color:#75715e"># Adjust brightness</span>
+        brightness <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>constant(brightness)
 
-	# Normalize pixels
-        mul = tf.multiply(spectrogram, brightness)
-        min_const = tf.constant(255.)
-        minimum = tf.minimum(mul, min_const)
+	<span style="color:#75715e"># Normalize pixels</span>
+        mul <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>multiply(spectrogram, brightness)
+        min_const <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>constant(<span style="color:#ae81ff">255.</span>)
+        minimum <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>minimum(mul, min_const)
 
-	# Expand dims so we get the proper shape
-        expand_dims = tf.expand_dims(minimum, -1)
+	<span style="color:#75715e"># Expand dims so we get the proper shape</span>
+        expand_dims <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>expand_dims(minimum, <span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>)
 
-	# Resize the spectrogram to input size of the model
-        resize = tf.image.resize(expand_dims, [width, height])
+	<span style="color:#75715e"># Resize the spectrogram to input size of the model</span>
+        resize <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>image<span style="color:#f92672">.</span>resize(expand_dims, [width, height])
 
-	# Remove the trailing dimension
-        squeeze = tf.squeeze(resize, 0)
+	<span style="color:#75715e"># Remove the trailing dimension</span>
+        squeeze <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>squeeze(resize, <span style="color:#ae81ff">0</span>)
 
-	# Tensorflow spectrogram has time along y axis and frequencies along x axis
-	# so we fix that
-        flip_left_right = tf.image.flip_left_right(squeeze)
-        transposed = tf.image.transpose(flip_left_right)
+	<span style="color:#75715e"># Tensorflow spectrogram has time along y axis and frequencies along x axis</span>
+	<span style="color:#75715e"># so we fix that</span>
+        flip_left_right <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>image<span style="color:#f92672">.</span>flip_left_right(squeeze)
+        transposed <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>image<span style="color:#f92672">.</span>transpose(flip_left_right)
 
-	# Cast to uint8 and encode as png
-        cast = tf.cast(transposed, tf.uint8)
+	<span style="color:#75715e"># Cast to uint8 and encode as png</span>
+        cast <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>cast(transposed, tf<span style="color:#f92672">.</span>uint8)
 
-	# Encode tensor as a png image
-        return tf.image.encode_png(cast)
+	<span style="color:#75715e"># Encode tensor as a png image</span>
+        <span style="color:#66d9ef">return</span> tf<span style="color:#f92672">.</span>image<span style="color:#f92672">.</span>encode_png(cast)
 
-if __name__ == '__main__':
-	input_file = tf.constant('input.wav')
-	output_file = tf.constant('spectrogram.png')
+<span style="color:#66d9ef">if</span> __name__ <span style="color:#f92672">==</span> <span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">__main__</span><span style="color:#e6db74">&#39;</span>:
+	input_file <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>constant(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">input.wav</span><span style="color:#e6db74">&#39;</span>)
+	output_file <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>constant(<span style="color:#e6db74"></span><span style="color:#e6db74">&#39;</span><span style="color:#e6db74">spectrogram.png</span><span style="color:#e6db74">&#39;</span>)
 
-	# Generage the spectrogram
-	audio = tf.io.read_file(input_file)
-	image = audio_to_spectrogram(audio, 224, 224)
+	<span style="color:#75715e"># Generage the spectrogram</span>
+	audio <span style="color:#f92672">=</span> tf<span style="color:#f92672">.</span>io<span style="color:#f92672">.</span>read_file(input_file)
+	image <span style="color:#f92672">=</span> audio_to_spectrogram(audio, <span style="color:#ae81ff">224</span>, <span style="color:#ae81ff">224</span>)
 
-	# Write the png encoded image to a file
-	tf.io.write(output_file, image)
-</code></pre>
-
-<p>And it&rsquo;s pretty fast too, we reach about <strong>30 to 50 milliseconds</strong> including the preprocessing stuff and the model inference, that&rsquo;s pretty cool.</p>
-
+	<span style="color:#75715e"># Write the png encoded image to a file</span>
+	tf<span style="color:#f92672">.</span>io<span style="color:#f92672">.</span>write(output_file, image)
+</code></pre></div><p>And it's pretty fast too, we reach about <strong>30 to 50 milliseconds</strong> including the preprocessing stuff and the model inference, that's pretty cool.</p>
 <p>See you again next time 😄.</p>
                 </section>
             </article>
