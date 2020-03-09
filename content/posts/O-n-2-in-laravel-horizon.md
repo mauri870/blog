@@ -5,7 +5,7 @@ tags: [
   "Laravel",
   "Horizon",
 ]
-draft: true
+draft: false
 ---
 
 O(n^2) again, now with Laravel Horizon memory usage.
