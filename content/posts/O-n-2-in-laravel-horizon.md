@@ -1,6 +1,6 @@
 ---
 title: "O(n^2) Redis memory usage with Laravel Horizon"
-date: 2019-11-12T10:00:00-03:00
+date: 2020-03-06T09:00:00-03:00
 tags: [
   "Laravel",
   "Horizon",
