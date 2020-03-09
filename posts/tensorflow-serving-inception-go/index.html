@@ -7,7 +7,7 @@
 		
     <meta name="author" content="Mauri de Souza Nunes">
     <meta name="description" content="Tensorflow Serving is the most optimized way to serve a Tensorflow machine learning model in production. The official tutorials only cover the python client, so lets implement a Go/Golang one.">
-		<meta name="generator" content="Hugo 0.60.1" />
+		<meta name="generator" content="Hugo 0.66.0" />
 		<title>Writing a Golang client for the Tensorflow Serving Inception model &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -88,7 +88,7 @@
 <hr>
 <p>We have a Tensorflow Deep Learning model here at <a href="http://fluxoti.com">FluxoTi</a> for sound classification and we need a way to serve it with the best performance since this model runs about 100 thousand times a day. The solution was simple, <a href="https://github.com/tensorflow/serving">Tensorflow Serving</a>, a high-performance and flexible system for machine learning models.</p>
 <h2 id="1-train-and-export-the-model">1. Train and export the model</h2>
-<p>Since Tensorflow Serving is designed to serve Tensorflow models, we first need to train one. For the sake of simplicity, you can follow the <a href="https://www.tensorflow.org/serving/serving_inception">tutorials</a> in order to export a pre-treined inception model. You can skip the Kubernetes part, we only need the final image with the compiled tensorflow serving server and the exported model. I'll probably write a post in the future about how to export a custom model.</p>
+<p>Since Tensorflow Serving is designed to serve Tensorflow models, we first need to train one. For the sake of simplicity, you can follow the <a href="https://www.tensorflow.org/serving/serving_inception">tutorials</a> in order to export a pre-treined inception model. You can skip the Kubernetes part, we only need the final image with the compiled tensorflow serving server and the exported model. I&rsquo;ll probably write a post in the future about how to export a custom model.</p>
 <h2 id="2-preparing-the-proto-files">2. Preparing the proto files</h2>
 <p>Tensorflow Serving is written in C++, exposing a gRPC server that talks Protobuf. In order to make a Go client, we must compile the protobuf files first to generate all the boilerplate code for Go, yeah protobuf is really cool hum 😄.</p>
 <p>First of all clone the tensorflow serving repository:</p>
@@ -96,26 +96,26 @@
 </code></pre></div><p>Since the serving proto files depends on the tensorflow ones, clone the tensorflow repo too:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">git clone -b r1.7 https://github.com/tensorflow/tensorflow.git
 </code></pre></div><blockquote>
-<p>Maybe using bazel you don't need to do these steps manually, but who uses bazel?? Probably only Google&hellip;</p>
+<p>Maybe using bazel you don&rsquo;t need to do these steps manually, but who uses bazel?? Probably only Google&hellip;</p>
 </blockquote>
 <p>Then you need the protoc compiler, get it <a href="github.com/google/protobuf">here</a>. And of course the golang protobuf plugin, <a href="https://github.com/golang/protobuf">here</a>.</p>
 <p>Now you can compile the protos:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mkdir -p vendor
 PROTOC_OPTS<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;-I tensorflow -I serving --go_out=plugins=grpc:vendor&#39;</span>
 
-eval <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> serving/tensorflow_serving/apis/*.proto</span><span style="color:#e6db74">&#34;</span>
-eval <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> serving/tensorflow_serving/config/*.proto</span><span style="color:#e6db74">&#34;</span>
-eval <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> serving/tensorflow_serving/util/*.proto</span><span style="color:#e6db74">&#34;</span>
-eval <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> serving/tensorflow_serving/sources/storage_path/*.proto</span><span style="color:#e6db74">&#34;</span>
-eval <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> tensorflow/tensorflow/core/framework/*.proto</span><span style="color:#e6db74">&#34;</span>
-eval <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> tensorflow/tensorflow/core/example/*.proto</span><span style="color:#e6db74">&#34;</span>
-eval <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> tensorflow/tensorflow/core/lib/core/*.proto</span><span style="color:#e6db74">&#34;</span>
-eval <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> tensorflow/tensorflow/core/protobuf/{saver,meta_graph}.proto</span><span style="color:#e6db74">&#34;</span>
+eval <span style="color:#e6db74">&#34;protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> serving/tensorflow_serving/apis/*.proto&#34;</span>
+eval <span style="color:#e6db74">&#34;protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> serving/tensorflow_serving/config/*.proto&#34;</span>
+eval <span style="color:#e6db74">&#34;protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> serving/tensorflow_serving/util/*.proto&#34;</span>
+eval <span style="color:#e6db74">&#34;protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> serving/tensorflow_serving/sources/storage_path/*.proto&#34;</span>
+eval <span style="color:#e6db74">&#34;protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> tensorflow/tensorflow/core/framework/*.proto&#34;</span>
+eval <span style="color:#e6db74">&#34;protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> tensorflow/tensorflow/core/example/*.proto&#34;</span>
+eval <span style="color:#e6db74">&#34;protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> tensorflow/tensorflow/core/lib/core/*.proto&#34;</span>
+eval <span style="color:#e6db74">&#34;protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> tensorflow/tensorflow/core/protobuf/{saver,meta_graph}.proto&#34;</span>
 </code></pre></div><p>Running this will create a directory called <code>tensorflow</code> and <code>tensorflow_serving</code> in the vendor directory.</p>
 <h2 id="3-the-inception-go-client">3. The Inception Go client</h2>
 <p>You need the protobuf wrappers and the grpc package:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go get github.com/golang/protobuf/ptypes/wrappers google.golang.org/grpc
-</code></pre></div><p>Don't forget to run the serving server:</p>
+</code></pre></div><p>Don&rsquo;t forget to run the serving server:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run --rm -p 10000:10000 your_serving_image
 </code></pre></div><p>And here is the client code:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// save it as inception-client.go
@@ -194,7 +194,7 @@ eval <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">protoc 
 
 	<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">resp</span>)
 }
-</code></pre></div><p>That's it, let's test:</p>
+</code></pre></div><p>That&rsquo;s it, let&rsquo;s test:</p>
 <pre><code>go build .
 ./inception-client --serving-address localhost:10000 path/to/image.png
 </code></pre><p>See you again next time 😄.</p>
@@ -239,7 +239,7 @@ eval <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">protoc 
     
     <p class="small">
     
-       © Copyright 2019 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+       © Copyright 2020 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
     
     </p>
     

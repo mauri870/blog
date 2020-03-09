@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+    <meta name="author" content="Mauri de Souza Nunes">
+    <meta name="description" content="Buffers are key pieces when writing software, they can be smaller or bigger based on your needs. But when you have too much of then with big sizes things start to Go out of control.
+ Looking at one of our Go microservices heap and trace profiles I spotted the linear increase in heap memory which triggered an abnormal number of GC runs (almost 25) during the 30s spam of the profile.">
+		<meta name="generator" content="Hugo 0.66.0" />
+		<title>Watch ya buffer size &middot; Mauri870&#39;s dev blog</title>
+		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
+		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
+		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/font-awesome.min.css">
+		
+
+		
+		<link href="https://mauri870.github.io/blog/index.xml" rel="alternate" type="application/rss+xml" title="Mauri870&#39;s dev blog" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+  <a href='/'>Home</a>
+	
+	
+		<a href='https://mauri870.github.io/blog/'> <span class="arrow">←</span>Blog</a>
+	
+	<a href='https://mauri870.github.io/blog/posts'>Archive</a>
+	<a href='https://mauri870.github.io/blog/tags'>Tags</a>
+	<a href='https://mauri870.github.io/blog/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="https://mauri870.github.io/blog/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Watch ya buffer size
+                    </h1>
+                    <h2 class="headline">
+                    Mar 7, 2020 08:59
+                    · 698 words
+                    · 4 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a style="padding-left: 1em;" href="https://mauri870.github.io/blog/tags/golang">Golang</a>
+                          
+                              <a style="padding-left: 1em;" href="https://mauri870.github.io/blog/tags/pprof">Pprof</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                  
+                    <div id="toc">
+                      <nav id="TableOfContents"></nav>
+                    </div>
+                  
+                
+                <section id="post-body">
+                    <p>Buffers are key pieces when writing software, they can be smaller or bigger based on your needs. But when you have too much of then with big sizes things start to Go out of control.</p>
+<hr>
+<p>Looking at one of our Go microservices heap and trace profiles I spotted the
+linear increase in heap memory which triggered an abnormal number of GC runs (almost 25) during the 30s spam of the profile. The memory usage was pretty high too.</p>
+<p><img src="../../images/posts/trace-profile-gc.png" alt="go tool trace"></p>
+<p>It was clear that the Go&rsquo;s Heap was filling up and the garbage collector was running too often because of that.</p>
+<p>With further investigation, I took a CPU profile that showed runtime.memclrNoHeapPointers was consuming most of the cpu time. That was strange, you would normally expect to see pieces of your code to be running more often and not the runtime of the language itself:</p>
+<pre><code>(pprof) top
+Showing nodes accounting for 440ms, 57.14% of 770ms total
+Showing top 10 nodes out of 285
+      flat  flat%   sum%        cum   cum%
+     130ms 16.88% 16.88%      130ms 16.88%  runtime.memclrNoHeapPointers
+      80ms 10.39% 27.27%       80ms 10.39%  runtime.futex
+      60ms  7.79% 35.06%       80ms 10.39%  syscall.Syscall
+      40ms  5.19% 40.26%       60ms  7.79%  runtime.scanobject
+      30ms  3.90% 44.16%       30ms  3.90%  runtime.usleep
+      20ms  2.60% 46.75%       20ms  2.60%  runtime.findfunc
+      20ms  2.60% 49.35%       20ms  2.60%  runtime.memmove
+      20ms  2.60% 51.95%       30ms  3.90%  runtime.newobject
+      20ms  2.60% 54.55%       20ms  2.60%  runtime.nextFreeFast
+      20ms  2.60% 57.14%       20ms  2.60%  runtime.pageIndexOf
+</code></pre><p>The runtime.memclrNoHeapPointers function clear memory addresses starting at the given address, it&rsquo;s part of the sweep phase in the Go&rsquo;s mark-and-sweep garbage collector. This function handles noscan objects, which means
+that it only handle memory cleaning of objects that do not have
+pointers. That&rsquo;s a clear clue for us that we are allocating too much memory for slices/arrays/buffers, but where? I&rsquo;m not allocating large structures anywhere in the code 🤔.</p>
+<p>Going further down the call tree:</p>
+<pre><code>(pprof) top memclrNoHeapPointers
+Active filters:
+   focus=memclrNoHeapPointers
+Showing nodes accounting for 130ms, 16.88% of 770ms total
+Showing top 10 nodes out of 12
+      flat  flat%   sum%        cum   cum%
+     130ms 16.88% 16.88%      130ms 16.88%  runtime.memclrNoHeapPointers
+         0     0% 16.88%      130ms 16.88%  cloud.google.com/go/storage.(*Writer).open.func1
+         0     0% 16.88%      130ms 16.88%  google.golang.org/api/gensupport.NewInfoFromMedia
+         0     0% 16.88%      130ms 16.88%  google.golang.org/api/gensupport.NewMediaBuffer
+         0     0% 16.88%      130ms 16.88%  google.golang.org/api/gensupport.PrepareUpload
+         0     0% 16.88%      130ms 16.88%  google.golang.org/api/storage/v1.(*ObjectsInsertCall).Media
+         0     0% 16.88%      130ms 16.88%  runtime.(*mheap).alloc
+         0     0% 16.88%      130ms 16.88%  runtime.largeAlloc
+         0     0% 16.88%      130ms 16.88%  runtime.makeslice
+         0     0% 16.88%      130ms 16.88%  runtime.mallocgc
+</code></pre><p>The root cause seems to be Google&rsquo;s Storage Writer implementation, more
+precisely gensupport.NewInfoFromMedia that&rsquo;s using most of the cpu time.</p>
+<p>The heap memory profile is also pointing out to the same conclusion:</p>
+<pre><code>(pprof) top
+Showing nodes accounting for 34359.68kB, 100% of 34359.68kB total
+Showing top 10 nodes out of 28
+      flat  flat%   sum%        cum   cum%
+   32768kB 95.37% 95.37%    32768kB 95.37%  google.golang.org/api/gensupport.NewMediaBuffer
+  557.26kB  1.62% 96.99%   557.26kB  1.62%  crypto/elliptic.initTable
+  520.04kB  1.51% 98.50%   520.04kB  1.51%  hash/crc64.makeSlicingBy8Table
+  514.38kB  1.50%   100%   514.38kB  1.50%  github.com/golang/protobuf/proto.RegisterType
+         0     0%   100%    32768kB 95.37%  cloud.google.com/go/storage.(*Writer).open.func1
+         0     0%   100%   557.26kB  1.62%  crypto/ecdsa.Verify
+         0     0%   100%   557.26kB  1.62%  crypto/ecdsa.verify
+         0     0%   100%   557.26kB  1.62%  crypto/ecdsa.verifyGeneric
+         0     0%   100%   557.26kB  1.62%  crypto/elliptic.(*p256Point).p256BaseMult
+         0     0%   100%   557.26kB  1.62%  crypto/elliptic.p256Curve.CombinedMult
+</code></pre><p>Looking at the code of NewMediaBuffer we can see the following:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">NewMediaBuffer</span>(<span style="color:#a6e22e">media</span> <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Reader</span>, <span style="color:#a6e22e">chunkSize</span> <span style="color:#66d9ef">int</span>) <span style="color:#f92672">*</span><span style="color:#a6e22e">MediaBuffer</span> {
+	<span style="color:#66d9ef">return</span> <span style="color:#f92672">&amp;</span><span style="color:#a6e22e">MediaBuffer</span>{<span style="color:#a6e22e">media</span>: <span style="color:#a6e22e">media</span>, <span style="color:#a6e22e">chunk</span>: make([]<span style="color:#66d9ef">byte</span>, <span style="color:#ae81ff">0</span>, <span style="color:#a6e22e">chunkSize</span>)}
+</code></pre></div><p>The make language constructor is initializing a byte array of chunkSize
+items and a custom capacity, which is allocated straight away.</p>
+<p>NewInfoFromMedia, which is visible in the CPU profile uses this method
+to create a buffer:</p>
+<pre><code>NewMediaBuffer(rdr, googleapi.DefaultUploadChunkSize)
+</code></pre><p>Guess what, <strong>googleapi.DefaultUploadChunkSize <a href="https://github.com/googleapis/google-api-go-client/blob/5f2719ce745f503c8b0195b0b769fedfecad98be/googleapi/googleapi.go#L57">is 16MB(!)</a></strong></p>
+<p>That&rsquo;s a huge memory buffer for each writer created, didn&rsquo;t take much
+time to realize where the heap spikes and GC load is comming from.</p>
+<p>Since we handle small objects(&lt;100kb) most of the time, adjusting the ChunkSize
+to a lower value fixed the issue:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#a6e22e">writer</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">Bucket</span>.<span style="color:#a6e22e">Object</span>(<span style="color:#a6e22e">filename</span>).<span style="color:#a6e22e">NewWriter</span>(<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">Context</span>)
+<span style="color:#a6e22e">writer</span>.<span style="color:#a6e22e">ChunkSize</span> = <span style="color:#a6e22e">defaultChunkSize</span>
+</code></pre></div><p>Damn Google, not all programs are handling such large files :|</p>
+<p>This simple change decreased the memory usage of the service by <strong>10-20x</strong>.</p>
+<p>We can achieve even better results with buffer reuse, a technique used on databases and cache applications to reuse memory buffers to avoid the overhead of a garbage collector run and future heap allocations. This can be done easily in Go with something like <a href="https://golang.org/pkg/sync/#Pool">sync.Pool</a> or <a href="https://github.com/couchbase/go-slab">go-slab</a>.</p>
+<p>See you again next time 😄.</p>
+
+                </section>
+            </article>
+
+            
+
+            
+                <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'mauri870'; 
+
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.github.com/mauri870">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2020 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+    
+    </p>
+    
+    <p class="small">
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0; width: auto; height: auto" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+    </p>
+
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://mauri870.github.io/blog/js/jquery-3.3.1.min.js"></script>
+<script src="https://mauri870.github.io/blog/js/main.js"></script>
+<script src="https://mauri870.github.io/blog/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

@@ -7,7 +7,7 @@
 		
     <meta name="author" content="Mauri de Souza Nunes">
     <meta name="description" content="Microservices become the new standard for scalable and maintanable arquitectures. Monolithic aplications are splited into smaller pieces to keep things simple and decoupled. Tracing comes in hand when you need to aggregate the events during the request lifecycle between a single or multiple services.">
-		<meta name="generator" content="Hugo 0.60.1" />
+		<meta name="generator" content="Hugo 0.66.0" />
 		<title>Using Opentracing/Jaeger with Laravel &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -87,11 +87,11 @@
 <hr>
 <p>Here at <a href="http://fluxoti.com">FluxoTi</a> we are beginning to split our monolith application into smaller services, backed by kubernetes. Since we already have smaller services that we want to connect, we need a way to trace the request lifecycle to find bottlenecks, errors and make the debug process more easy.</p>
 <h2 id="1-opentracing--jaeger-to-the-rescue">1. Opentracing / Jaeger to the rescue</h2>
-<p>There's many distributed tracing systems suck as Zipkin and Dapper, but they have incompatible APIs. Opentracing was created to fill this gap. By exposing a consistent, expressive, neutral API for popular platforms, add or switch between distributed tracing implementations becomes easy.</p>
-<p>Jaeger is inspired by OpenZipkin and Dapper and implements the Opentracing protocol. Jaeger has clients in Java, Go, NodeJS, Python, C++, PHP among others, that's exactly what we want. You can refer to the <a href="http://opentracing.io/documentation">Opentracing introduction</a> to understand the concepts behind a tracing system.</p>
+<p>There&rsquo;s many distributed tracing systems suck as Zipkin and Dapper, but they have incompatible APIs. Opentracing was created to fill this gap. By exposing a consistent, expressive, neutral API for popular platforms, add or switch between distributed tracing implementations becomes easy.</p>
+<p>Jaeger is inspired by OpenZipkin and Dapper and implements the Opentracing protocol. Jaeger has clients in Java, Go, NodeJS, Python, C++, PHP among others, that&rsquo;s exactly what we want. You can refer to the <a href="http://opentracing.io/documentation">Opentracing introduction</a> to understand the concepts behind a tracing system.</p>
 <h2 id="2-integrating-jaeger-with-laravel">2. Integrating Jaeger with Laravel</h2>
-<p>To integrate jaeger with laravel we'll need a jaeger package for php, like <a href="https://github.com/jukylin/jaeger-php">jukylin/jaeger-php</a>.</p>
-<p>There's only 3 structures that we need to use, a <code>Tracer</code>, a <code>Span</code> and the <code>Config</code>. If you have read the opentracing introduction you're probably familiar with these terms.</p>
+<p>To integrate jaeger with laravel we&rsquo;ll need a jaeger package for php, like <a href="https://github.com/jukylin/jaeger-php">jukylin/jaeger-php</a>.</p>
+<p>There&rsquo;s only 3 structures that we need to use, a <code>Tracer</code>, a <code>Span</code> and the <code>Config</code>. If you have read the opentracing introduction you&rsquo;re probably familiar with these terms.</p>
 <p>To keep things simple I decide to build a wrapper around the framework events, to avoid as little modifications as possible, and keep adding aditional spans to track the services in the future.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">composer require jukylin/jaeger-php:dev-master@dev  <span style="color:#75715e"># jaeger php client</span>
 composer require ramsey/uuid <span style="color:#75715e"># uuid library for the unique request id</span>
@@ -190,7 +190,7 @@ $createUserSpan-&gt;finish();
 // ...
 // then finish the span...
 $createCompanySpan-&gt;finish();
-</code></pre></div><p>If we inject the correct trace id between microservice calls, the next service can continue the trace and at the end we have a complete distributed tracing, isn't that awesome?</p>
+</code></pre></div><p>If we inject the correct trace id between microservice calls, the next service can continue the trace and at the end we have a complete distributed tracing, isn&rsquo;t that awesome?</p>
 <p><img src="../../images/posts/jaeger-laravel-tracing-example.png" alt="Jaeger Demo"></p>
 <p>For a more concrete example, check out my <a href="https://github.com/mauri870/laravel-jaeger-demo">demo project</a>.</p>
 <p>See you again next time 😄.</p>
@@ -235,7 +235,7 @@ $createCompanySpan-&gt;finish();
     
     <p class="small">
     
-       © Copyright 2019 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+       © Copyright 2020 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
     
     </p>
     

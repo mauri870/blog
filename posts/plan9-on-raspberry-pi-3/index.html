@@ -6,8 +6,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
     <meta name="author" content="Mauri de Souza Nunes">
-    <meta name="description" content="Plan9 is a research operating system from the same group who created UNIX at Bell Labs Computing Sciences Research Center (CSRC). It emerged in the 80s, and its early development coincided with continuing development of the later versions of Research UNIX. Let&#39;s install it in the raspberry pi 3!">
-		<meta name="generator" content="Hugo 0.60.1" />
+    <meta name="description" content="Plan9 is a research operating system from the same group who created UNIX at Bell Labs Computing Sciences Research Center (CSRC). It emerged in the 80s, and its early development coincided with continuing development of the later versions of Research UNIX. Let&rsquo;s install it in the raspberry pi 3!">
+		<meta name="generator" content="Hugo 0.66.0" />
 		<title>Plan9 on raspberry pi 3 &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -81,7 +81,7 @@
                   
                 
                 <section id="post-body">
-                    <p>Plan9 is a research operating system from the same group who created UNIX at Bell Labs Computing Sciences Research Center (CSRC). It emerged in the 80s, and its early development coincided with continuing development of the later versions of Research UNIX. Let's install it in the raspberry pi 3!</p>
+                    <p>Plan9 is a research operating system from the same group who created UNIX at Bell Labs Computing Sciences Research Center (CSRC). It emerged in the 80s, and its early development coincided with continuing development of the later versions of Research UNIX. Let&rsquo;s install it in the raspberry pi 3!</p>
 <h2 id="1-installing-plan9">1. Installing Plan9</h2>
 <p>To install the plan9 os you need a micro sdcard with at least 2GB (I use a 4GB one).</p>
 <blockquote>
@@ -90,7 +90,7 @@
 <p>Check the name of your sd card:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">fdisk -l
 </code></pre></div><blockquote>
-<p>For me it's <code>/dev/sdc</code>.</p>
+<p>For me it&rsquo;s <code>/dev/sdc</code>.</p>
 </blockquote>
 <p>Format the device to FAT32:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mkfs.vfat -n <span style="color:#e6db74">&#39;PLAN9&#39;</span> -I /dev/sdc
@@ -103,11 +103,11 @@
 </code></pre><p>Now you are ready to boot Plan9 on raspberry pi!</p>
 <h2 id="3-first-steps">3. First steps</h2>
 <p>Since the plan9 image you just downloaded is a fully bootable one, it not require the installation step.</p>
-<p>When the pi boots up, you get into the Plan9 graphical interface, <a href="http://man.cat-v.org/plan_9/1/rio">rio(1)</a>. Rio is a minimalist window manager, it's just a bunch of rectangles that you draw in the screen 😄.</p>
+<p>When the pi boots up, you get into the Plan9 graphical interface, <a href="http://man.cat-v.org/plan_9/1/rio">rio(1)</a>. Rio is a minimalist window manager, it&rsquo;s just a bunch of rectangles that you draw in the screen 😄.</p>
 <p><img src="../../images/posts/plan9.png" alt="Plan9 Rio"></p>
 <p>To use Plan9 you definitely need a three button mouse. Hold the right button, hover <code>New</code> and release. Again hold the right button, drag a rectangle big enough and release. Now you have a shell, <a href="http://man.cat-v.org/plan_9/1/rc">rc(1)</a>. First of all check your internet connection:</p>
 <blockquote>
-<p>I'm using ethernet, probably wifi only work on plan9 forks like 9front.</p>
+<p>I&rsquo;m using ethernet, probably wifi only work on plan9 forks like 9front.</p>
 </blockquote>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ndb/dns <span style="color:#75715e"># start the dns resolver</span>
 ip/ipconfig <span style="color:#75715e"># configure interfaces and get ip address with dhcp</span>
@@ -119,10 +119,10 @@ ip/ping google.com <span style="color:#75715e"># check internet connection</span
 <blockquote>
 <p>If you receive an error about dns resolution, try to reboot and run DNSSERVER=8.8.8.8 before the commands above.</p>
 </blockquote>
-<p>Now let's try to use a web browser. You are thinking about Chrome? Firefox? Nop. Plan9 has it's own web browser, <a href="http://man.cat-v.org/plan_9/1/abaco">abaco(1)</a></p>
+<p>Now let&rsquo;s try to use a web browser. You are thinking about Chrome? Firefox? Nop. Plan9 has it&rsquo;s own web browser, <a href="http://man.cat-v.org/plan_9/1/abaco">abaco(1)</a></p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">webfs <span style="color:#75715e"># start a filesystem that handle urls</span>
 abaco <span style="color:#e6db74">&#39;http://google.com/search?q=plan9&#39;</span>
-</code></pre></div><p>It's pretty ugly I know, no css, no js, <em>but it works</em>!</p>
+</code></pre></div><p>It&rsquo;s pretty ugly I know, no css, no js, <em>but it works</em>!</p>
 <blockquote>
 <p>The network settings are not persisted if you reboot, so just like your <code>.profile</code> in bash, add the commands to <code>$home/lib/profile</code>.</p>
 </blockquote>
@@ -143,12 +143,12 @@ GOROOT<span style="color:#f92672">=</span>$home/go
 bind -a $GOROOT/bin /bin <span style="color:#75715e"># append the go binaries to the end of the /bin entries</span>
 bind -a $GOBIN /bin
 </code></pre></div><blockquote>
-<p>Don't forget to add the binds and envs to <code>$home/lib/profile</code> too</p>
+<p>Don&rsquo;t forget to add the binds and envs to <code>$home/lib/profile</code> too</p>
 </blockquote>
-<p>Let's check:</p>
+<p>Let&rsquo;s check:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go env
 </code></pre></div><hr>
-<p>I'm in love with Plan9, it's such a cool operating system to learn. If you are interested too check the following resources:</p>
+<p>I&rsquo;m in love with Plan9, it&rsquo;s such a cool operating system to learn. If you are interested too check the following resources:</p>
 <ul>
 <li><a href="http://fqa.9front.org">9front</a></li>
 <li><a href="https://9p.io/plan9/">9p.io</a></li>
@@ -198,7 +198,7 @@ bind -a $GOBIN /bin
     
     <p class="small">
     
-       © Copyright 2019 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+       © Copyright 2020 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
     
     </p>
     
