@@ -8,7 +8,7 @@ tags: [
 draft: false
 ---
 
-Buffers are key pieces when writing software, they can be smaller or bigger based on your needs. But when you have too much of then with big sizes things start to Go out of control.
+Buffers are key pieces when writing software, they can be smaller or bigger based on your needs. But when you have too much of these with big sizes things start to Go out of control.
 
 ---
 
