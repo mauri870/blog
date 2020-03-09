@@ -10,6 +10,8 @@ draft: false
 
 Buffers are key pieces when writing software, they can be smaller or bigger based on your needs. But when you have too much of these with big sizes things start to Go out of control.
 
+<!--more-->
+
 ---
 
 Looking at one of our Go microservices heap and trace profiles I spotted the
