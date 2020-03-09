@@ -95,7 +95,7 @@ func NewMediaBuffer(media io.Reader, chunkSize int) *MediaBuffer {
 ```
 
 The make language constructor is initializing a byte array of chunkSize
-items and a custom capacity, which is allocated straight away.
+items and a custom capacity.
 
 NewInfoFromMedia, which is visible in the CPU profile uses this method
 to create a buffer:
