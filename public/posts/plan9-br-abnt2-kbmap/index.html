@@ -7,7 +7,7 @@
 		
     <meta name="author" content="Mauri de Souza Nunes">
     <meta name="description" content="This is a quick post about a new Plan9 keyboard map, supporting the brazilian ABNT2 layout.">
-		<meta name="generator" content="Hugo 0.60.1" />
+		<meta name="generator" content="Hugo 0.66.0" />
 		<title>Plan9 br-abnt2 keyboard map &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -76,11 +76,11 @@
 <hr>
 <p>In order to use the new keyboard layout, just copy the following file (with a trailing newline!) to <code>/sys/lib/kbmap/br-abnt2</code>:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">hget -o /sys/lib/kbmap/br-abnt2 https://gist.githubusercontent.com/mauri870/8ef952b83c44479262460e0330bfa1f1/raw/br-abnt2
-</code></pre></div><p>Run <a href="http://man.cat-v.org/plan_9/1/kbmap">kbmap(1)</a>, the new layout should appear in the list. Since it's based on the ascii layout, select the ascii first to make sure that this layout loads on top of it.</p>
+</code></pre></div><p>Run <a href="http://man.cat-v.org/plan_9/1/kbmap">kbmap(1)</a>, the new layout should appear in the list. Since it&rsquo;s based on the ascii layout, select the ascii first to make sure that this layout loads on top of it.</p>
 <!-- raw HTML omitted -->
 <p>Also put <code>cat /sys/lib/kbmap/br-abnt2 &gt; /dev/kbmap</code> into your <code>$home/lib/profile</code> under the <code>case 'terminal'</code> to apply the keyboard map at startup.</p>
 <blockquote>
-<p>NOTE: Unfortunatelly I could't figure out how to make the acentuation work, hence the 0 value in line 1, 4, 9 and 12.</p>
+<p>NOTE: Unfortunatelly I could&rsquo;t figure out how to make the acentuation work, hence the 0 value in line 1, 4, 9 and 12.</p>
 </blockquote>
 <p>If you have any thoughts in how to improve the configuration, let me know.</p>
                 </section>
@@ -124,7 +124,7 @@
     
     <p class="small">
     
-       © Copyright 2019 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+       © Copyright 2020 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
     
     </p>
     

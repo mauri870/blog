@@ -6,8 +6,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
     <meta name="author" content="Mauri de Souza Nunes">
-    <meta name="description" content="Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust? Let&#39;s find out.">
-		<meta name="generator" content="Hugo 0.60.1" />
+    <meta name="description" content="Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust? Let&rsquo;s find out.">
+		<meta name="generator" content="Hugo 0.66.0" />
 		<title>Writing an Asterisk PBX module in Rust and C &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -82,11 +82,11 @@
                   
                 
                 <section id="post-body">
-                    <p>Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust? Let's find out.</p>
+                    <p>Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust? Let&rsquo;s find out.</p>
 <hr>
-<p>As I've already explained in an <a href="/blog/posts/audio-spectrograms-in-tensorflow">older post</a>, we have a Deep Learning microservice responsible for <a href="https://en.wikipedia.org/wiki/Auto_dialer#Answering_machine_detection">Answering Machine Detection(AMD)</a>. The problem is how to integrate this external service and make it accessible whitin an Asterisk dialplan.</p>
+<p>As I&rsquo;ve already explained in an <a href="/blog/posts/audio-spectrograms-in-tensorflow">older post</a>, we have a Deep Learning microservice responsible for <a href="https://en.wikipedia.org/wiki/Auto_dialer#Answering_machine_detection">Answering Machine Detection(AMD)</a>. The problem is how to integrate this external service and make it accessible whitin an Asterisk dialplan.</p>
 <h2 id="1-agi-to-the-rescue">1. AGI to the rescue</h2>
-<p>Our first attempt was to invoke a program acting as a client for the external service. Using the AGI application we're able to spawn our client within the dialplan, which is just a golang program.</p>
+<p>Our first attempt was to invoke a program acting as a client for the external service. Using the AGI application we&rsquo;re able to spawn our client within the dialplan, which is just a golang program.</p>
 <p>The client just sends a HTTP request to the AMD service with the initial recorded audio of the outbound call and some metadata and receives back a json response containing the prediction results. The relevant dialplan configuration looks like this:</p>
 <pre><code>; ommitted
 same =&gt;		n,Set(recording_amd=/var/spool/asterisk/monitor/${EXTEN}-${UNIQUEID}_amd-in) ; Set a variable containing the recording path
@@ -97,9 +97,9 @@ same =&gt;		n,Set(recording_amd=/var/spool/asterisk/monitor/${EXTEN}-${UNIQUEID}
  same =&gt;	n,AGI(amd-client,${recording_amd}.gsm) ; Invoke our client
  same =&gt;	n,NoOp(${amd_result}) ; Does nothing. The variable amd_result contains the prediction result.
 ; omitted
-</code></pre><p>This works well, but since the migration of our architecture to Kubernetes (also described <a href="/blog/posts/gsutil-leak">in this post</a>) we started to face some problems, mainly involving <a href="https://en.wikipedia.org/wiki/Out_of_memory">OOM</a> scenarios in our Kubernetes nodes. After much research and debug we find out that when the OOM errors occurs the pods have a lot of zombie processes of the amd-client. Since we can't found the root cause and I was already thinking of writing a native module, we decide to go ahead and give Rust a try.</p>
+</code></pre><p>This works well, but since the migration of our architecture to Kubernetes (also described <a href="/blog/posts/gsutil-leak">in this post</a>) we started to face some problems, mainly involving <a href="https://en.wikipedia.org/wiki/Out_of_memory">OOM</a> scenarios in our Kubernetes nodes. After much research and debug we find out that when the OOM errors occurs the pods have a lot of zombie processes of the amd-client. Since we can&rsquo;t found the root cause and I was already thinking of writing a native module, we decide to go ahead and give Rust a try.</p>
 <h2 id="2-rust-ffi">2. Rust FFI</h2>
-<p>The problem of adopting the Rust language for this project is that Rust doesn't have a stabilized ABI and does not support <a href="https://en.wikipedia.org/wiki/C_preprocessor">CPP</a> stuff, like macros and define. Then we have no choice but to write some C code to glue things together along with a library in Rust that export(<code>#[no_mangle]</code>) the functions and structs(<code>#[repr(C)]</code>) needed as a shared or static lib.</p>
+<p>The problem of adopting the Rust language for this project is that Rust doesn&rsquo;t have a stabilized ABI and does not support <a href="https://en.wikipedia.org/wiki/C_preprocessor">CPP</a> stuff, like macros and define. Then we have no choice but to write some C code to glue things together along with a library in Rust that export(<code>#[no_mangle]</code>) the functions and structs(<code>#[repr(C)]</code>) needed as a shared or static lib.</p>
 <p>The following resources helped me a lot:</p>
 <ul>
 <li><a href="http://jakegoulding.com/rust-ffi-omnibus">Rust FFI Omnibus</a></li>
@@ -107,7 +107,7 @@ same =&gt;		n,Set(recording_amd=/var/spool/asterisk/monitor/${EXTEN}-${UNIQUEID}
 </ul>
 <p>For example our prediction struct looks like this:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#e6db74">/// A struct that wraps the code and confidence for a prediction
-</span><span style="color:#e6db74"></span><span style="color:#75715e">#[</span><span style="color:#75715e">repr(C)</span><span style="color:#75715e">]</span>
+</span><span style="color:#e6db74"></span><span style="color:#75715e">#[repr(C)]</span>
 <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">AmdPrediction</span> {
     code: <span style="color:#66d9ef">u32</span>,       <span style="color:#75715e">// The integer prediction code
 </span><span style="color:#75715e"></span>    confidence: <span style="color:#66d9ef">f32</span>, <span style="color:#75715e">// The confidence of the prediction
@@ -115,20 +115,20 @@ same =&gt;		n,Set(recording_amd=/var/spool/asterisk/monitor/${EXTEN}-${UNIQUEID}
 </span><span style="color:#75715e"></span>}
 </code></pre></div><p>As you can see, we use <code>repr(C)</code> to allow this struct to be called from C code. We also have a function to lookup the string label for a given prediction code:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#e6db74">/// Retrieve the label corresponding to an amd status code
-</span><span style="color:#e6db74"></span><span style="color:#75715e">#[</span><span style="color:#75715e">no_mangle</span><span style="color:#75715e">]</span>
+</span><span style="color:#e6db74"></span><span style="color:#75715e">#[no_mangle]</span>
 <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">extern</span> <span style="color:#e6db74">&#34;C&#34;</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">amd_label_name</span>(code: <span style="color:#66d9ef">u32</span>) -&gt; <span style="color:#f92672">*</span><span style="color:#66d9ef">const</span> c_char {
     <span style="color:#66d9ef">let</span> label: <span style="color:#66d9ef">&amp;</span>[<span style="color:#66d9ef">u8</span>] <span style="color:#f92672">=</span> <span style="color:#66d9ef">match</span> code {
-        AMD_STATUS_MACHINE <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> <span style="color:#e6db74">b&#34;</span><span style="color:#e6db74">machine</span><span style="color:#ae81ff">\0</span><span style="color:#e6db74">&#34;</span>,
-        AMD_STATUS_HUMAN <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> <span style="color:#e6db74">b&#34;</span><span style="color:#e6db74">human</span><span style="color:#ae81ff">\0</span><span style="color:#e6db74">&#34;</span>,
-        AMD_STATUS_SILENCE <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> <span style="color:#e6db74">b&#34;</span><span style="color:#e6db74">silence</span><span style="color:#ae81ff">\0</span><span style="color:#e6db74">&#34;</span>,
-        AMD_STATUS_ERROR <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> <span style="color:#e6db74">b&#34;</span><span style="color:#e6db74">error</span><span style="color:#ae81ff">\0</span><span style="color:#e6db74">&#34;</span>,
-        _ <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> <span style="color:#e6db74">b&#34;</span><span style="color:#e6db74">unknown</span><span style="color:#ae81ff">\0</span><span style="color:#e6db74">&#34;</span>,
+        AMD_STATUS_MACHINE <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">b&#34;machine</span><span style="color:#ae81ff">\0</span><span style="color:#e6db74">&#34;</span>,
+        AMD_STATUS_HUMAN <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">b&#34;human</span><span style="color:#ae81ff">\0</span><span style="color:#e6db74">&#34;</span>,
+        AMD_STATUS_SILENCE <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">b&#34;silence</span><span style="color:#ae81ff">\0</span><span style="color:#e6db74">&#34;</span>,
+        AMD_STATUS_ERROR <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">b&#34;error</span><span style="color:#ae81ff">\0</span><span style="color:#e6db74">&#34;</span>,
+        _ <span style="color:#f92672">=&gt;</span> <span style="color:#e6db74">b&#34;unknown</span><span style="color:#ae81ff">\0</span><span style="color:#e6db74">&#34;</span>,
     };
     label.as_ptr() <span style="color:#66d9ef">as</span> <span style="color:#f92672">*</span><span style="color:#66d9ef">const</span> c_char
 }
 </code></pre></div><p>An interesting fact is that Rust do not accept null values, but it can in fact create a null raw pointer using <code>std::ptr::null</code>:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#e6db74">/// Performs the inference for a given file and return a pointer to an `AmdPrediction`
-</span><span style="color:#e6db74"></span><span style="color:#75715e">#[</span><span style="color:#75715e">no_mangle</span><span style="color:#75715e">]</span>
+</span><span style="color:#e6db74"></span><span style="color:#75715e">#[no_mangle]</span>
 <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">extern</span> <span style="color:#e6db74">&#34;C&#34;</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">amd_inference</span>(file: <span style="color:#f92672">*</span><span style="color:#66d9ef">const</span> c_char) -&gt; <span style="color:#f92672">*</span><span style="color:#66d9ef">mut</span> AmdPrediction {
     <span style="color:#66d9ef">if</span> file.is_null() {
         <span style="color:#66d9ef">return</span> std::ptr::null_mut();
@@ -137,8 +137,8 @@ same =&gt;		n,Set(recording_amd=/var/spool/asterisk/monitor/${EXTEN}-${UNIQUEID}
     <span style="color:#66d9ef">let</span> file <span style="color:#f92672">=</span> <span style="color:#66d9ef">unsafe</span> { CStr::from_ptr(file).to_str() }.unwrap();
 
     <span style="color:#66d9ef">let</span> prediction <span style="color:#f92672">=</span> <span style="color:#66d9ef">match</span> amd_do_inference(file) {
-        Ok(pred) <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> pred,
-        Err(e) <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> {
+        Ok(pred) <span style="color:#f92672">=&gt;</span> pred,
+        Err(e) <span style="color:#f92672">=&gt;</span> {
             error::set_last_error(e);
             <span style="color:#66d9ef">return</span> std::ptr::null_mut();
         }
@@ -148,7 +148,7 @@ same =&gt;		n,Set(recording_amd=/var/spool/asterisk/monitor/${EXTEN}-${UNIQUEID}
 }
 </code></pre></div><p>The memory that is allocated by Rust, should be freed by Rust. So we also need to export a function to free up the allocated memory.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#e6db74">/// Free an `AmdPrediction` pointer
-</span><span style="color:#e6db74"></span><span style="color:#75715e">#[</span><span style="color:#75715e">no_mangle</span><span style="color:#75715e">]</span>
+</span><span style="color:#e6db74"></span><span style="color:#75715e">#[no_mangle]</span>
 <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">extern</span> <span style="color:#e6db74">&#34;C&#34;</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">amd_prediction_free</span>(ptr: <span style="color:#f92672">*</span><span style="color:#66d9ef">mut</span> AmdPrediction) {
     <span style="color:#66d9ef">if</span> ptr.is_null() {
         <span style="color:#66d9ef">return</span>;
@@ -158,7 +158,7 @@ same =&gt;		n,Set(recording_amd=/var/spool/asterisk/monitor/${EXTEN}-${UNIQUEID}
         Box::from_raw(ptr);
     }
 }
-</code></pre></div><p>By creating a Box using a raw pointer, we bring it back to the rust land so it'll be freed when they reach the end of the scope at the end of the unsafe block.</p>
+</code></pre></div><p>By creating a Box using a raw pointer, we bring it back to the rust land so it&rsquo;ll be freed when they reach the end of the scope at the end of the unsafe block.</p>
 <p>Another interesting topic is how to handle errors in a rust library. Since we need to expose those errors to C, a common approach is to use a thread local variable to keep track of the last error that occured in the library, exposing a function to retrieve the error, something like this:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-rust" data-lang="rust"><span style="color:#66d9ef">use</span> std::cell::RefCell;
 <span style="color:#66d9ef">use</span> std::ffi::CString;
@@ -168,19 +168,19 @@ same =&gt;		n,Set(recording_amd=/var/spool/asterisk/monitor/${EXTEN}-${UNIQUEID}
 thread_local<span style="color:#f92672">!</span> {
     <span style="color:#e6db74">/// An `errno`-like thread-local variable which keeps track of the most
 </span><span style="color:#e6db74"></span>    <span style="color:#e6db74">/// recent error to occur in the library.
-</span><span style="color:#e6db74"></span>    <span style="color:#66d9ef">static</span> LAST_ERROR: <span style="color:#a6e22e">RefCell</span><span style="color:#f92672">&lt;</span>Option<span style="color:#f92672">&lt;</span>LastError<span style="color:#f92672">&gt;</span><span style="color:#f92672">&gt;</span> <span style="color:#f92672">=</span> RefCell::new(None);
+</span><span style="color:#e6db74"></span>    <span style="color:#66d9ef">static</span> LAST_ERROR: <span style="color:#a6e22e">RefCell</span><span style="color:#f92672">&lt;</span>Option<span style="color:#f92672">&lt;</span>LastError<span style="color:#f92672">&gt;&gt;</span> <span style="color:#f92672">=</span> RefCell::new(None);
 }
 
 <span style="color:#e6db74">/// Keeps track of the latest error
-</span><span style="color:#e6db74"></span><span style="color:#75715e">#[</span><span style="color:#75715e">derive(Debug)</span><span style="color:#75715e">]</span>
+</span><span style="color:#e6db74"></span><span style="color:#75715e">#[derive(Debug)]</span>
 <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">LastError</span> {
     error: Box<span style="color:#f92672">&lt;</span>StdError<span style="color:#f92672">&gt;</span>,
     c_string: <span style="color:#a6e22e">CString</span>,
 }
 
 <span style="color:#e6db74">/// A C friendly struct to hold the latest error message
-</span><span style="color:#e6db74"></span><span style="color:#75715e">#[</span><span style="color:#75715e">derive(Debug, PartialEq)</span><span style="color:#75715e">]</span>
-<span style="color:#75715e">#[</span><span style="color:#75715e">repr(C)</span><span style="color:#75715e">]</span>
+</span><span style="color:#e6db74"></span><span style="color:#75715e">#[derive(Debug, PartialEq)]</span>
+<span style="color:#75715e">#[repr(C)]</span>
 <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">MyLibError</span> {
     msg: <span style="color:#f92672">*</span><span style="color:#66d9ef">const</span> c_char,
 }
@@ -209,18 +209,18 @@ thread_local<span style="color:#f92672">!</span> {
 }
 
 <span style="color:#e6db74">/// Retrieve the most recent error
-</span><span style="color:#e6db74"></span><span style="color:#75715e">#[</span><span style="color:#75715e">no_mangle</span><span style="color:#75715e">]</span>
+</span><span style="color:#e6db74"></span><span style="color:#75715e">#[no_mangle]</span>
 <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">unsafe</span> <span style="color:#66d9ef">extern</span> <span style="color:#e6db74">&#34;C&#34;</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">mylib_last_error</span>() -&gt; <span style="color:#a6e22e">AmdError</span> {
     LAST_ERROR.with(<span style="color:#f92672">|</span>l<span style="color:#f92672">|</span> <span style="color:#66d9ef">match</span> l.borrow().as_ref() {
-        Some(err) <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> MyLibError {
+        Some(err) <span style="color:#f92672">=&gt;</span> MyLibError {
             msg: <span style="color:#a6e22e">err</span>.c_string.as_ptr(),
         },
-        None <span style="color:#f92672">=</span><span style="color:#f92672">&gt;</span> MyLibError::default(),
+        None <span style="color:#f92672">=&gt;</span> MyLibError::default(),
     })
 }
 
 <span style="color:#e6db74">/// Clear the last error
-</span><span style="color:#e6db74"></span><span style="color:#75715e">#[</span><span style="color:#75715e">no_mangle</span><span style="color:#75715e">]</span>
+</span><span style="color:#e6db74"></span><span style="color:#75715e">#[no_mangle]</span>
 <span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">extern</span> <span style="color:#e6db74">&#34;C&#34;</span> <span style="color:#66d9ef">fn</span> <span style="color:#a6e22e">mylib_clear_last_error</span>() {
     LAST_ERROR.with(<span style="color:#f92672">|</span>l<span style="color:#f92672">|</span> l.borrow_mut().take());
 }
@@ -228,7 +228,7 @@ thread_local<span style="color:#f92672">!</span> {
 <p>In order to automate the library header generation we use cbindgen by invoking it in our build.rs file so Cargo can generate it  when building our library. We still need make tho in order to compile the asterisk module since the rust part is just the library. Our project was based on <a href="https://github.com/zaf/Asterisk-eSpeak">this module</a> as an initial template.</p>
 <h2 id="3-loading-and-testing-the-module">3. Loading and testing the module</h2>
 <p>In order to load the module in asterisk we need to put the rust library shared object into the <code>$LD_LIBRARY_PATH</code>, run <code>ldconfig</code> and put the path to the shared object file of the module in the asterisk <code>modules.conf</code> file.</p>
-<p>Then we're ready to load the module:</p>
+<p>Then we&rsquo;re ready to load the module:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">root@e3b75b6f6141:/# asterisk -x <span style="color:#e6db74">&#34;module load app_3cplus_amd&#34;</span>
 Loaded app_3cplus_amd
 root@e3b75b6f6141:/# asterisk -x <span style="color:#e6db74">&#34;module show like app_3cplus_amd&#34;</span>
@@ -248,8 +248,8 @@ same =&gt;		n,Set(recording_amd=/var/spool/asterisk/monitor/${EXTEN}-${UNIQUEID}
  
  same =&gt;	n,NoOp(${amd_result}) ; Does nothing. The variable amd_result contains the prediction result.
 ; omitted
-</code></pre><p>We're running this module in production for 2 weeks now. The OOM problems ceased, the resource usage is lower and we are pretty happy to put all together and this is the first project ever using Rust at our company and it won't be the last for sure.</p>
-<p>That's it for now, see you again next time.</p>
+</code></pre><p>We&rsquo;re running this module in production for 2 weeks now. The OOM problems ceased, the resource usage is lower and we are pretty happy to put all together and this is the first project ever using Rust at our company and it won&rsquo;t be the last for sure.</p>
+<p>That&rsquo;s it for now, see you again next time.</p>
                 </section>
             </article>
 
@@ -291,7 +291,7 @@ same =&gt;		n,Set(recording_amd=/var/spool/asterisk/monitor/${EXTEN}-${UNIQUEID}
     
     <p class="small">
     
-       © Copyright 2019 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+       © Copyright 2020 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
     
     </p>
     

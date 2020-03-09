@@ -6,8 +6,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
     <meta name="author" content="Mauri de Souza Nunes">
-    <meta name="description" content="I&#39;m a person that loves to learn new things, and assembly is one of the most recent topics I decide to dig into.">
-		<meta name="generator" content="Hugo 0.60.1" />
+    <meta name="description" content="I&rsquo;m a person that loves to learn new things, and assembly is one of the most recent topics I decide to dig into.">
+		<meta name="generator" content="Hugo 0.66.0" />
 		<title>Assembly Linux x64 - Part 1 &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -84,18 +84,18 @@
                   
                 
                 <section id="post-body">
-                    <p>I'm a person that loves to learn new things, and assembly is one of the most recent topics I decide to dig into.</p>
-<p>My first contact with assembly was on the <a href="https://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/os">Baking Pi</a> course offered by the University of Cambridge. Probably I'll write a blog post about it in the near future.</p>
-<p>Assembly Linux x64 is a bit different from what I've seen so far when working with bare metal ARM. Assembly Linux works on top of the kernel, so we have access to a standardized ABI, a.k.a <a href="http://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64">system calls</a>.</p>
+                    <p>I&rsquo;m a person that loves to learn new things, and assembly is one of the most recent topics I decide to dig into.</p>
+<p>My first contact with assembly was on the <a href="https://www.cl.cam.ac.uk/projects/raspberrypi/tutorials/os">Baking Pi</a> course offered by the University of Cambridge. Probably I&rsquo;ll write a blog post about it in the near future.</p>
+<p>Assembly Linux x64 is a bit different from what I&rsquo;ve seen so far when working with bare metal ARM. Assembly Linux works on top of the kernel, so we have access to a standardized ABI, a.k.a <a href="http://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64">system calls</a>.</p>
 <h2 id="1-machine-code-vs-assembly-language">1. Machine code vs Assembly Language</h2>
-<p>Assembly language is a low-level programming language for a device in which there is a very strong (but often not one-to-one) correspondence between the language and the architecture's machine code instructions. Each assembly language is specific to a particular computer architecture. In contrast, most high-level programming languages are generally portable across multiple architectures but require interpreting or compiling.</p>
+<p>Assembly language is a low-level programming language for a device in which there is a very strong (but often not one-to-one) correspondence between the language and the architecture&rsquo;s machine code instructions. Each assembly language is specific to a particular computer architecture. In contrast, most high-level programming languages are generally portable across multiple architectures but require interpreting or compiling.</p>
 <p>Basically, assembly is the human readable form of arquitecture opcodes, unless you understand hexadecimal and the reference table 😄.</p>
 <hr>
-<p>Let's take a look at a basic C program:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">  <span style="color:#75715e">#</span><span style="color:#75715e">include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
+<p>Let&rsquo;s take a look at a basic C program:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">  <span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdio.h&gt;</span><span style="color:#75715e">
 </span><span style="color:#75715e"></span>
-  <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">char</span> <span style="color:#f92672">*</span><span style="color:#f92672">*</span>argv) {
-    printf(<span style="color:#e6db74"></span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">Hello World!</span><span style="color:#e6db74">&#34;</span>);
+  <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">char</span> <span style="color:#f92672">**</span>argv) {
+    printf(<span style="color:#e6db74">&#34;Hello World!&#34;</span>);
   }</code></pre></div>
 <p>This program simply prints &ldquo;Hello World&rdquo; to your terminal. If you are not familiar with C, the main function is the program entrypoint. But if we compile this source code into a binary with <code>gcc -o hello hello.c</code> and look at the dissassembled instructions with <code>objdump -Mintel -d hello</code> we can see the following:</p>
 <pre><code>&lt;ommited for brevity&gt;
@@ -135,13 +135,13 @@
 <pre><code>&lt;ommited for brevity&gt;
 write(1, &quot;Hello World!\n&quot;, 13) = 13
 exit_group(0)
-</code></pre><p>Behind the scenes libc is calling the <a href="https://linux.die.net/man/2/write">write (2)</a> function which of course rely on the linux system call <code>sys_write</code> to do it's job.</p>
+</code></pre><p>Behind the scenes libc is calling the <a href="https://linux.die.net/man/2/write">write (2)</a> function which of course rely on the linux system call <code>sys_write</code> to do it&rsquo;s job.</p>
 <blockquote>
 <p>fd 1 is stdout</p>
 </blockquote>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-c" data-lang="c">ssize_t <span style="color:#a6e22e">write</span>(<span style="color:#66d9ef">int</span> fd, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">void</span> <span style="color:#f92672">*</span>buf, size_t count);
 </code></pre></div><p>As you can see, the Linux Kernel is the core component and every language has to use system calls at the lowest level to interact with it. Compilers translate your C, Go, Rust(LLVM), Swift(LLVM) and any other compiled language code to assembly, which makes then simple to optimize and also fast. Most of the compilers right there, specially the old ones, like gcc, use the most strange optimizations and hacks to achieve the fastest execution.</p>
-<p>Today, due to it's complex and plataform dependent nature, assembly written by hand is most used in critical parts (like criptography and OS development) and microcontrollers / embedded devices (like the <a href="http://www.cathodecorner.com/nwl/nwld1.asm.txt">Nixie Watch from Catodo Corner</a>).</p>
+<p>Today, due to it&rsquo;s complex and plataform dependent nature, assembly written by hand is most used in critical parts (like criptography and OS development) and microcontrollers / embedded devices (like the <a href="http://www.cathodecorner.com/nwl/nwld1.asm.txt">Nixie Watch from Catodo Corner</a>).</p>
 <hr>
 <h2 id="2-hello-world-in-assembly-linux-x64">2. Hello World in Assembly Linux x64</h2>
 <p>This is the structure of a basic assembly program:</p>
@@ -160,7 +160,7 @@ exit_group(0)
 <p>The <code>section .text</code> define our source code, this section will be copied into memory during execution.</p>
 </li>
 <li>
-<p><code>global _start</code>: define a global symbol _start that's used by the linker during the linking process.</p>
+<p><code>global _start</code>: define a global symbol _start that&rsquo;s used by the linker during the linking process.</p>
 </li>
 <li>
 <p><code>_start:</code>: the linker will setup this address as our program entrypoint.</p>
@@ -169,10 +169,10 @@ exit_group(0)
 <p><code>section .data:</code>: This section declare a section of data that is included in the elf file on disk.</p>
 </li>
 <li>
-<p><code>section .bss:</code>: This section declare a section of data that's not included in the final elf. This section is dinamically allocated by the loader when you run the program. This section is also guaranteed to be all zeros when the program is loaded.</p>
+<p><code>section .bss:</code>: This section declare a section of data that&rsquo;s not included in the final elf. This section is dinamically allocated by the loader when you run the program. This section is also guaranteed to be all zeros when the program is loaded.</p>
 </li>
 </ol>
-<p>By the way, this program does nothing at all. Save this with the name <code>program.asm</code>, let's compile it and see the machine code generated:</p>
+<p>By the way, this program does nothing at all. Save this with the name <code>program.asm</code>, let&rsquo;s compile it and see the machine code generated:</p>
 <blockquote>
 <p><strong>You will need the yasm assembler</strong></p>
 </blockquote>
@@ -182,7 +182,7 @@ objdump -Mintel -d program
 </code></pre></div><p>You should see this:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-txt" data-lang="txt">program:     file format elf64-x86-64
 
-</code></pre></div><p>Yep, nothing. That's correct. Our program has no instructions in it so the linker outputs no instructions with just it's header information.</p>
+</code></pre></div><p>Yep, nothing. That&rsquo;s correct. Our program has no instructions in it so the linker outputs no instructions with just it&rsquo;s header information.</p>
 <p>Here is a runnable example, a hello world using system calls:</p>
 <div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
 <table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
@@ -219,13 +219,13 @@ objdump -Mintel -d program
 </div>
 </div>
 <p>For each line of code:</p>
-<p><strong>4</strong> - The instruction <code>mov</code> transfers the value of the right most operand to the left. In this case it stores 1 into the register <code>rax</code>. Linux has an <a href="http://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64/">standardized method</a> to call system routines from assembly. Following this table we should store the system call number in the register <code>rax</code>, for <code>sys_write</code> it's 1.</p>
+<p><strong>4</strong> - The instruction <code>mov</code> transfers the value of the right most operand to the left. In this case it stores 1 into the register <code>rax</code>. Linux has an <a href="http://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64/">standardized method</a> to call system routines from assembly. Following this table we should store the system call number in the register <code>rax</code>, for <code>sys_write</code> it&rsquo;s 1.</p>
 <p><strong>5</strong> - The register <code>rdi</code> for this syscall must contain a valid file descriptor, 1 is stdout. If you not trust me, try <code>echo &quot;Hello World&quot; &gt; /proc/self/fd/1</code> 😉</p>
-<p><strong>6</strong> - Again, a <code>mov</code> instruction. The difference here is that it's storing the message in the register <code>rsi</code>. The message is just a label, an alias for the memory address defined in the data section. For <code>sys_write</code> the <code>rsi</code> must contain a <code>const char *buf</code>, a constant pointer (memory address) to a char. If we try to get the value that the message address is pointing to we will get the char <code>H</code>, because it points to the first item at that memory address.</p>
+<p><strong>6</strong> - Again, a <code>mov</code> instruction. The difference here is that it&rsquo;s storing the message in the register <code>rsi</code>. The message is just a label, an alias for the memory address defined in the data section. For <code>sys_write</code> the <code>rsi</code> must contain a <code>const char *buf</code>, a constant pointer (memory address) to a char. If we try to get the value that the message address is pointing to we will get the char <code>H</code>, because it points to the first item at that memory address.</p>
 <p><strong>7</strong> - In <code>rdx</code> goes the size of the buffer that it needs to write. Since the memory is a contiguous buffer of data and it only has the start of the string (the message label) it should known how many bytes to copy from this buffer to the stdout, in this case 13 bytes.</p>
 <p><strong>8</strong> - The instruction <code>syscall</code> is a special one reserved to invoke OS system call handler in x86_64 at privilege level 0. Basically it signals the kernel to execute the system call.</p>
 <p><strong>10</strong> - Here goes another system call. All programs running on <code>Unix</code> based systems have to exit with <code>0</code> to indicate success, here 60 means <code>sys_exit</code>.</p>
-<p><strong>11</strong> - The instruction <code>xor</code> apply an exclusive or between the two operands, it's the fastest way to zero out a register. In <code>rdi</code> goes the exit status, 0.</p>
+<p><strong>11</strong> - The instruction <code>xor</code> apply an exclusive or between the two operands, it&rsquo;s the fastest way to zero out a register. In <code>rdi</code> goes the exit status, 0.</p>
 <p><strong>12</strong> Execute the <code>sys_exit</code>.</p>
 <p><strong>14</strong> - Section data is used to declare variables that will be included in the final elf file. The message label points to an address in memory that contains 13 bytes in sequence (db = define bytes), forming the <code>Hello World!</code> text followed by a line feed (10 in decimal or 0xA in hex) and the null byte character representing the end of the string, just like in C.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">yasm -f elf64 -o program.o program.asm
@@ -240,9 +240,9 @@ objdump -Mintel -d program
   4000c8:       48 c7 c0 3c 00 00 00    mov    rax,0x3c
   4000cf:       48 31 ff                xor    rdi,rdi
   4000d2:       0f 05                   syscall
-</code></pre><p>What we wrote it's exactly what we are seeing! Except the message label of course, it's replaced by the memory address and the decimals by hex 😄.</p>
+</code></pre><p>What we wrote it&rsquo;s exactly what we are seeing! Except the message label of course, it&rsquo;s replaced by the memory address and the decimals by hex 😄.</p>
 <h2 id="3-rewriting-some-gnu-coreutils-programs-in-assembly-linux-x64">3. Rewriting some GNU coreutils programs in assembly linux x64</h2>
-<p>To read more about assembly I started this <a href="https://github.com/mauri870/problems-assembly">repository</a> where I'm trying to mimic the base functionality of some GNU coreutils programs with pure assembly and system calls. Probably I'll cover some of these in a later post.</p>
+<p>To read more about assembly I started this <a href="https://github.com/mauri870/problems-assembly">repository</a> where I&rsquo;m trying to mimic the base functionality of some GNU coreutils programs with pure assembly and system calls. Probably I&rsquo;ll cover some of these in a later post.</p>
 <p>Please feel free to check it out and read more about this old but still exciting language!</p>
 <p>See you again next time 😄.</p>
                 </section>
@@ -286,7 +286,7 @@ objdump -Mintel -d program
     
     <p class="small">
     
-       © Copyright 2019 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+       © Copyright 2020 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
     
     </p>
     
