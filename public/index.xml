@@ -21,6 +21,15 @@
     </item>
     
     <item>
+      <title>O(n^2) Redis memory usage with Laravel Horizon</title>
+      <link>https://mauri870.github.io/blog/posts/o-n-2-in-laravel-horizon/</link>
+      <pubDate>Tue, 12 Nov 2019 10:00:00 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/posts/o-n-2-in-laravel-horizon/</guid>
+      <description>&lt;p&gt;O(n^2) again, now with Laravel Horizon memory usage.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
       <title>Plan9 br-abnt2 keyboard map</title>
       <link>https://mauri870.github.io/blog/posts/plan9-br-abnt2-kbmap/</link>
       <pubDate>Thu, 09 May 2019 21:00:00 -0300</pubDate>

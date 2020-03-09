@@ -6,10 +6,19 @@
     <description>Recent content in Laravel on Mauri870&#39;s dev blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 13 May 2018 22:26:06 -0300</lastBuildDate>
+    <lastBuildDate>Tue, 12 Nov 2019 10:00:00 -0300</lastBuildDate>
     
 	<atom:link href="https://mauri870.github.io/blog/tags/laravel/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>O(n^2) Redis memory usage with Laravel Horizon</title>
+      <link>https://mauri870.github.io/blog/posts/o-n-2-in-laravel-horizon/</link>
+      <pubDate>Tue, 12 Nov 2019 10:00:00 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/posts/o-n-2-in-laravel-horizon/</guid>
+      <description>&lt;p&gt;O(n^2) again, now with Laravel Horizon memory usage.&lt;/p&gt;</description>
+    </item>
     
     <item>
       <title>Using Opentracing/Jaeger with Laravel</title>
