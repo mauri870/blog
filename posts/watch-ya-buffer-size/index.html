@@ -6,8 +6,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
     <meta name="author" content="Mauri de Souza Nunes">
-    <meta name="description" content="Buffers are key pieces when writing software, they can be smaller or bigger based on your needs. But when you have too much of then with big sizes things start to Go out of control.
- Looking at one of our Go microservices heap and trace profiles I spotted the linear increase in heap memory which triggered an abnormal number of GC runs (almost 25) during the 30s spam of the profile.">
+    <meta name="description" content="Buffers are key pieces when writing software, they can be smaller or bigger based on your needs. But when you have too much of these with big sizes things start to Go out of control.">
 		<meta name="generator" content="Hugo 0.66.0" />
 		<title>Watch ya buffer size &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
@@ -75,7 +74,7 @@
                   
                 
                 <section id="post-body">
-                    <p>Buffers are key pieces when writing software, they can be smaller or bigger based on your needs. But when you have too much of then with big sizes things start to Go out of control.</p>
+                    <p>Buffers are key pieces when writing software, they can be smaller or bigger based on your needs. But when you have too much of these with big sizes things start to Go out of control.</p>
 <hr>
 <p>Looking at one of our Go microservices heap and trace profiles I spotted the
 linear increase in heap memory which triggered an abnormal number of GC runs (almost 25) during the 30s spam of the profile. The memory usage was pretty high too.</p>
@@ -152,7 +151,6 @@ to a lower value fixed the issue:</p>
 <p>This simple change decreased the memory usage of the service by <strong>10-20x</strong>.</p>
 <p>We can achieve even better results with buffer reuse, a technique used on databases and cache applications to reuse memory buffers to avoid the overhead of a garbage collector run and future heap allocations. This can be done easily in Go with something like <a href="https://golang.org/pkg/sync/#Pool">sync.Pool</a> or <a href="https://github.com/couchbase/go-slab">go-slab</a>.</p>
 <p>See you again next time 😄.</p>
-
                 </section>
             </article>
 

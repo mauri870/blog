@@ -17,8 +17,7 @@
       <pubDate>Sat, 07 Mar 2020 08:59:14 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/posts/watch-ya-buffer-size/</guid>
-      <description>Buffers are key pieces when writing software, they can be smaller or bigger based on your needs. But when you have too much of then with big sizes things start to Go out of control.
- Looking at one of our Go microservices heap and trace profiles I spotted the linear increase in heap memory which triggered an abnormal number of GC runs (almost 25) during the 30s spam of the profile.</description>
+      <description>&lt;p&gt;Buffers are key pieces when writing software, they can be smaller or bigger based on your needs. But when you have too much of these with big sizes things start to Go out of control.&lt;/p&gt;</description>
     </item>
     
   </channel>
