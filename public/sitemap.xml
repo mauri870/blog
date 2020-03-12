@@ -3,41 +3,6 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://mauri870.github.io/blog/tags/go/</loc>
-    <lastmod>2020-03-07T08:59:14-03:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://mauri870.github.io/blog/tags/golang/</loc>
-    <lastmod>2020-03-07T08:59:14-03:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://mauri870.github.io/blog/</loc>
-    <lastmod>2020-03-07T08:59:14-03:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://mauri870.github.io/blog/posts/</loc>
-    <lastmod>2020-03-07T08:59:14-03:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://mauri870.github.io/blog/tags/pprof/</loc>
-    <lastmod>2020-03-07T08:59:14-03:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://mauri870.github.io/blog/tags/</loc>
-    <lastmod>2020-03-07T08:59:14-03:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://mauri870.github.io/blog/posts/watch-ya-buffer-size/</loc>
-    <lastmod>2020-03-07T08:59:14-03:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://mauri870.github.io/blog/tags/horizon/</loc>
     <lastmod>2020-03-06T09:00:00-03:00</lastmod>
   </url>
@@ -48,7 +13,22 @@
   </url>
   
   <url>
+    <loc>https://mauri870.github.io/blog/</loc>
+    <lastmod>2020-03-06T09:00:00-03:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://mauri870.github.io/blog/posts/o-n-2-in-laravel-horizon/</loc>
+    <lastmod>2020-03-06T09:00:00-03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mauri870.github.io/blog/posts/</loc>
+    <lastmod>2020-03-06T09:00:00-03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mauri870.github.io/blog/tags/</loc>
     <lastmod>2020-03-06T09:00:00-03:00</lastmod>
   </url>
   
@@ -89,6 +69,16 @@
   
   <url>
     <loc>https://mauri870.github.io/blog/tags/gke/</loc>
+    <lastmod>2018-12-05T10:00:00-03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mauri870.github.io/blog/tags/go/</loc>
+    <lastmod>2018-12-05T10:00:00-03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mauri870.github.io/blog/tags/golang/</loc>
     <lastmod>2018-12-05T10:00:00-03:00</lastmod>
   </url>
   
