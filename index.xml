@@ -6,19 +6,10 @@
     <description>Recent content on Mauri870&#39;s dev blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 07 Mar 2020 08:59:14 -0300</lastBuildDate>
+    <lastBuildDate>Fri, 06 Mar 2020 09:00:00 -0300</lastBuildDate>
     
 	<atom:link href="https://mauri870.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>Watch ya buffer size</title>
-      <link>https://mauri870.github.io/blog/posts/watch-ya-buffer-size/</link>
-      <pubDate>Sat, 07 Mar 2020 08:59:14 -0300</pubDate>
-      
-      <guid>https://mauri870.github.io/blog/posts/watch-ya-buffer-size/</guid>
-      <description>&lt;p&gt;Buffers are key pieces when writing software, they can be smaller or bigger based on your needs. But when you have too much of these with big sizes things start to Go out of control.&lt;/p&gt;</description>
-    </item>
     
     <item>
       <title>O(n^2) Redis memory usage with Laravel Horizon</title>
