@@ -40,7 +40,7 @@ git clone -b r1.7 https://github.com/tensorflow/tensorflow.git
 
 > Maybe using bazel you don't need to do these steps manually, but who uses bazel?? Probably only Google...
 
-Then you need the protoc compiler, get it [here](github.com/google/protobuf). And of course the golang protobuf plugin, [here](https://github.com/golang/protobuf).
+Then you need the protoc compiler, get it [here](https://github.com/protocolbuffers/protobuf). And of course the golang protobuf plugin, [here](https://github.com/golang/protobuf).
 
 Now you can compile the protos:
 
