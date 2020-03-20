@@ -7,7 +7,7 @@
 		
     <meta name="author" content="Mauri de Souza Nunes">
     <meta name="description" content="Tensorflow Serving is the most optimized way to serve a Tensorflow machine learning model in production. The official tutorials only cover the python client, so lets implement a Go/Golang one.">
-		<meta name="generator" content="Hugo 0.66.0" />
+		<meta name="generator" content="Hugo 0.67.1" />
 		<title>Writing a Golang client for the Tensorflow Serving Inception model &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" href="https://mauri870.github.io/blog/images/favicon.ico">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -98,7 +98,7 @@
 </code></pre></div><blockquote>
 <p>Maybe using bazel you don&rsquo;t need to do these steps manually, but who uses bazel?? Probably only Google&hellip;</p>
 </blockquote>
-<p>Then you need the protoc compiler, get it <a href="github.com/google/protobuf">here</a>. And of course the golang protobuf plugin, <a href="https://github.com/golang/protobuf">here</a>.</p>
+<p>Then you need the protoc compiler, get it <a href="https://github.com/protocolbuffers/protobuf">here</a>. And of course the golang protobuf plugin, <a href="https://github.com/golang/protobuf">here</a>.</p>
 <p>Now you can compile the protos:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mkdir -p vendor
 PROTOC_OPTS<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;-I tensorflow -I serving --go_out=plugins=grpc:vendor&#39;</span>
