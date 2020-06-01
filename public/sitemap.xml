@@ -73,11 +73,6 @@
   </url>
   
   <url>
-    <loc>https://mauri870.github.io/blog/tags/go/</loc>
-    <lastmod>2018-12-05T10:00:00-03:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://mauri870.github.io/blog/tags/golang/</loc>
     <lastmod>2018-12-05T10:00:00-03:00</lastmod>
   </url>
@@ -145,6 +140,11 @@
   <url>
     <loc>https://mauri870.github.io/blog/tags/tensorflow-serving/</loc>
     <lastmod>2018-05-21T23:26:10-03:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://mauri870.github.io/blog/tags/go/</loc>
+    <lastmod>2018-05-19T12:35:00-03:00</lastmod>
   </url>
   
   <url>
