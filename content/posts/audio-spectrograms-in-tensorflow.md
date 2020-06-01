@@ -56,11 +56,12 @@ Here's the source code for a program to test the spectrogram generation in  tens
 
 ```python
 import tensorflow as tf
-# FIXME: audio_ops.decode_wav is deprecated, use tensorflow_io.IOTensor.from_audio
+# FIXME: audio_ops.decode_wav is deprecated, use tf.audio.decode_wav
 from tensorflow.contrib.framework.python.ops import audio_ops
 
 # Enable eager execution for a more interactive frontend.
 # If using the default graph mode, you'll probably need to run in a session.
+# This is not necessary for tensorflow 2.0
 tf.enable_eager_execution()
 
 @tf.function
@@ -121,9 +122,12 @@ def audio_to_spectrogram(
 	# so we fix that
         flip_left_right = tf.image.flip_left_right(squeeze)
         transposed = tf.image.transpose(flip_left_right)
+	return transposed
 
+@tf.function
+def to_png(data):
 	# Cast to uint8 and encode as png
-        cast = tf.cast(transposed, tf.uint8)
+        cast = tf.cast(data, tf.uint8)
 
 	# Encode tensor as a png image
         return tf.image.encode_png(cast)
@@ -134,7 +138,7 @@ if __name__ == '__main__':
 
 	# Generage the spectrogram
 	audio = tf.io.read_file(input_file)
-	image = audio_to_spectrogram(audio, 224, 224)
+	image = to_png(audio_to_spectrogram(audio, 224, 224))
 
 	# Write the png encoded image to a file
 	tf.io.write(output_file, image)
