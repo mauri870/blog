@@ -75,15 +75,6 @@
     </item>
     
     <item>
-      <title>Go</title>
-      <link>https://mauri870.github.io/blog/tags/go/</link>
-      <pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
-      
-      <guid>https://mauri870.github.io/blog/tags/go/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>Golang</title>
       <link>https://mauri870.github.io/blog/tags/golang/</link>
       <pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
@@ -179,6 +170,15 @@
       <pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
       
       <guid>https://mauri870.github.io/blog/tags/tensorflow-serving/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Go</title>
+      <link>https://mauri870.github.io/blog/tags/go/</link>
+      <pubDate>Sat, 19 May 2018 12:35:00 -0300</pubDate>
+      
+      <guid>https://mauri870.github.io/blog/tags/go/</guid>
       <description></description>
     </item>
     
