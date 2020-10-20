@@ -6,11 +6,7 @@
     <description>Recent content in Raspberry Pi 3 on Mauri870&#39;s dev blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 31 May 2018 20:55:00 -0300</lastBuildDate>
-    
-	<atom:link href="https://mauri870.github.io/blog/tags/raspberry-pi-3/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Thu, 31 May 2018 20:55:00 -0300</lastBuildDate><atom:link href="https://mauri870.github.io/blog/tags/raspberry-pi-3/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Plan9 on raspberry pi 3</title>
       <link>https://mauri870.github.io/blog/posts/plan9-on-raspberry-pi-3/</link>
