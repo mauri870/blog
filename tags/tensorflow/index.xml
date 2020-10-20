@@ -6,11 +6,7 @@
     <description>Recent content in Tensorflow on Mauri870&#39;s dev blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 24 May 2018 00:05:00 -0300</lastBuildDate>
-    
-	<atom:link href="https://mauri870.github.io/blog/tags/tensorflow/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Thu, 24 May 2018 00:05:00 -0300</lastBuildDate><atom:link href="https://mauri870.github.io/blog/tags/tensorflow/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Audio Spectrograms in Tensorflow</title>
       <link>https://mauri870.github.io/blog/posts/audio-spectrograms-in-tensorflow/</link>

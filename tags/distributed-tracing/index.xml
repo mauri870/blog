@@ -6,11 +6,7 @@
     <description>Recent content in Distributed Tracing on Mauri870&#39;s dev blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 13 May 2018 22:26:06 -0300</lastBuildDate>
-    
-	<atom:link href="https://mauri870.github.io/blog/tags/distributed-tracing/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Sun, 13 May 2018 22:26:06 -0300</lastBuildDate><atom:link href="https://mauri870.github.io/blog/tags/distributed-tracing/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Using Opentracing/Jaeger with Laravel</title>
       <link>https://mauri870.github.io/blog/posts/opentracing-jaeger-laravel/</link>
