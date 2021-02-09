@@ -10,7 +10,7 @@ googleAnalytics = "UA-79904458-1"
 hasCJKLanguage = false
 
 [params]
-	author = "Mauri de Souza Nunes"
+	author = "Mauri de Souza Meneguzzo"
 	description = "My personal dev blog"
 	bio = "Software engineering, AI, web and devops stuff"
 
