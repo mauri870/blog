@@ -1,5 +1,9 @@
 # My personal blog
 
+```bash
+git submodule update --init --recursive
+```
+
 Development with live reload:
 
 ```bash
