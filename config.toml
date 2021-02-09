@@ -24,9 +24,6 @@ hasCJKLanguage = false
 	subtitle404 = "The page you are looking for could not be found :("
 
 	iconFont = "font-awesome"
-
-	enableDisqus = true
-	disqusShortname = "mauri870"
 [social]
 	github-square = "https://www.github.com/mauri870"
 	instagram = "https://instagram.com/maurismeneguzzo"
