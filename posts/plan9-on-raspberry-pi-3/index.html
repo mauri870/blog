@@ -5,9 +5,9 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
-    <meta name="author" content="Mauri de Souza Nunes">
+    <meta name="author" content="Mauri de Souza Meneguzzo">
     <meta name="description" content="Plan9 is a research operating system from the same group who created UNIX at Bell Labs Computing Sciences Research Center (CSRC). It emerged in the 80s, and its early development coincided with continuing development of the later versions of Research UNIX. Let&rsquo;s install it in the raspberry pi 3!">
-		<meta name="generator" content="Hugo 0.76.5" />
+		<meta name="generator" content="Hugo 0.89.4" />
 		<title>Plan9 on raspberry pi 3 &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" type="image/svg+xml"href="https://mauri870.github.io/blog/images/favicon.svg">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -88,17 +88,17 @@
 <p><strong>You probably need to log in as root in order to run the following commands</strong></p>
 </blockquote>
 <p>Check the name of your sd card:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">fdisk -l
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">fdisk -l
 </code></pre></div><blockquote>
 <p>For me it&rsquo;s <code>/dev/sdc</code>.</p>
 </blockquote>
 <p>Format the device to FAT32:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mkfs.vfat -n <span style="color:#e6db74">&#39;PLAN9&#39;</span> -I /dev/sdc
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mkfs.vfat -n <span style="color:#e6db74">&#39;PLAN9&#39;</span> -I /dev/sdc
 </code></pre></div><p>Download the plan9 image and write to your sdcard or save it somewhere:</p>
 <blockquote>
 <p><strong>Remember to change your device!</strong></p>
 </blockquote>
-<pre><code>wget -O - http://plan9.bell-labs.com/sources/contrib/miller/9pi.img.gz | \
+<pre tabindex="0"><code>wget -O - http://plan9.bell-labs.com/sources/contrib/miller/9pi.img.gz | \
   gunzip -c | dd bs=4M of=/dev/null status=progress
 </code></pre><p>Now you are ready to boot Plan9 on raspberry pi!</p>
 <h2 id="3-first-steps">3. First steps</h2>
@@ -109,7 +109,7 @@
 <blockquote>
 <p>I&rsquo;m using ethernet, probably wifi only work on plan9 forks like 9front.</p>
 </blockquote>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ndb/dns <span style="color:#75715e"># start the dns resolver</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ndb/dns <span style="color:#75715e"># start the dns resolver</span>
 ip/ipconfig <span style="color:#75715e"># configure interfaces and get ip address with dhcp</span>
 ip/ping google.com <span style="color:#75715e"># check internet connection</span>
 </code></pre></div><blockquote>
@@ -120,7 +120,7 @@ ip/ping google.com <span style="color:#75715e"># check internet connection</span
 <p>If you receive an error about dns resolution, try to reboot and run DNSSERVER=8.8.8.8 before the commands above.</p>
 </blockquote>
 <p>Now let&rsquo;s try to use a web browser. You are thinking about Chrome? Firefox? Nop. Plan9 has it&rsquo;s own web browser, <a href="http://man.cat-v.org/plan_9/1/abaco">abaco(1)</a></p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">webfs <span style="color:#75715e"># start a filesystem that handle urls</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">webfs <span style="color:#75715e"># start a filesystem that handle urls</span>
 abaco <span style="color:#e6db74">&#39;http://google.com/search?q=plan9&#39;</span>
 </code></pre></div><p>It&rsquo;s pretty ugly I know, no css, no js, <em>but it works</em>!</p>
 <blockquote>
@@ -128,11 +128,11 @@ abaco <span style="color:#e6db74">&#39;http://google.com/search?q=plan9&#39;</sp
 </blockquote>
 <h2 id="3-installing-git">3. Installing Git</h2>
 <p>Unfortunately git is not ported to Plan9, but David du Colombier wrote a rc script to mimic the original git commands:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">hget -o $home/bin/rc/git http://9legacy.org/9legacy/tools/git
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">hget -o $home/bin/rc/git http://9legacy.org/9legacy/tools/git
 chmod +x $home/bin/rc/git
 </code></pre></div><p>The rc scripts are stored in the <code>$home/bin/rc</code> directory and automatically appended to /bin, so you can run then in the global namespace.</p>
 <h2 id="2-installing-golang">2. Installing Golang</h2>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">hget -o go1.10.tbz http://www.9legacy.org/download/go/go1.10-plan9-arm7-bootstrap.tbz
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">hget -o go1.10.tbz http://www.9legacy.org/download/go/go1.10-plan9-arm7-bootstrap.tbz
 tar xvf go1.10.tbz <span style="color:#f92672">&amp;&amp;</span> mv go-* go
 
 <span style="color:#75715e"># Go configs</span>
@@ -146,7 +146,7 @@ bind -a $GOBIN /bin
 <p>Don&rsquo;t forget to add the binds and envs to <code>$home/lib/profile</code> too</p>
 </blockquote>
 <p>Let&rsquo;s check:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go env
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go env
 </code></pre></div><hr>
 <p>I&rsquo;m in love with Plan9, it&rsquo;s such a cool operating system to learn. If you are interested too check the following resources:</p>
 <ul>
@@ -163,21 +163,6 @@ bind -a $GOBIN /bin
             
 
             
-                <div id="disqus_thread"></div>
-<script type="text/javascript">
-    var disqus_shortname = 'mauri870'; 
-
-     
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</div>
-
-            
 
             
 
@@ -191,6 +176,10 @@ bind -a $GOBIN /bin
         <i class="fa fa-github-square"></i>
     </a>
     
+    <a class="symbol" href="https://instagram.com/maurismeneguzzo">
+        <i class="fa fa-instagram"></i>
+    </a>
+    
 
 
 </div>
@@ -198,7 +187,7 @@ bind -a $GOBIN /bin
     
     <p class="small">
     
-       © Copyright 2020 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Meneguzzo
     
     </p>
     

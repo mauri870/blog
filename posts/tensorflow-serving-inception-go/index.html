@@ -5,9 +5,9 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
-    <meta name="author" content="Mauri de Souza Nunes">
+    <meta name="author" content="Mauri de Souza Meneguzzo">
     <meta name="description" content="Tensorflow Serving is the most optimized way to serve a Tensorflow machine learning model in production. The official tutorials only cover the python client, so lets implement a Go/Golang one.">
-		<meta name="generator" content="Hugo 0.76.5" />
+		<meta name="generator" content="Hugo 0.89.4" />
 		<title>Writing a Golang client for the Tensorflow Serving Inception model &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" type="image/svg+xml"href="https://mauri870.github.io/blog/images/favicon.svg">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -92,15 +92,15 @@
 <h2 id="2-preparing-the-proto-files">2. Preparing the proto files</h2>
 <p>Tensorflow Serving is written in C++, exposing a gRPC server that talks Protobuf. In order to make a Go client, we must compile the protobuf files first to generate all the boilerplate code for Go, yeah protobuf is really cool hum 😄.</p>
 <p>First of all clone the tensorflow serving repository:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">git clone -b r1.7 https://github.com/tensorflow/serving.git
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">git clone -b r1.7 https://github.com/tensorflow/serving.git
 </code></pre></div><p>Since the serving proto files depends on the tensorflow ones, clone the tensorflow repo too:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">git clone -b r1.7 https://github.com/tensorflow/tensorflow.git
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">git clone -b r1.7 https://github.com/tensorflow/tensorflow.git
 </code></pre></div><blockquote>
 <p>Maybe using bazel you don&rsquo;t need to do these steps manually, but who uses bazel?? Probably only Google&hellip;</p>
 </blockquote>
 <p>Then you need the protoc compiler, get it <a href="https://github.com/protocolbuffers/protobuf">here</a>. And of course the golang protobuf plugin, <a href="https://github.com/golang/protobuf">here</a>.</p>
 <p>Now you can compile the protos:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mkdir -p vendor
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">mkdir -p vendor
 PROTOC_OPTS<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;-I tensorflow -I serving --go_out=plugins=grpc:vendor&#39;</span>
 
 eval <span style="color:#e6db74">&#34;protoc </span>$PROTOC_OPTS<span style="color:#e6db74"> serving/tensorflow_serving/apis/*.proto&#34;</span>
@@ -114,11 +114,11 @@ eval <span style="color:#e6db74">&#34;protoc </span>$PROTOC_OPTS<span style="col
 </code></pre></div><p>Running this will create a directory called <code>tensorflow</code> and <code>tensorflow_serving</code> in the vendor directory.</p>
 <h2 id="3-the-inception-go-client">3. The Inception Go client</h2>
 <p>You need the protobuf wrappers and the grpc package:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go get github.com/golang/protobuf/ptypes/wrappers google.golang.org/grpc
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">go get github.com/golang/protobuf/ptypes/wrappers google.golang.org/grpc
 </code></pre></div><p>Don&rsquo;t forget to run the serving server:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run --rm -p 10000:10000 your_serving_image
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run --rm -p 10000:10000 your_serving_image
 </code></pre></div><p>And here is the client code:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// save it as inception-client.go
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-golang" data-lang="golang"><span style="color:#75715e">// save it as inception-client.go
 </span><span style="color:#75715e"></span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
 
 <span style="color:#f92672">import</span> (
@@ -195,28 +195,13 @@ eval <span style="color:#e6db74">&#34;protoc </span>$PROTOC_OPTS<span style="col
 	<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Println</span>(<span style="color:#a6e22e">resp</span>)
 }
 </code></pre></div><p>That&rsquo;s it, let&rsquo;s test:</p>
-<pre><code>go build .
+<pre tabindex="0"><code>go build .
 ./inception-client --serving-address localhost:10000 path/to/image.png
 </code></pre><p>See you again next time 😄.</p>
                 </section>
             </article>
 
             
-
-            
-                <div id="disqus_thread"></div>
-<script type="text/javascript">
-    var disqus_shortname = 'mauri870'; 
-
-     
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</div>
 
             
 
@@ -232,6 +217,10 @@ eval <span style="color:#e6db74">&#34;protoc </span>$PROTOC_OPTS<span style="col
         <i class="fa fa-github-square"></i>
     </a>
     
+    <a class="symbol" href="https://instagram.com/maurismeneguzzo">
+        <i class="fa fa-instagram"></i>
+    </a>
+    
 
 
 </div>
@@ -239,7 +228,7 @@ eval <span style="color:#e6db74">&#34;protoc </span>$PROTOC_OPTS<span style="col
     
     <p class="small">
     
-       © Copyright 2020 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Meneguzzo
     
     </p>
     

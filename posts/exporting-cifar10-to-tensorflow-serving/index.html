@@ -5,9 +5,9 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
-    <meta name="author" content="Mauri de Souza Nunes">
+    <meta name="author" content="Mauri de Souza Meneguzzo">
     <meta name="description" content="The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. In this blog post I&rsquo;ll cover how to export a trained CIFAR-10 tensorflow model to Tensorflow Serving.">
-		<meta name="generator" content="Hugo 0.76.5" />
+		<meta name="generator" content="Hugo 0.89.4" />
 		<title>How to export the CIFAR10 model to Tensorflow Serving &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" type="image/svg+xml"href="https://mauri870.github.io/blog/images/favicon.svg">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -93,14 +93,14 @@
 <h2 id="2-exporting-the-model">2. Exporting the model</h2>
 <p>In order to export the trained model to tensorflow serving, we first need to modify our computational graph to use the tensorflow serving signature.</p>
 <p>Save this file as <code>cifar10_saved_model.py</code> in the same directory as the cifar10 files.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#e6db74">&#34;&#34;&#34;Tensorflow Serving export script for cifar10
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#e6db74">&#34;&#34;&#34;Tensorflow Serving export script for cifar10
 </span><span style="color:#e6db74">&#34;&#34;&#34;</span>
 <span style="color:#f92672">from</span> __future__ <span style="color:#f92672">import</span> absolute_import
 <span style="color:#f92672">from</span> __future__ <span style="color:#f92672">import</span> division
 <span style="color:#f92672">from</span> __future__ <span style="color:#f92672">import</span> print_function
 
 <span style="color:#f92672">import</span> os
-<span style="color:#f92672">import</span> tensorflow <span style="color:#f92672">as</span> tf
+<span style="color:#f92672">import</span> tensorflow <span style="color:#66d9ef">as</span> tf
 
 <span style="color:#f92672">import</span> cifar10
 <span style="color:#f92672">import</span> cifar10_input
@@ -184,7 +184,7 @@ tf<span style="color:#f92672">.</span>app<span style="color:#f92672">.</span>fla
         <span style="color:#75715e"># extract global_step from it.</span>
         global_step <span style="color:#f92672">=</span> ckpt<span style="color:#f92672">.</span>model_checkpoint_path<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#39;/&#39;</span>)[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]<span style="color:#f92672">.</span>split(<span style="color:#e6db74">&#39;-&#39;</span>)[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]
       <span style="color:#66d9ef">else</span>:
-        <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;No checkpoint file found&#39;</span>)
+        print(<span style="color:#e6db74">&#39;No checkpoint file found&#39;</span>)
         <span style="color:#66d9ef">return</span>
 
       <span style="color:#75715e"># Export inference model.</span>
@@ -242,9 +242,9 @@ tf<span style="color:#f92672">.</span>app<span style="color:#f92672">.</span>fla
           legacy_init_op<span style="color:#f92672">=</span>legacy_init_op)
 
       builder<span style="color:#f92672">.</span>save()
-      <span style="color:#66d9ef">print</span>(<span style="color:#e6db74">&#39;Successfully exported model to </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> output_path)
+      print(<span style="color:#e6db74">&#39;Successfully exported model to </span><span style="color:#e6db74">%s</span><span style="color:#e6db74">&#39;</span> <span style="color:#f92672">%</span> output_path)
 
-<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">main</span>(argv<span style="color:#f92672">=</span>None):  <span style="color:#75715e"># pylint: disable=unused-argument</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">main</span>(argv<span style="color:#f92672">=</span><span style="color:#66d9ef">None</span>):  <span style="color:#75715e"># pylint: disable=unused-argument</span>
   <span style="color:#66d9ef">if</span> tf<span style="color:#f92672">.</span>gfile<span style="color:#f92672">.</span>Exists(FLAGS<span style="color:#f92672">.</span>output_dir):
     tf<span style="color:#f92672">.</span>gfile<span style="color:#f92672">.</span>DeleteRecursively(FLAGS<span style="color:#f92672">.</span>output_dir)
   tf<span style="color:#f92672">.</span>gfile<span style="color:#f92672">.</span>MakeDirs(FLAGS<span style="color:#f92672">.</span>output_dir)
@@ -263,21 +263,6 @@ tf<span style="color:#f92672">.</span>app<span style="color:#f92672">.</span>fla
             
 
             
-                <div id="disqus_thread"></div>
-<script type="text/javascript">
-    var disqus_shortname = 'mauri870'; 
-
-     
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</div>
-
-            
 
             
 
@@ -291,6 +276,10 @@ tf<span style="color:#f92672">.</span>app<span style="color:#f92672">.</span>fla
         <i class="fa fa-github-square"></i>
     </a>
     
+    <a class="symbol" href="https://instagram.com/maurismeneguzzo">
+        <i class="fa fa-instagram"></i>
+    </a>
+    
 
 
 </div>
@@ -298,7 +287,7 @@ tf<span style="color:#f92672">.</span>app<span style="color:#f92672">.</span>fla
     
     <p class="small">
     
-       © Copyright 2020 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Meneguzzo
     
     </p>
     

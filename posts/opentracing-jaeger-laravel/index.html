@@ -5,9 +5,9 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
-    <meta name="author" content="Mauri de Souza Nunes">
+    <meta name="author" content="Mauri de Souza Meneguzzo">
     <meta name="description" content="Microservices become the new standard for scalable and maintanable arquitectures. Monolithic aplications are splited into smaller pieces to keep things simple and decoupled. Tracing comes in hand when you need to aggregate the events during the request lifecycle between a single or multiple services.">
-		<meta name="generator" content="Hugo 0.76.5" />
+		<meta name="generator" content="Hugo 0.89.4" />
 		<title>Using Opentracing/Jaeger with Laravel &middot; Mauri870&#39;s dev blog</title>
 		<link rel="shortcut icon" type="image/svg+xml"href="https://mauri870.github.io/blog/images/favicon.svg">
 		<link rel="stylesheet" href="https://mauri870.github.io/blog/css/style.css">
@@ -93,10 +93,10 @@
 <p>To integrate jaeger with laravel we&rsquo;ll need a jaeger package for php, like <a href="https://github.com/jukylin/jaeger-php">jukylin/jaeger-php</a>.</p>
 <p>There&rsquo;s only 3 structures that we need to use, a <code>Tracer</code>, a <code>Span</code> and the <code>Config</code>. If you have read the opentracing introduction you&rsquo;re probably familiar with these terms.</p>
 <p>To keep things simple I decide to build a wrapper around the framework events, to avoid as little modifications as possible, and keep adding aditional spans to track the services in the future.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">composer require jukylin/jaeger-php:dev-master@dev  <span style="color:#75715e"># jaeger php client</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">composer require jukylin/jaeger-php:dev-master@dev  <span style="color:#75715e"># jaeger php client</span>
 composer require ramsey/uuid <span style="color:#75715e"># uuid library for the unique request id</span>
 </code></pre></div><p>In a service provider, registered as early as possible, add the following content:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-php" data-lang="php"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">boot</span>()
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-php" data-lang="php"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">boot</span>()
 {
   <span style="color:#75715e">// Setup a unique ID for each request. This will allow us to find
 </span><span style="color:#75715e"></span>  <span style="color:#75715e">// the request trace in the jaeger ui
@@ -172,7 +172,7 @@ composer require ramsey/uuid <span style="color:#75715e"># uuid library for the 
   });
 }
 </code></pre></div><p>This is only an example, but you can set how many tags you want, how many logs you want, and also spawn how much spans you need. For example:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-php" data-lang="php"><span style="color:#75715e">// ...controller/service
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-php" data-lang="php"><span style="color:#75715e">// ...controller/service
 </span><span style="color:#75715e"></span>$tracer <span style="color:#f92672">=</span> <span style="color:#a6e22e">app</span>(<span style="color:#e6db74">&#39;context.tracer&#39;</span>);
 $createCompanySpan <span style="color:#f92672">=</span> $tracer<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">startSpan</span>(<span style="color:#e6db74">&#39;create company&#39;</span>, [
   <span style="color:#e6db74">&#39;child_of&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">app</span>(<span style="color:#e6db74">&#39;context.tracer.globalSpan&#39;</span>)
@@ -200,21 +200,6 @@ $createUserSpan <span style="color:#f92672">=</span> $tracer<span style="color:#
             
 
             
-                <div id="disqus_thread"></div>
-<script type="text/javascript">
-    var disqus_shortname = 'mauri870'; 
-
-     
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-</div>
-
-            
 
             
 
@@ -228,6 +213,10 @@ $createUserSpan <span style="color:#f92672">=</span> $tracer<span style="color:#
         <i class="fa fa-github-square"></i>
     </a>
     
+    <a class="symbol" href="https://instagram.com/maurismeneguzzo">
+        <i class="fa fa-instagram"></i>
+    </a>
+    
 
 
 </div>
@@ -235,7 +224,7 @@ $createUserSpan <span style="color:#f92672">=</span> $tracer<span style="color:#
     
     <p class="small">
     
-       © Copyright 2020 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Nunes
+       © Copyright 2021 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Meneguzzo
     
     </p>
     
