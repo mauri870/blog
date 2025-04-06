@@ -1,4 +1,4 @@
-baseURL = "https://mauri870.github.io/blog/"
+baseURL = "https://blog.mauri870.com/"
 languageCode = "en-us"
 title = "Mauri870's dev blog"
 theme = "cactus"

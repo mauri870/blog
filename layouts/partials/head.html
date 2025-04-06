@@ -10,7 +10,7 @@
     {{ with .Site.Params.author }}<meta name="author" content="{{ . }}">{{ end }}
     {{if .Summary }}<meta name="description" content="{{ .Summary | chomp }}">{{else}}
     <meta name="description" content="{{ .Site.Params.description }}">{{end}}
-		{{ .Hugo.Generator }}
+		{{ hugo.Generator }} 
 		<title>{{ if .IsHome }}{{ .Title }}{{ else }}{{ .Title }} &middot; {{ .Site.Title }}{{ end }}</title>
 		<link rel="shortcut icon" type="image/svg+xml"href="{{ .Site.BaseURL }}images/favicon.svg">
 		<link rel="stylesheet" href="{{ .Site.BaseURL }}css/style.css">
@@ -23,7 +23,7 @@
 		{{ end }}
 
 		{{ if .Site.Params.enableRSS }}
-		<link href="{{ .Site.RSSLink }}" rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" />
+		<link href="{{ with .OutputFormats.Get "RSS" }}{{ .RelPermalink }}{{ end }}" rel="alternate" type="application/rss+xml" title="{{ .Site.Title }}" />
 		{{ end }}
 
 		{{ range .Site.Params.customCSS }}
