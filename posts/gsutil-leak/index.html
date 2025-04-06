@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+    <meta name="author" content="Mauri de Souza Meneguzzo">
+    <meta name="description" content="This week we solved a resource leak in our asterisk images reserved for call handling. Here&rsquo;s the path we follow to mitigate the issue, which we find out to be related with the gsutil command line tool.">
+		<meta name="generator" content="Hugo 0.145.0"> 
+		<title>Asterisk leaking resources? No, it&#39;s gsutil :&#39;( &middot; Mauri870&#39;s dev blog</title>
+		<link rel="shortcut icon" type="image/svg+xml"href="https://blog.mauri870.com/images/favicon.svg">
+		<link rel="stylesheet" href="https://blog.mauri870.com/css/style.css">
+		<link rel="stylesheet" href="https://blog.mauri870.com/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://blog.mauri870.com/css/font-awesome.min.css">
+		
+
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="Mauri870&#39;s dev blog" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+  <a href='/'>Home</a>
+	
+	
+		<a href='https://blog.mauri870.com/'> <span class="arrow">←</span>Blog</a>
+	
+	<a href='https://blog.mauri870.com/posts'>Archive</a>
+	<a href='https://blog.mauri870.com/tags'>Tags</a>
+	<a href='https://blog.mauri870.com/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Asterisk leaking resources? No, it&#39;s gsutil :&#39;(
+                    </h1>
+                    <h2 class="headline">
+                    Dec 5, 2018 10:00
+                    · 873 words
+                    · 5 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a style="padding-left: 1em;" href="https://blog.mauri870.com/tags/asterisk">Asterisk</a>
+                          
+                              <a style="padding-left: 1em;" href="https://blog.mauri870.com/tags/google-storage">Google Storage</a>
+                          
+                              <a style="padding-left: 1em;" href="https://blog.mauri870.com/tags/golang">Golang</a>
+                          
+                              <a style="padding-left: 1em;" href="https://blog.mauri870.com/tags/kubernetes">Kubernetes</a>
+                          
+                              <a style="padding-left: 1em;" href="https://blog.mauri870.com/tags/gke">GKE</a>
+                          
+                              <a style="padding-left: 1em;" href="https://blog.mauri870.com/tags/optimization">Optimization</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                  
+                    <div id="toc">
+                      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-uploading-files-with-gsutil-in-production-a-big-mistake">1. Uploading files with gsutil in production: a big mistake</a></li>
+    <li><a href="#2-getting-rid-of-gsutil">2. Getting rid of gsutil</a></li>
+  </ul>
+</nav>
+                    </div>
+                  
+                
+                <section id="post-body">
+                    <p>This week we solved a resource leak in our asterisk images reserved for call handling. Here&rsquo;s the path we follow to mitigate the issue, which we find out to be related with the gsutil command line tool.</p>
+<hr>
+<p>We recently switched our infraestructure and applications to Google Kubernetes Engine, including our telephony stack.</p>
+<p>One of the main problems of the migration were the storage volumes provided by GCP. In the old architecture, running Kubernetes on top of Rancher, we use a NFS server to provide storage volumes for our pods, mounted as ReadWriteMany. This works well for the asterisk call recordings because we mounted the same volume in all asterisk pods, since the NFS server handle the write calls.</p>
+<p>When we move to GKE, the volumes available are raw disks, and we can only mount those for writing in a single node. The solution we came across is to use Google Storage Buckets.</p>
+<h2 id="1-uploading-files-with-gsutil-in-production-a-big-mistake">1. Uploading files with gsutil in production: a big mistake</h2>
+<p>Btw I don&rsquo;t know why I thought this would be a good choice&hellip;</p>
+<p>The initial idea was to code a simple tool to upload files to the bucket. Since I saw the Gsutil command line tool, it looked perfect for the job.</p>
+<p>We already have some routines to handle the call recordings in an asterisk stasis, basically audio conversion using <a href="http://sox.sourceforge.net/">sox</a>. The only changes we made was to install the Google Cloud SDK(already contains the gsutil tool) in the image, along with a valid service account with write storage permission in runtime.</p>
+<p>This seems great and in fact it works well, until we saw the resource usage in production&hellip; The pods constantly went to an <code>Evicted</code> state, basically exausting the node resources until the scheduler decides to remove the offending pod, which happens a lot, basically after every half hour. Since the instances keep the call sessions, when each pod exits the calls are gone for the clients :&rsquo;(.</p>
+<p>Here&rsquo;s the load of the running pods. You can see that each one is using about 3vCPU. The ram usage seems lower, but the majority of the evicted pods are due to nearly OOM failures.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ kubectl top pods | grep asterisk-calls
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-5d8vm             3924m        305Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-cn5ss             3194m        192Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-4cdq2             3256m        337Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-gskj6             3717m        619Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-gwsdx             3936m        715Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-n6gt7             3890m        256Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-pkgql             3950m        239Mi
+</span></span></code></pre></div><p>Initially I though that was an asterisk leak of some sort, then after exec(ing) in some of the pods to inspect what&rsquo;s happening we find a lot of python processes still running, waiting for an event to be completed, all of these created by gsutil. Then we find out that the resource leak was indeed related to the gsutil tool and not asterisk.</p>
+<h2 id="2-getting-rid-of-gsutil">2. Getting rid of gsutil</h2>
+<p>We already have a golang microservice that&rsquo;s responsible to serve the call recordings from the bucket, so I suggested to move the &ldquo;uploading to bucket&rdquo; role to it, removing the need of gsutil and the cloud sdk.</p>
+<p>Using the <code>cloud.google.com/go/storage</code> package, it acts as a front layer for the storage, providing a local filesystem (for local testing) and a cloud storage implementation (for production).</p>
+<p>We use this simple script to upload the recordings using curl:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>RECORDINGS_DIR<span style="color:#f92672">=</span>/var/spool/asterisk/monitor/
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> <span style="color:#e6db74">&#34;</span>$#<span style="color:#e6db74">&#34;</span> -ne <span style="color:#ae81ff">1</span> <span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>  echo <span style="color:#e6db74">&#34;Usage: upload-recording.sh </span><span style="color:#e6db74">${</span>RECORDINGS_DIR<span style="color:#e6db74">}</span><span style="color:#e6db74">path/to/file.gsm&#34;</span>
+</span></span><span style="display:flex;"><span>  exit <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>RECORDING_PATH<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;</span>$1<span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span>RECORDING_RELATIVE<span style="color:#f92672">=</span><span style="color:#e6db74">${</span>RECORDING_PATH#<span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>RECORDINGS_DIR<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span><span style="color:#e6db74">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> <span style="color:#f92672">[</span> -e <span style="color:#e6db74">&#34;</span>$RECORDING_PATH<span style="color:#e6db74">&#34;</span> <span style="color:#f92672">]</span>; <span style="color:#66d9ef">then</span>
+</span></span><span style="display:flex;"><span>    curl -XPOST <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>      -F <span style="color:#e6db74">&#34;filename=</span><span style="color:#e6db74">${</span>RECORDING_RELATIVE<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>      -F <span style="color:#e6db74">&#34;file=@</span><span style="color:#e6db74">${</span>RECORDING_PATH<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span> <span style="color:#e6db74">${</span>RECORDINGS_SERVER<span style="color:#e6db74">}</span>/create <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>    rm <span style="color:#e6db74">&#34;</span><span style="color:#e6db74">${</span>RECORDING_PATH<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fi</span>
+</span></span></code></pre></div><p>The recordings microservice stands behind a service (internal lb in kubernetes) and with graceful shutdown in the http server, it works pretty well with no downtime.</p>
+<p>Here&rsquo;s the most critical part of handler function that saves the file, as you can see we use <code>io.Copy</code> to stream the file contents directly to the underlying storage implementation. The <code>io.Reader</code> and <code>io.Writer</code> are key interfaces in Go and used pretty much everywhere in the stdlib, from http to crypto packages:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">createHandler</span>(<span style="color:#a6e22e">sto</span> <span style="color:#a6e22e">storage</span>.<span style="color:#a6e22e">Storage</span>) <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Handler</span> {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">HandlerFunc</span>(<span style="color:#66d9ef">func</span>(<span style="color:#a6e22e">rw</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">ResponseWriter</span>, <span style="color:#a6e22e">r</span> <span style="color:#f92672">*</span><span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">Request</span>) {
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">ParseMultipartForm</span>(<span style="color:#ae81ff">32</span> <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">20</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Errorln</span>(<span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">rw</span>.<span style="color:#a6e22e">WriteHeader</span>(<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">StatusInternalServerError</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">filename</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">FormValue</span>(<span style="color:#e6db74">&#34;filename&#34;</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">filename</span> <span style="color:#f92672">==</span> <span style="color:#e6db74">&#34;&#34;</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Errorln</span>(<span style="color:#e6db74">&#34;Filename cannot be empty!&#34;</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">rw</span>.<span style="color:#a6e22e">WriteHeader</span>(<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">StatusInternalServerError</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">file</span>, <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">r</span>.<span style="color:#a6e22e">FormFile</span>(<span style="color:#e6db74">&#34;file&#34;</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Errorln</span>(<span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">rw</span>.<span style="color:#a6e22e">WriteHeader</span>(<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">StatusInternalServerError</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">file</span>.<span style="color:#a6e22e">Close</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">writer</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">sto</span>.<span style="color:#a6e22e">Put</span>(<span style="color:#a6e22e">filename</span>)
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">err</span> = <span style="color:#a6e22e">io</span>.<span style="color:#a6e22e">Copy</span>(<span style="color:#a6e22e">writer</span>, <span style="color:#a6e22e">file</span>); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Errorf</span>(<span style="color:#e6db74">&#34;Failed to copy file contents from request: %s\n&#34;</span>, <span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> = <span style="color:#a6e22e">writer</span>.<span style="color:#a6e22e">Close</span>(); <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Errorf</span>(<span style="color:#e6db74">&#34;Error while closing writer: %s\n&#34;</span>, <span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#a6e22e">rw</span>.<span style="color:#a6e22e">WriteHeader</span>(<span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">StatusInternalServerError</span>)
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		<span style="color:#a6e22e">log</span>.<span style="color:#a6e22e">Infof</span>(<span style="color:#e6db74">&#34;Saved file %s\n&#34;</span>, <span style="color:#a6e22e">filename</span>)
+</span></span><span style="display:flex;"><span>	})
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Here&rsquo;s a canary deploy we made to test out the changes, you can see how big was the resource leak generated by gsutil:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ kubectl top pods | grep asterisk-calls
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-5d8vm             3924m        305Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-cn5ss             3194m        192Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-gqlvd             347m         92Mi &lt;- canary deploy here
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-gskj6             3717m        619Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-gwsdx             3936m        715Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-n6gt7             3890m        256Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-655c957dcb-pkgql             3950m        239Mi
+</span></span></code></pre></div><blockquote>
+<p>It&rsquo;s about 8x less resource usage!</p></blockquote>
+<p>And here is the full production rollout:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ kubectl top pods | grep <span style="color:#e6db74">&#39;asterisk-calls\|recordings-server&#39;</span>
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-56c64d497f-2spsf             230m         72Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-56c64d497f-9fh6f             215m         73Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-56c64d497f-fhzxg             340m         75Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-56c64d497f-hb764             374m         80Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-56c64d497f-pdvg5             309m         87Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-56c64d497f-r5gxw             378m         94Mi
+</span></span><span style="display:flex;"><span>mask-asterisk-calls-56c64d497f-z96vm             307m         103Mi
+</span></span><span style="display:flex;"><span>mask-recordings-server-5c74d6b859-jvbzr          19m          69Mi
+</span></span><span style="display:flex;"><span>mask-recordings-server-5c74d6b859-jznsm          20m          69Mi
+</span></span><span style="display:flex;"><span>mask-recordings-server-5c74d6b859-t5bfc          19m          76Mi
+</span></span><span style="display:flex;"><span>mask-recordings-server-5c74d6b859-wbqxs          21m          69Mi
+</span></span></code></pre></div><p>The effect was so big that our cluster size decreased from 8 to 4 nodes, that&rsquo;s insane. 🤯</p>
+                </section>
+            </article>
+
+            
+
+            
+
+            
+
+            <footer id="footer">
+    
+    <p class="small">
+    
+       © Copyright 2025 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Meneguzzo
+    
+    </p>
+    
+    <p class="small">
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0; width: auto; height: auto" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+    </p>
+
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://blog.mauri870.com/js/jquery-3.3.1.min.js"></script>
+<script src="https://blog.mauri870.com/js/main.js"></script>
+<script src="https://blog.mauri870.com/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>

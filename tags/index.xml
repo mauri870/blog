@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on Mauri870&#39;s dev blog</title>
+    <link>https://blog.mauri870.com/tags/</link>
+    <description>Recent content in Tags on Mauri870&#39;s dev blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 03 Nov 2020 07:45:14 -0300</lastBuildDate>
+    <atom:link href="https://blog.mauri870.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>AI</title>
+      <link>https://blog.mauri870.com/tags/ai/</link>
+      <pubDate>Tue, 03 Nov 2020 07:45:14 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/ai/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Tensorflow</title>
+      <link>https://blog.mauri870.com/tags/tensorflow/</link>
+      <pubDate>Tue, 03 Nov 2020 07:45:14 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/tensorflow/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Tensorflow Serving</title>
+      <link>https://blog.mauri870.com/tags/tensorflow-serving/</link>
+      <pubDate>Tue, 03 Nov 2020 07:45:14 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/tensorflow-serving/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Horizon</title>
+      <link>https://blog.mauri870.com/tags/horizon/</link>
+      <pubDate>Fri, 06 Mar 2020 09:00:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/horizon/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Laravel</title>
+      <link>https://blog.mauri870.com/tags/laravel/</link>
+      <pubDate>Fri, 06 Mar 2020 09:00:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/laravel/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Plan9</title>
+      <link>https://blog.mauri870.com/tags/plan9/</link>
+      <pubDate>Thu, 09 May 2019 21:00:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/plan9/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Asterisk</title>
+      <link>https://blog.mauri870.com/tags/asterisk/</link>
+      <pubDate>Fri, 03 May 2019 13:00:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/asterisk/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>C</title>
+      <link>https://blog.mauri870.com/tags/c/</link>
+      <pubDate>Fri, 03 May 2019 13:00:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/c/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Rust</title>
+      <link>https://blog.mauri870.com/tags/rust/</link>
+      <pubDate>Fri, 03 May 2019 13:00:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/rust/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>GKE</title>
+      <link>https://blog.mauri870.com/tags/gke/</link>
+      <pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/gke/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Golang</title>
+      <link>https://blog.mauri870.com/tags/golang/</link>
+      <pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/golang/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Google Storage</title>
+      <link>https://blog.mauri870.com/tags/google-storage/</link>
+      <pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/google-storage/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Kubernetes</title>
+      <link>https://blog.mauri870.com/tags/kubernetes/</link>
+      <pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Optimization</title>
+      <link>https://blog.mauri870.com/tags/optimization/</link>
+      <pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/optimization/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Raspberry Pi 3</title>
+      <link>https://blog.mauri870.com/tags/raspberry-pi-3/</link>
+      <pubDate>Thu, 31 May 2018 20:55:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/raspberry-pi-3/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Sound Processing</title>
+      <link>https://blog.mauri870.com/tags/sound-processing/</link>
+      <pubDate>Thu, 24 May 2018 00:05:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/sound-processing/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>CIFAR10</title>
+      <link>https://blog.mauri870.com/tags/cifar10/</link>
+      <pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/cifar10/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Python</title>
+      <link>https://blog.mauri870.com/tags/python/</link>
+      <pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/python/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Go</title>
+      <link>https://blog.mauri870.com/tags/go/</link>
+      <pubDate>Sat, 19 May 2018 12:35:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/go/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Distributed Tracing</title>
+      <link>https://blog.mauri870.com/tags/distributed-tracing/</link>
+      <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/distributed-tracing/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Jaeger</title>
+      <link>https://blog.mauri870.com/tags/jaeger/</link>
+      <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/jaeger/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Opentracing</title>
+      <link>https://blog.mauri870.com/tags/opentracing/</link>
+      <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/opentracing/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Assembly</title>
+      <link>https://blog.mauri870.com/tags/assembly/</link>
+      <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/assembly/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux</title>
+      <link>https://blog.mauri870.com/tags/linux/</link>
+      <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/linux/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>X64</title>
+      <link>https://blog.mauri870.com/tags/x64/</link>
+      <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/x64/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Yasm</title>
+      <link>https://blog.mauri870.com/tags/yasm/</link>
+      <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/yasm/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>

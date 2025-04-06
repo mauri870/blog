@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>X64 on Mauri870&#39;s dev blog</title>
+    <link>https://blog.mauri870.com/tags/x64/</link>
+    <description>Recent content in X64 on Mauri870&#39;s dev blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 08 May 2018 21:22:56 -0300</lastBuildDate>
+    <atom:link href="https://blog.mauri870.com/tags/x64/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Assembly Linux x64 - Part 1</title>
+      <link>https://blog.mauri870.com/posts/assembly-linux-x64-part-1/</link>
+      <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
+      <guid>https://blog.mauri870.com/posts/assembly-linux-x64-part-1/</guid>
+      <description>&lt;p&gt;I&amp;rsquo;m a person that loves to learn new things, and assembly is one of the most recent topics I decide to dig into.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
