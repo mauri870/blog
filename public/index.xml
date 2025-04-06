@@ -10,37 +10,37 @@
     <atom:link href="https://blog.mauri870.com/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>AMD 2.0</title>
-      <link>https://blog.mauri870.com/posts/amd2-improvements/</link>
+      <link>https://blog.mauri870.com/posts/amd-2.0/</link>
       <pubDate>Tue, 03 Nov 2020 07:45:14 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/amd2-improvements/</guid>
+      <guid>https://blog.mauri870.com/posts/amd-2.0/</guid>
       <description>&lt;p&gt;We finished the full rollout of a new version of our AMD project, let&amp;rsquo;s find out the improvements made alongside some implementation notes!&lt;/p&gt;</description>
     </item>
     <item>
       <title>O(n^2) Redis memory usage with Laravel Horizon</title>
-      <link>https://blog.mauri870.com/posts/o-n-2-in-laravel-horizon/</link>
+      <link>https://blog.mauri870.com/posts/on2-redis-memory-usage-with-laravel-horizon/</link>
       <pubDate>Fri, 06 Mar 2020 09:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/o-n-2-in-laravel-horizon/</guid>
+      <guid>https://blog.mauri870.com/posts/on2-redis-memory-usage-with-laravel-horizon/</guid>
       <description>&lt;p&gt;O(n^2) again, now with Laravel Horizon memory usage.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Plan9 br-abnt2 keyboard map</title>
-      <link>https://blog.mauri870.com/posts/plan9-br-abnt2-kbmap/</link>
+      <link>https://blog.mauri870.com/posts/plan9-br-abnt2-keyboard-map/</link>
       <pubDate>Thu, 09 May 2019 21:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/plan9-br-abnt2-kbmap/</guid>
+      <guid>https://blog.mauri870.com/posts/plan9-br-abnt2-keyboard-map/</guid>
       <description>&lt;p&gt;This is a quick post about a new Plan9 keyboard map, supporting the brazilian ABNT2 layout.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Writing an Asterisk PBX module in Rust and C</title>
-      <link>https://blog.mauri870.com/posts/asterisk-rust-module/</link>
+      <link>https://blog.mauri870.com/posts/writing-an-asterisk-pbx-module-in-rust-and-c/</link>
       <pubDate>Fri, 03 May 2019 13:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/asterisk-rust-module/</guid>
+      <guid>https://blog.mauri870.com/posts/writing-an-asterisk-pbx-module-in-rust-and-c/</guid>
       <description>&lt;p&gt;Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust? Let&amp;rsquo;s find out.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Asterisk leaking resources? No, it&#39;s gsutil :&#39;(</title>
-      <link>https://blog.mauri870.com/posts/gsutil-leak/</link>
+      <link>https://blog.mauri870.com/posts/asterisk-leaking-resources-no-its-gsutil/</link>
       <pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/gsutil-leak/</guid>
+      <guid>https://blog.mauri870.com/posts/asterisk-leaking-resources-no-its-gsutil/</guid>
       <description>&lt;p&gt;This week we solved a resource leak in our asterisk images reserved for call handling. Here&amp;rsquo;s the path we follow to mitigate the issue, which we find out to be related with the gsutil command line tool.&lt;/p&gt;</description>
     </item>
     <item>
@@ -59,23 +59,23 @@
     </item>
     <item>
       <title>How to export the CIFAR10 model to Tensorflow Serving</title>
-      <link>https://blog.mauri870.com/posts/exporting-cifar10-to-tensorflow-serving/</link>
+      <link>https://blog.mauri870.com/posts/how-to-export-the-cifar10-model-to-tensorflow-serving/</link>
       <pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/exporting-cifar10-to-tensorflow-serving/</guid>
+      <guid>https://blog.mauri870.com/posts/how-to-export-the-cifar10-model-to-tensorflow-serving/</guid>
       <description>&lt;p&gt;The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. In this blog post I&amp;rsquo;ll cover how to export a trained CIFAR-10 tensorflow model to Tensorflow Serving.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Writing a Golang client for the Tensorflow Serving Inception model</title>
-      <link>https://blog.mauri870.com/posts/tensorflow-serving-inception-go/</link>
+      <link>https://blog.mauri870.com/posts/writing-a-golang-client-for-the-tensorflow-serving-inception-model/</link>
       <pubDate>Sat, 19 May 2018 12:35:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/tensorflow-serving-inception-go/</guid>
+      <guid>https://blog.mauri870.com/posts/writing-a-golang-client-for-the-tensorflow-serving-inception-model/</guid>
       <description>&lt;p&gt;Tensorflow Serving is the most optimized way to serve a Tensorflow machine learning model in production. The official tutorials only cover the python client, so lets implement a Go/Golang one.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Using Opentracing/Jaeger with Laravel</title>
-      <link>https://blog.mauri870.com/posts/opentracing-jaeger-laravel/</link>
+      <link>https://blog.mauri870.com/posts/using-opentracing/jaeger-with-laravel/</link>
       <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/opentracing-jaeger-laravel/</guid>
+      <guid>https://blog.mauri870.com/posts/using-opentracing/jaeger-with-laravel/</guid>
       <description>&lt;p&gt;Microservices become the new standard for scalable and maintanable arquitectures. Monolithic aplications are splited into smaller pieces to keep things simple and decoupled. Tracing comes in hand when you need to aggregate the events during the request lifecycle between a single or multiple services.&lt;/p&gt;</description>
     </item>
     <item>

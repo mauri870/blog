@@ -5,7 +5,7 @@
     <loc>https://blog.mauri870.com/tags/ai/</loc>
     <lastmod>2020-11-03T07:45:14-03:00</lastmod>
   </url><url>
-    <loc>https://blog.mauri870.com/posts/amd2-improvements/</loc>
+    <loc>https://blog.mauri870.com/posts/amd-2.0/</loc>
     <lastmod>2020-11-03T07:45:14-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/</loc>
@@ -29,13 +29,13 @@
     <loc>https://blog.mauri870.com/tags/laravel/</loc>
     <lastmod>2020-03-06T09:00:00-03:00</lastmod>
   </url><url>
-    <loc>https://blog.mauri870.com/posts/o-n-2-in-laravel-horizon/</loc>
+    <loc>https://blog.mauri870.com/posts/on2-redis-memory-usage-with-laravel-horizon/</loc>
     <lastmod>2020-03-06T09:00:00-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/tags/plan9/</loc>
     <lastmod>2019-05-09T21:00:00-03:00</lastmod>
   </url><url>
-    <loc>https://blog.mauri870.com/posts/plan9-br-abnt2-kbmap/</loc>
+    <loc>https://blog.mauri870.com/posts/plan9-br-abnt2-keyboard-map/</loc>
     <lastmod>2019-05-09T21:00:00-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/tags/asterisk/</loc>
@@ -47,10 +47,10 @@
     <loc>https://blog.mauri870.com/tags/rust/</loc>
     <lastmod>2019-05-03T13:00:00-03:00</lastmod>
   </url><url>
-    <loc>https://blog.mauri870.com/posts/asterisk-rust-module/</loc>
+    <loc>https://blog.mauri870.com/posts/writing-an-asterisk-pbx-module-in-rust-and-c/</loc>
     <lastmod>2019-05-03T13:00:00-03:00</lastmod>
   </url><url>
-    <loc>https://blog.mauri870.com/posts/gsutil-leak/</loc>
+    <loc>https://blog.mauri870.com/posts/asterisk-leaking-resources-no-its-gsutil/</loc>
     <lastmod>2018-12-05T10:00:00-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/tags/gke/</loc>
@@ -83,7 +83,7 @@
     <loc>https://blog.mauri870.com/tags/cifar10/</loc>
     <lastmod>2018-05-21T23:26:10-03:00</lastmod>
   </url><url>
-    <loc>https://blog.mauri870.com/posts/exporting-cifar10-to-tensorflow-serving/</loc>
+    <loc>https://blog.mauri870.com/posts/how-to-export-the-cifar10-model-to-tensorflow-serving/</loc>
     <lastmod>2018-05-21T23:26:10-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/tags/python/</loc>
@@ -92,7 +92,7 @@
     <loc>https://blog.mauri870.com/tags/go/</loc>
     <lastmod>2018-05-19T12:35:00-03:00</lastmod>
   </url><url>
-    <loc>https://blog.mauri870.com/posts/tensorflow-serving-inception-go/</loc>
+    <loc>https://blog.mauri870.com/posts/writing-a-golang-client-for-the-tensorflow-serving-inception-model/</loc>
     <lastmod>2018-05-19T12:35:00-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/tags/distributed-tracing/</loc>
@@ -104,7 +104,7 @@
     <loc>https://blog.mauri870.com/tags/opentracing/</loc>
     <lastmod>2018-05-13T22:26:06-03:00</lastmod>
   </url><url>
-    <loc>https://blog.mauri870.com/posts/opentracing-jaeger-laravel/</loc>
+    <loc>https://blog.mauri870.com/posts/using-opentracing/jaeger-with-laravel/</loc>
     <lastmod>2018-05-13T22:26:06-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/tags/assembly/</loc>

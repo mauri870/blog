@@ -10,9 +10,9 @@
     <atom:link href="https://blog.mauri870.com/tags/cifar10/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>How to export the CIFAR10 model to Tensorflow Serving</title>
-      <link>https://blog.mauri870.com/posts/exporting-cifar10-to-tensorflow-serving/</link>
+      <link>https://blog.mauri870.com/posts/how-to-export-the-cifar10-model-to-tensorflow-serving/</link>
       <pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/exporting-cifar10-to-tensorflow-serving/</guid>
+      <guid>https://blog.mauri870.com/posts/how-to-export-the-cifar10-model-to-tensorflow-serving/</guid>
       <description>&lt;p&gt;The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. In this blog post I&amp;rsquo;ll cover how to export a trained CIFAR-10 tensorflow model to Tensorflow Serving.&lt;/p&gt;</description>
     </item>
   </channel>

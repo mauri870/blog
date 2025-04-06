@@ -10,9 +10,9 @@
     <atom:link href="https://blog.mauri870.com/tags/tensorflow/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>AMD 2.0</title>
-      <link>https://blog.mauri870.com/posts/amd2-improvements/</link>
+      <link>https://blog.mauri870.com/posts/amd-2.0/</link>
       <pubDate>Tue, 03 Nov 2020 07:45:14 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/amd2-improvements/</guid>
+      <guid>https://blog.mauri870.com/posts/amd-2.0/</guid>
       <description>&lt;p&gt;We finished the full rollout of a new version of our AMD project, let&amp;rsquo;s find out the improvements made alongside some implementation notes!&lt;/p&gt;</description>
     </item>
     <item>
@@ -24,16 +24,16 @@
     </item>
     <item>
       <title>How to export the CIFAR10 model to Tensorflow Serving</title>
-      <link>https://blog.mauri870.com/posts/exporting-cifar10-to-tensorflow-serving/</link>
+      <link>https://blog.mauri870.com/posts/how-to-export-the-cifar10-model-to-tensorflow-serving/</link>
       <pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/exporting-cifar10-to-tensorflow-serving/</guid>
+      <guid>https://blog.mauri870.com/posts/how-to-export-the-cifar10-model-to-tensorflow-serving/</guid>
       <description>&lt;p&gt;The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. In this blog post I&amp;rsquo;ll cover how to export a trained CIFAR-10 tensorflow model to Tensorflow Serving.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Writing a Golang client for the Tensorflow Serving Inception model</title>
-      <link>https://blog.mauri870.com/posts/tensorflow-serving-inception-go/</link>
+      <link>https://blog.mauri870.com/posts/writing-a-golang-client-for-the-tensorflow-serving-inception-model/</link>
       <pubDate>Sat, 19 May 2018 12:35:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/tensorflow-serving-inception-go/</guid>
+      <guid>https://blog.mauri870.com/posts/writing-a-golang-client-for-the-tensorflow-serving-inception-model/</guid>
       <description>&lt;p&gt;Tensorflow Serving is the most optimized way to serve a Tensorflow machine learning model in production. The official tutorials only cover the python client, so lets implement a Go/Golang one.&lt;/p&gt;</description>
     </item>
   </channel>

@@ -1,0 +1,75 @@
+baseURL: https://blog.mauri870.com/
+languageCode: en-us
+title: "Mauri870's dev blog"
+theme: hugo-theme-mini
+
+defaultContentLanguage: en
+
+hasCJKLanguage: false
+permalinks:
+  posts: /posts/:title/
+
+googleAnalytics: UA-79904458-1
+# disqusShortname: your-disqus-shortname
+
+# Hugo Configure Markup
+# More info: https://gohugo.io/getting-started/configuration-markup#
+markup:
+  highlight:
+    guessSyntax: true
+    style: emacs
+  tableOfContents:
+    endLevel: 3
+    ordered: false
+    startLevel: 2
+  # needed to render raw HTML (e.g. <sub>, <sup>, <kbd>, <mark>)
+  goldmark:
+    renderer:
+      unsafe: true
+
+# Social links in footer, support github,twitter,stackoverflow,facebook
+social:
+  # e.g.
+  github: your-github-link
+  twitter: your-twitter-link
+  stackoverflow: your-stackoverflow-link
+
+# Site parameters
+params:
+  # Site Author
+  author: "Mauri de Souza Meneguzzo"
+  # Author biography
+  bio: "Software engineering, AI, web and devops stuff"
+  # Site Description, used in HTML meat
+  description: "My personal dev blog"
+
+
+  ###########################################
+  # Optional Configuration
+  ###########################################
+
+  # To enable RSS, you could set `enableRSS: true`, default is `true`
+  enableRSS: true
+  # To enable comments, you may need to set `disqusShortname`
+  enableComments: true
+  # To enable comments, you may need to set `googleAnalytics`
+  enableGoogleAnalytics: true
+  # To enable table of content, you could set `showToc: true`, default is `false`
+  showToc: true
+  # To hidden powerBy message in the page footer, you could set: `showPowerBy: false`, default is `true`
+  showPowerBy: true
+  # To enable math typesetting , you could set `math: true`, default is `false`
+  math: false
+  # To hidden post summary in home page, you could set `hiddenPostSummaryInHomePage: true`, default is `false`
+  hiddenPostSummaryInHomePage: false
+  # Website copyright, default: '© Copyright 2021 ❤️ {params.author}'
+  copyright: '' 
+
+  # Extra links in navigation
+  links:
+    ## e.g.
+    # - name: Project
+    #   path: /project
+
+  customCSS: # Custom CSS
+    - css/custom.css
