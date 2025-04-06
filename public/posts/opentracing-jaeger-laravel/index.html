@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+    <meta name="author" content="Mauri de Souza Meneguzzo">
+    <meta name="description" content="Microservices become the new standard for scalable and maintanable arquitectures. Monolithic aplications are splited into smaller pieces to keep things simple and decoupled. Tracing comes in hand when you need to aggregate the events during the request lifecycle between a single or multiple services.">
+		<meta name="generator" content="Hugo 0.145.0"> 
+		<title>Using Opentracing/Jaeger with Laravel &middot; Mauri870&#39;s dev blog</title>
+		<link rel="shortcut icon" type="image/svg+xml"href="https://blog.mauri870.com/images/favicon.svg">
+		<link rel="stylesheet" href="https://blog.mauri870.com/css/style.css">
+		<link rel="stylesheet" href="https://blog.mauri870.com/css/highlight.css">
+
+		
+		<link rel="stylesheet" href="https://blog.mauri870.com/css/font-awesome.min.css">
+		
+
+		
+		<link href="" rel="alternate" type="application/rss+xml" title="Mauri870&#39;s dev blog" />
+		
+
+		
+	</head>
+
+    <body>
+       <nav class="main-nav">
+  <a href='/'>Home</a>
+	
+	
+		<a href='https://blog.mauri870.com/'> <span class="arrow">←</span>Blog</a>
+	
+	<a href='https://blog.mauri870.com/posts'>Archive</a>
+	<a href='https://blog.mauri870.com/tags'>Tags</a>
+	<a href='https://blog.mauri870.com/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Using Opentracing/Jaeger with Laravel
+                    </h1>
+                    <h2 class="headline">
+                    May 13, 2018 22:26
+                    · 717 words
+                    · 4 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a style="padding-left: 1em;" href="https://blog.mauri870.com/tags/laravel">Laravel</a>
+                          
+                              <a style="padding-left: 1em;" href="https://blog.mauri870.com/tags/opentracing">Opentracing</a>
+                          
+                              <a style="padding-left: 1em;" href="https://blog.mauri870.com/tags/jaeger">Jaeger</a>
+                          
+                              <a style="padding-left: 1em;" href="https://blog.mauri870.com/tags/distributed-tracing">Distributed Tracing</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                  
+                    <div id="toc">
+                      <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-opentracing--jaeger-to-the-rescue">1. Opentracing / Jaeger to the rescue</a></li>
+    <li><a href="#2-integrating-jaeger-with-laravel">2. Integrating Jaeger with Laravel</a></li>
+  </ul>
+</nav>
+                    </div>
+                  
+                
+                <section id="post-body">
+                    <p>Microservices become the new standard for scalable and maintanable arquitectures. Monolithic aplications are splited into smaller pieces to keep things simple and decoupled. Tracing comes in hand when you need to aggregate the events during the request lifecycle between a single or multiple services.</p>
+<hr>
+<p>Here at <a href="http://fluxoti.com">FluxoTi</a> we are beginning to split our monolith application into smaller services, backed by kubernetes. Since we already have smaller services that we want to connect, we need a way to trace the request lifecycle to find bottlenecks, errors and make the debug process more easy.</p>
+<h2 id="1-opentracing--jaeger-to-the-rescue">1. Opentracing / Jaeger to the rescue</h2>
+<p>There&rsquo;s many distributed tracing systems suck as Zipkin and Dapper, but they have incompatible APIs. Opentracing was created to fill this gap. By exposing a consistent, expressive, neutral API for popular platforms, add or switch between distributed tracing implementations becomes easy.</p>
+<p>Jaeger is inspired by OpenZipkin and Dapper and implements the Opentracing protocol. Jaeger has clients in Java, Go, NodeJS, Python, C++, PHP among others, that&rsquo;s exactly what we want. You can refer to the <a href="http://opentracing.io/documentation">Opentracing introduction</a> to understand the concepts behind a tracing system.</p>
+<h2 id="2-integrating-jaeger-with-laravel">2. Integrating Jaeger with Laravel</h2>
+<p>To integrate jaeger with laravel we&rsquo;ll need a jaeger package for php, like <a href="https://github.com/jukylin/jaeger-php">jukylin/jaeger-php</a>.</p>
+<p>There&rsquo;s only 3 structures that we need to use, a <code>Tracer</code>, a <code>Span</code> and the <code>Config</code>. If you have read the opentracing introduction you&rsquo;re probably familiar with these terms.</p>
+<p>To keep things simple I decide to build a wrapper around the framework events, to avoid as little modifications as possible, and keep adding aditional spans to track the services in the future.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>composer require jukylin/jaeger-php:dev-master@dev  <span style="color:#75715e"># jaeger php client</span>
+</span></span><span style="display:flex;"><span>composer require ramsey/uuid <span style="color:#75715e"># uuid library for the unique request id</span>
+</span></span></code></pre></div><p>In a service provider, registered as early as possible, add the following content:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">boot</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Setup a unique ID for each request. This will allow us to find
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// the request trace in the jaeger ui
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">app</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">instance</span>(<span style="color:#e6db74">&#39;context.uuid&#39;</span>, <span style="color:#a6e22e">Uuid</span><span style="color:#f92672">::</span><span style="color:#a6e22e">uuid1</span>());
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Get the base config object
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  $config <span style="color:#f92672">=</span> <span style="color:#a6e22e">Config</span><span style="color:#f92672">::</span><span style="color:#a6e22e">getInstance</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// If in development or testing, you can use this to change
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// the tracer to a mocked one (NoopTracer)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// if (!app()-&gt;environment(&#39;production&#39;)) {
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">//     $config-&gt;setDisabled(true);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// }
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Start the tracer with a service name and the jaeger address
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  $tracer <span style="color:#f92672">=</span> $config<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">initTrace</span>(<span style="color:#e6db74">&#39;my-app&#39;</span>, <span style="color:#e6db74">&#39;jaeger:6831&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Set the tracer as a singleton in the IOC container
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">app</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">instance</span>(<span style="color:#e6db74">&#39;context.tracer&#39;</span>, $tracer);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Start the global span, it&#39;ll wrap the request/console lifecycle
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  $globalSpan <span style="color:#f92672">=</span> $tracer<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">startSpan</span>(<span style="color:#e6db74">&#39;app&#39;</span>);
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Set the uuid as a tag for this trace
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  $globalSpan<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">setTags</span>([<span style="color:#e6db74">&#39;uuid&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">app</span>(<span style="color:#e6db74">&#39;context.uuid&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">toString</span>()]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// If running in console (a.k.a a job or a command) set the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// type tag accordingly
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  $type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;http&#39;</span>;
+</span></span><span style="display:flex;"><span>  <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">app</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">runningInConsole</span>()) {
+</span></span><span style="display:flex;"><span>      $type <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;console&#39;</span>;
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  $globalSpan<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">setTags</span>([<span style="color:#e6db74">&#39;type&#39;</span> <span style="color:#f92672">=&gt;</span> $type]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Save the global span as a singleton too
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  $this<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">app</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">instance</span>(<span style="color:#e6db74">&#39;context.tracer.globalSpan&#39;</span>, $globalSpan);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// When the app terminates we must finish the global span
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// and send the trace to the jaeger agent.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">app</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">terminating</span>(<span style="color:#66d9ef">function</span> () {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">app</span>(<span style="color:#e6db74">&#39;context.tracer.globalSpan&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">finish</span>();
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">app</span>(<span style="color:#e6db74">&#39;context.tracer&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">flush</span>();
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Listen for each logged message and attach it to the global span
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">Event</span><span style="color:#f92672">::</span><span style="color:#a6e22e">listen</span>(<span style="color:#a6e22e">MessageLogged</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">MessageLogged</span> $e) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">app</span>(<span style="color:#e6db74">&#39;context.tracer.globalSpan&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">log</span>((<span style="color:#66d9ef">array</span>) $e);
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Listen for the request handled event and set more tags for the trace
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">Event</span><span style="color:#f92672">::</span><span style="color:#a6e22e">listen</span>(<span style="color:#a6e22e">RequestHandled</span><span style="color:#f92672">::</span><span style="color:#a6e22e">class</span>, <span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">RequestHandled</span> $e) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">app</span>(<span style="color:#e6db74">&#39;context.tracer.globalSpan&#39;</span>)<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">setTags</span>([
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#39;user_id&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">auth</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">user</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">id</span> <span style="color:#f92672">??</span> <span style="color:#e6db74">&#34;-&#34;</span>,
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#39;company_id&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">auth</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">user</span>()<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">company_id</span> <span style="color:#f92672">??</span> <span style="color:#e6db74">&#34;-&#34;</span>,
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#39;request_host&#39;</span> <span style="color:#f92672">=&gt;</span> $e<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">request</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">getHost</span>(),
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#39;request_path&#39;</span> <span style="color:#f92672">=&gt;</span> $path <span style="color:#f92672">=</span> $e<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">request</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">path</span>(),
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#39;request_method&#39;</span> <span style="color:#f92672">=&gt;</span> $e<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">request</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">method</span>(),
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#39;api&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">str_contains</span>($path, <span style="color:#e6db74">&#39;api&#39;</span>),
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#39;response_status&#39;</span> <span style="color:#f92672">=&gt;</span> $e<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">response</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">getStatusCode</span>(),
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#39;error&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#f92672">!</span>$e<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">response</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">isSuccessful</span>(),
+</span></span><span style="display:flex;"><span>      ]);
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">// Also listen for queries and log then,
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#75715e">// it also receives the log in the MessageLogged event above
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>  <span style="color:#a6e22e">DB</span><span style="color:#f92672">::</span><span style="color:#a6e22e">listen</span>(<span style="color:#66d9ef">function</span> ($query) {
+</span></span><span style="display:flex;"><span>      <span style="color:#a6e22e">Log</span><span style="color:#f92672">::</span><span style="color:#a6e22e">debug</span>(<span style="color:#e6db74">&#34;[DB Query] </span><span style="color:#e6db74">{</span>$query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">connection</span><span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">getName</span>()<span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;</span>, [
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#39;query&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">str_replace</span>(<span style="color:#e6db74">&#39;&#34;&#39;</span>, <span style="color:#e6db74">&#34;&#39;&#34;</span>, $query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">sql</span>),
+</span></span><span style="display:flex;"><span>          <span style="color:#e6db74">&#39;time&#39;</span> <span style="color:#f92672">=&gt;</span> $query<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">time</span><span style="color:#f92672">.</span><span style="color:#e6db74">&#39;ms&#39;</span>,
+</span></span><span style="display:flex;"><span>      ]);
+</span></span><span style="display:flex;"><span>  });
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>This is only an example, but you can set how many tags you want, how many logs you want, and also spawn how much spans you need. For example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-php" data-lang="php"><span style="display:flex;"><span><span style="color:#75715e">// ...controller/service
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$tracer <span style="color:#f92672">=</span> <span style="color:#a6e22e">app</span>(<span style="color:#e6db74">&#39;context.tracer&#39;</span>);
+</span></span><span style="display:flex;"><span>$createCompanySpan <span style="color:#f92672">=</span> $tracer<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">startSpan</span>(<span style="color:#e6db74">&#39;create company&#39;</span>, [
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#39;child_of&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#a6e22e">app</span>(<span style="color:#e6db74">&#39;context.tracer.globalSpan&#39;</span>)
+</span></span><span style="display:flex;"><span>]);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$createUserSpan <span style="color:#f92672">=</span> $tracer<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">startSpan</span>(<span style="color:#e6db74">&#39;create user&#39;</span>, [
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#39;child_of&#39;</span> <span style="color:#f92672">=&gt;</span> $createCompanySpan
+</span></span><span style="display:flex;"><span>]);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// call user service
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// then finish the span...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$createUserSpan<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">finish</span>();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// call company service
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// ...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// then finish the span...
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>$createCompanySpan<span style="color:#f92672">-&gt;</span><span style="color:#a6e22e">finish</span>();
+</span></span></code></pre></div><p>If we inject the correct trace id between microservice calls, the next service can continue the trace and at the end we have a complete distributed tracing, isn&rsquo;t that awesome?</p>
+<p><img src="../../images/posts/jaeger-laravel-tracing-example.png" alt="Jaeger Demo"></p>
+<p>For a more concrete example, check out my <a href="https://github.com/mauri870/laravel-jaeger-demo">demo project</a>.</p>
+<p>See you again next time 😄.</p>
+                </section>
+            </article>
+
+            
+
+            
+
+            
+
+            <footer id="footer">
+    
+    <p class="small">
+    
+       © Copyright 2025 <i class="fa fa-heart" aria-hidden="true"></i> Mauri de Souza Meneguzzo
+    
+    </p>
+    
+    <p class="small">
+        <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"><img alt="Creative Commons License" style="border-width:0; width: auto; height: auto" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+    </p>
+
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script src="https://blog.mauri870.com/js/jquery-3.3.1.min.js"></script>
+<script src="https://blog.mauri870.com/js/main.js"></script>
+<script src="https://blog.mauri870.com/js/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+    </body>
+</html>
