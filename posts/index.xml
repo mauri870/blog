@@ -6,8 +6,15 @@
     <description>Recent content in Posts on Mauri870&#39;s dev blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 03 Nov 2020 07:45:14 -0300</lastBuildDate>
+    <lastBuildDate>Sun, 06 Apr 2025 19:15:00 -0300</lastBuildDate>
     <atom:link href="https://blog.mauri870.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>The Low-Background Web</title>
+      <link>https://blog.mauri870.com/posts/the-low-background-web/</link>
+      <pubDate>Sun, 06 Apr 2025 19:15:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/posts/the-low-background-web/</guid>
+      <description>&lt;p&gt;We are generating more content than ever — but how much of it is still truly human? And how do we even know what&amp;rsquo;s real anymore? Let&amp;rsquo;s talk about the Low-Background Web.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>AMD 2.0</title>
       <link>https://blog.mauri870.com/posts/amd-2.0/</link>
