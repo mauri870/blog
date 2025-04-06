@@ -10,9 +10,9 @@
     <atom:link href="https://blog.mauri870.com/tags/rust/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Writing an Asterisk PBX module in Rust and C</title>
-      <link>https://blog.mauri870.com/posts/asterisk-rust-module/</link>
+      <link>https://blog.mauri870.com/posts/writing-an-asterisk-pbx-module-in-rust-and-c/</link>
       <pubDate>Fri, 03 May 2019 13:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/asterisk-rust-module/</guid>
+      <guid>https://blog.mauri870.com/posts/writing-an-asterisk-pbx-module-in-rust-and-c/</guid>
       <description>&lt;p&gt;Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust? Let&amp;rsquo;s find out.&lt;/p&gt;</description>
     </item>
   </channel>

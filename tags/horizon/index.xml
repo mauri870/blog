@@ -10,9 +10,9 @@
     <atom:link href="https://blog.mauri870.com/tags/horizon/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>O(n^2) Redis memory usage with Laravel Horizon</title>
-      <link>https://blog.mauri870.com/posts/o-n-2-in-laravel-horizon/</link>
+      <link>https://blog.mauri870.com/posts/on2-redis-memory-usage-with-laravel-horizon/</link>
       <pubDate>Fri, 06 Mar 2020 09:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/o-n-2-in-laravel-horizon/</guid>
+      <guid>https://blog.mauri870.com/posts/on2-redis-memory-usage-with-laravel-horizon/</guid>
       <description>&lt;p&gt;O(n^2) again, now with Laravel Horizon memory usage.&lt;/p&gt;</description>
     </item>
   </channel>
