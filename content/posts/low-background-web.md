@@ -13,31 +13,31 @@ We are generating more content than ever — but how much of it is still truly h
 
 ## 1. What's low-background anyway?
 
-If you've ever read about nuclear physics or worked with sensitive instrumentation, you might've stumbled upon the term *low-background steel*. According to the [Wikipedia article](https://en.wikipedia.org/wiki/Low-background_steel) on the topic, it can be summarized as:
+If you've ever read about nuclear physics or worked with sensitive instrumentation, you might've stumbled upon the term *low-background steel*. According to [Wikipedia](https://en.wikipedia.org/wiki/Low-background_steel), it can be summarized as:
 
 > Any steel produced prior to the detonation of the first nuclear bombs in the 1940s and 1950s. Typically sourced from ships and other steel artifacts of this era, it is often used for modern particle detectors because more modern steel is contaminated with traces of nuclear fallout.
 
 Now think of that, but on the context of the web and AI-generated content.
 
-## 2. Before the storm
+## 2. The Web before the storm
 
-I'm calling it the **low-background web**: all the internet content that came *before* the rise of large-scale generative models. That's blogs, wikis, forums, documentation, and general-purpose content written by humans for humans, even before the advent of the internet itself.
+I'm calling it the **low-background web**: all the content that came *before* the rise of large-scale generative models. That's blogs, wikis, forums, documentation, and general-purpose content written by humans for humans, even digitalized content that precedes the internet itself.
 
-Back then the web was slower, rougher, and let's be honest, full of garbage. But at least it was *our original* garbage. Not content regurgitated by AI.
+Back then, the web was slower, messier, and, let's be honest, full of junk. But at least it was *our* original junk. Not content regurgitated by AI.
 
-We are living in a time where it is very difficult to trust the source of information, and it tends to get worse as the years go by. At some point, it will be basically impossible to distinguish what's real using human senses alone.
+We're living in a time where trusting the source of information is becoming increasingly difficult, and it's only getting worse as the years go by. We've learned to spot things — counting fingers in pictures, noticing shading inconsistencies — but the truth is, eventually, it will be impossible to tell what's real using human senses alone. What is real? How do you define real?
 
-After the advent of large language models (LLMs) around 2018, the web started to get flooded with AI-generated content. Articles, blog posts, images and video — you name it. This is not just a problem of quality, but also of authenticity. It's becoming increasingly difficult to discern what's real.
+After the advent of large language models (LLMs) around 2018 and more specifically after ChatGPT 3, the web started to get flooded with AI-generated content. Articles, blog posts, images and video — you name it. This is not just a problem of quality, but also of authenticity. It's becoming increasingly difficult to discern what's real.
 
 Besides the philosophical  implications, there is also the feedback loop problem. LLMs are now trained on content from previous LLMs, which were trained on earlier LLMs... and so on. It's like photocopying a drawing a dozen times in a row. It still packs information, but at some point, the signal gets lost in the noise.
 
-Imagine searching for a recipe for a meal you plan to cook. You find lots of posts, half a dozen are AI generated with more or less the same instructions, regurgitating the same information. No one comes up with new ideas, no one tries to innovate, we keep iterating on the same thing over and over. This can result in another phenomenon I call *the ice aging of information*.
+Imagine searching for a product review for a popular gadget. You find lots of posts, half a dozen are AI-generated with more or less the same opinions, regurgitating the same points. No one comes up with new insights, no one tries to offer a unique perspective, we keep iterating on the same thing over and over. This is a recurring phenomenon across the web, from blog posts to news articles to even creative content. This is what I call the *ice aging of information*.
 
-Humans are naturally creative and curious, curiosity has been the force that drives innovation and improvement since the beginning of our species. When we lose that spark, creativity, innovation and progress tend to stagnate.
+Humans are naturally creative and curious, creativity has been the force that drives innovation and improvement since the beginning of our species. When we lose that spark, I fear that innovation and progress tend to stagnate.
 
-The low-background is the signal. Don't follow the white rabbit.
+The low-background is in the signal, not the noise. Don't follow the white rabbit.
 
-## 3. A moving window
+## 3. Stand up and see for yourself.
 
 The tricky part? The boundary keeps shifting. As LLM-generated content gets indexed, reposted, repackaged, and redistributed, it gets harder to know what's clean and what's not. There's no metadata that says "hey, this paragraph was written 100% by a human.". Even if there was, would you still trust it?
 
