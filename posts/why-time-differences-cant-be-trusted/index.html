@@ -101,6 +101,7 @@
 
     <div class="content">
       <p>Time granularity on Windows is much lower than you&rsquo;d expect, and that can cause surprising bugs when measuring elapsed time.</p>
+<hr>
 <p>I was investigating a seemingly random CI failure on Windows for a test in Elastic Agent. At random, the <a href="https://www.elastic.co/docs/reference/ecs" target="_blank" rel="noopener">ECS</a> field <a href="https://www.elastic.co/docs/reference/ecs/ecs-event#field-event-duration" target="_blank" rel="noopener"><code>event.duration</code></a> would be missing from an ingested telemetry event.</p>
 <p>To understand the root cause, let&rsquo;s investigate how Go retrieves system time across different operating systems.</p>
 <h2 id="understanding-clock-resolution">Understanding Clock Resolution <a href="#understanding-clock-resolution" class="anchor">🔗</a></h2><p>Clock resolution refers to the smallest measurable unit of time that a system clock or timer can reliably report. A high-resolution clock can measure very small time intervals, often in the microseconds or nanoseconds range. A low-resolution clock can only measure larger intervals, typically in milliseconds or seconds.</p>
