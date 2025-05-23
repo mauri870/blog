@@ -2,22 +2,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://blog.mauri870.com/tags/go/</loc>
+    <lastmod>2025-05-23T18:35:12-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/</loc>
+    <lastmod>2025-05-23T18:35:12-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/performance/</loc>
+    <lastmod>2025-05-23T18:35:12-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/posts/</loc>
+    <lastmod>2025-05-23T18:35:12-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/</loc>
+    <lastmod>2025-05-23T18:35:12-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/posts/why-time-differences-cant-be-trusted/</loc>
+    <lastmod>2025-05-23T18:35:12-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/windows/</loc>
+    <lastmod>2025-05-23T18:35:12-03:00</lastmod>
+  </url><url>
     <loc>https://blog.mauri870.com/tags/ai/</loc>
     <lastmod>2025-04-06T19:15:00-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/tags/llm/</loc>
     <lastmod>2025-04-06T19:15:00-03:00</lastmod>
   </url><url>
-    <loc>https://blog.mauri870.com/</loc>
-    <lastmod>2025-04-06T19:15:00-03:00</lastmod>
-  </url><url>
     <loc>https://blog.mauri870.com/tags/philosophy/</loc>
-    <lastmod>2025-04-06T19:15:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/posts/</loc>
-    <lastmod>2025-04-06T19:15:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/tags/</loc>
     <lastmod>2025-04-06T19:15:00-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/posts/the-low-background-web/</loc>
@@ -100,9 +112,6 @@
   </url><url>
     <loc>https://blog.mauri870.com/tags/python/</loc>
     <lastmod>2018-05-21T23:26:10-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/tags/go/</loc>
-    <lastmod>2018-05-19T12:35:00-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/posts/writing-a-golang-client-for-the-tensorflow-serving-inception-model/</loc>
     <lastmod>2018-05-19T12:35:00-03:00</lastmod>
