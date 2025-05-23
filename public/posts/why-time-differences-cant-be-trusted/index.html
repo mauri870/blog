@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>Why Time Differences Can&#39;t Be Trusted | Mauri870&#39;s dev blog</title>
+
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">    
+<meta name="viewport" content="width=device-width,minimum-scale=1">
+<meta name="description" content="Time granularity on Windows is much lower than you&rsquo;d expect, and that can cause surprising bugs when measuring elapsed time.">
+<meta name="generator" content="Hugo 0.145.0">
+
+
+  <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+  
+    
+    <link rel="stylesheet" href="https://blog.mauri870.com/css/custom.css">
+  
+
+
+<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
+
+ 
+  
+
+
+
+
+
+
+
+  </head>
+
+  <body>
+    <nav class="navigation">
+	
+		<a href="/"> <span class="arrow">←</span>Home</a>
+	
+	<a href="/posts">Archive</a>
+	<a href="/tags">Tags</a>
+	<a href="/about">About</a>
+
+	
+
+	
+		<a class="button" href="https://blog.mauri870.com/posts/why-time-differences-cant-be-trusted/">Subscribe</a>
+	
+</nav>
+
+
+    <main class="main">
+      
+
+<section id="single">
+    <h1 class="title">Why Time Differences Can&#39;t Be Trusted</h1>
+
+    <div class="tip">
+        <time datetime="2025-05-23 18:35:12 -0300 -03">May 23, 2025</time>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          438 words
+        </span>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          3 minute read
+        </span>
+    </div>
+
+    
+    
+        
+  
+    <aside class="toc">
+      <details>
+          <summary>Table of Contents
+          </summary>
+          <div>
+              <nav id="TableOfContents">
+  <ul>
+    <li><a href="#understanding-clock-resolution">Understanding Clock Resolution</a></li>
+    <li><a href="#always-set-a-lower-bound">Always set a lower bound</a></li>
+    <li><a href="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+          </div>
+      </details>
+    </aside>
+  
+
+
+    
+
+
+    <div class="content">
+      <p>Time granularity on Windows is much lower than you&rsquo;d expect, and that can cause surprising bugs when measuring elapsed time.</p>
+<p>I was investigating a seemingly random CI failure on Windows for a test in Elastic Agent. At random, the <a href="https://www.elastic.co/docs/reference/ecs" target="_blank" rel="noopener">ECS</a> field <a href="https://www.elastic.co/docs/reference/ecs/ecs-event#field-event-duration" target="_blank" rel="noopener"><code>event.duration</code></a> would be missing from an ingested telemetry event.</p>
+<p>To understand the root cause, let&rsquo;s investigate how Go retrieves system time across different operating systems.</p>
+<h2 id="understanding-clock-resolution">Understanding Clock Resolution <a href="#understanding-clock-resolution" class="anchor">🔗</a></h2><p>Clock resolution refers to the smallest measurable unit of time that a system clock or timer can reliably report. A high-resolution clock can measure very small time intervals, often in the microseconds or nanoseconds range. A low-resolution clock can only measure larger intervals, typically in milliseconds or seconds.</p>
+<p>When you call <code>time.Now()</code> in Go, it returns the current wall-clock time, typically derived from the operating system&rsquo;s system clock. The accuracy and granularity of <code>time.Now()</code> depend heavily on the underlying system timer&rsquo;s resolution.</p>
+<p>On Linux, the clock resolution for <code>time.Now()</code> is provided by the <a href="https://man7.org/linux/man-pages/man7/vdso.7.html" target="_blank" rel="noopener">vDSO</a> <code>clock_gettime</code> call, which is used by the runtime <a href="https://github.com/golang/go/blob/8cb0941a85de6ddbd6f49f8e7dc2dd3caeeee61c/src/runtime/time_linux_amd64.s#L44C15-L44C34" target="_blank" rel="noopener">time·now</a> function. The resolution is typically in the range of nanoseconds to microseconds, depending on the hardware and kernel implementation.</p>
+<p>On Windows, Go <a href="https://github.com/golang/go/blob/8cb0941a85de6ddbd6f49f8e7dc2dd3caeeee61c/src/runtime/time_windows_amd64.s#L17" target="_blank" rel="noopener">time·now</a> just reads the system time out of a known memory location (0x7ffe0014 in the <a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-kuser_shared_data" target="_blank" rel="noopener">KUSER_SHARED_DATA</a> structure). The timer granularity is approximately 0.5 milliseconds, which is significantly coarser than on Linux.</p>
+<p>Here is a simple Go program to check the clock resolution on your system:</p>
+<details open>
+<summary>check-clock-resolution.go</summary>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">package</span> main
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">import</span> (
+</span></span><span style="display:flex;"><span>	<span style="color:#b44">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#b44">&#34;time&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">func</span> <span style="color:#00a000">main</span>() {
+</span></span><span style="display:flex;"><span>	start <span style="color:#666">:=</span> time.<span style="color:#00a000">Now</span>()
+</span></span><span style="display:flex;"><span>	<span style="color:#a2f;font-weight:bold">var</span> delta time.Duration
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#a2f;font-weight:bold">for</span> {
+</span></span><span style="display:flex;"><span>		delta = time.<span style="color:#00a000">Since</span>(start)
+</span></span><span style="display:flex;"><span>		<span style="color:#a2f;font-weight:bold">if</span> delta &gt; <span style="color:#666">0</span> {
+</span></span><span style="display:flex;"><span>			<span style="color:#a2f;font-weight:bold">break</span>
+</span></span><span style="display:flex;"><span>		}
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	fmt.<span style="color:#00a000">Printf</span>(<span style="color:#b44">&#34;Estimated time resolution: %v\n&#34;</span>, delta)
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div></details>
+<table>
+  <thead>
+      <tr>
+          <th>windows/amd64</th>
+          <th>521.7µs</th>
+          <th>0.52ms</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>linux/amd64</td>
+          <td>165ns</td>
+          <td>0.000165ms</td>
+      </tr>
+      <tr>
+          <td>darwin/arm64</td>
+          <td>667ns</td>
+          <td>0.000667ms</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="always-set-a-lower-bound">Always set a lower bound <a href="#always-set-a-lower-bound" class="anchor">🔗</a></h2><p>If you&rsquo;re computing time differences for fast-executing code, the low timer resolution on Windows can result in a measured duration of zero. A common approach is to write something like <code>time.Since(start)</code> to calculate the elapsed time. This can introduce subtle, platform-dependent flakiness in your code.</p>
+<p>To avoid this, always set a lower bound when taking time measurements:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span>event.Took = <span style="color:#a2f">max</span>(time.<span style="color:#00a000">Since</span>(r.start), time.Nanosecond)
+</span></span></code></pre></div><p>I fixed this issue in <a href="https://github.com/elastic/beats/pull/44442" target="_blank" rel="noopener">elastic/beats#44442</a>.</p>
+<h2 id="conclusion">Conclusion <a href="#conclusion" class="anchor">🔗</a></h2><p>It&rsquo;s easy to assume that time.Since gives you a precise measurement, but that assumption breaks down once you factor in the operating system. Go does a good job of abstracting away platform differences, which can make issues like this easy to miss.</p>
+<p>This isn&rsquo;t about Go, really. It&rsquo;s about not taking system behavior for granted. If your code relies on time measurements — for logs, metrics, or anything performance-critical — it pays to know what kind of precision you&rsquo;re actually getting.</p>
+    </div>
+
+    
+        <div class="tags">
+            
+                <a href="https://blog.mauri870.com/tags/windows">Windows</a>
+            
+                <a href="https://blog.mauri870.com/tags/go">Go</a>
+            
+                <a href="https://blog.mauri870.com/tags/performance">Performance</a>
+            
+        </div>
+    
+    
+    
+  <div id="comment">
+    
+    
+  </div>
+
+
+</section>
+
+
+    </main>
+    
+    <footer id="footer">
+    
+
+    <div class="copyright">
+    
+       © Copyright 
+       2025 
+       <span class="split">
+        <svg fill="#bbbbbb" width="15" height="15" version="1.1" id="heart-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">
+  <path d="M13.91,6.75c-1.17,2.25-4.3,5.31-6.07,6.94c-0.1903,0.1718-0.4797,0.1718-0.67,0C5.39,12.06,2.26,9,1.09,6.75&#xA;&#x9;C-1.48,1.8,5-1.5,7.5,3.45C10-1.5,16.48,1.8,13.91,6.75z"/>
+</svg>
+       </span>
+       Mauri de Souza Meneguzzo
+    
+    </div>
+
+    
+      <div class="powerby">
+        Powered by <a href='http://www.gohugo.io/'>Hugo</a> Theme By <a href='https://github.com/nodejh/hugo-theme-mini'>nodejh</a>
+      </div>
+    
+</footer>
+
+
+
+  </body>
+</html>

@@ -6,8 +6,15 @@
     <description>Recent content in Posts on Mauri870&#39;s dev blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 06 Apr 2025 19:15:00 -0300</lastBuildDate>
+    <lastBuildDate>Fri, 23 May 2025 18:35:12 -0300</lastBuildDate>
     <atom:link href="https://blog.mauri870.com/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Why Time Differences Can&#39;t Be Trusted</title>
+      <link>https://blog.mauri870.com/posts/why-time-differences-cant-be-trusted/</link>
+      <pubDate>Fri, 23 May 2025 18:35:12 -0300</pubDate>
+      <guid>https://blog.mauri870.com/posts/why-time-differences-cant-be-trusted/</guid>
+      <description>&lt;p&gt;Time granularity on Windows is much lower than you&amp;rsquo;d expect, and that can cause surprising bugs when measuring elapsed time.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>The Low-Background Web</title>
       <link>https://blog.mauri870.com/posts/the-low-background-web/</link>
