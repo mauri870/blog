@@ -64,7 +64,7 @@
           ·
         </span>
         <span>
-          438 words
+          480 words
         </span>
         <span class="split">
           ·
@@ -108,6 +108,7 @@
 <p>When you call <code>time.Now()</code> in Go, it returns the current wall-clock time, typically derived from the operating system&rsquo;s system clock. The accuracy and granularity of <code>time.Now()</code> depend heavily on the underlying system timer&rsquo;s resolution.</p>
 <p>On Linux, the clock resolution for <code>time.Now()</code> is provided by the <a href="https://man7.org/linux/man-pages/man7/vdso.7.html" target="_blank" rel="noopener">vDSO</a> <code>clock_gettime</code> call, which is used by the runtime <a href="https://github.com/golang/go/blob/8cb0941a85de6ddbd6f49f8e7dc2dd3caeeee61c/src/runtime/time_linux_amd64.s#L44C15-L44C34" target="_blank" rel="noopener">time·now</a> function. The resolution is typically in the range of nanoseconds to microseconds, depending on the hardware and kernel implementation.</p>
 <p>On Windows, Go <a href="https://github.com/golang/go/blob/8cb0941a85de6ddbd6f49f8e7dc2dd3caeeee61c/src/runtime/time_windows_amd64.s#L17" target="_blank" rel="noopener">time·now</a> just reads the system time out of a known memory location (0x7ffe0014 in the <a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-kuser_shared_data" target="_blank" rel="noopener">KUSER_SHARED_DATA</a> structure). The timer granularity is approximately 0.5 milliseconds, which is significantly coarser than on Linux.</p>
+<p>I assume Go uses this approach on windows to avoid making a system call to retrieve the time, which would be expensive. For example, <a href="https://github.com/cockroachdb/cockroach/pull/14597" target="_blank" rel="noopener">CockroachDB calls <code>GetSystemTimePreciseAsFileTime</code></a> to get a more precise time, but that is 2000x slower as of Go 1.8.</p>
 <p>Here is a simple Go program to check the clock resolution on your system:</p>
 <details open>
 <summary>check-clock-resolution.go</summary>
