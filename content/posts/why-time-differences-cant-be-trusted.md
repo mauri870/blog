@@ -5,7 +5,11 @@ tags: ["Windows", "Go", "Performance"]
 draft: false
 ---
 
+Time granularity on Windows is much lower than you'd expect, and that can cause surprising bugs when measuring elapsed time.
+
 <!--more-->
+
+---
 
 I was investigating a seemingly random CI failure on Windows for a test in Elastic Agent. At random, the [ECS](https://www.elastic.co/docs/reference/ecs) field [`event.duration`](https://www.elastic.co/docs/reference/ecs/ecs-event#field-event-duration) would be missing from an ingested telemetry event.
 
@@ -20,6 +24,8 @@ When you call `time.Now()` in Go, it returns the current wall-clock time, typica
 On Linux, the clock resolution for `time.Now()` is provided by the [vDSO](https://man7.org/linux/man-pages/man7/vdso.7.html) `clock_gettime` call, which is used by the runtime [time·now](https://github.com/golang/go/blob/8cb0941a85de6ddbd6f49f8e7dc2dd3caeeee61c/src/runtime/time_linux_amd64.s#L44C15-L44C34) function. The resolution is typically in the range of nanoseconds to microseconds, depending on the hardware and kernel implementation.
 
 On Windows, Go [time·now](https://github.com/golang/go/blob/8cb0941a85de6ddbd6f49f8e7dc2dd3caeeee61c/src/runtime/time_windows_amd64.s#L17) just reads the system time out of a known memory location (0x7ffe0014 in the [KUSER_SHARED_DATA](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/ns-ntddk-kuser_shared_data) structure). The timer granularity is approximately 0.5 milliseconds, which is significantly coarser than on Linux.
+
+I assume Go uses this approach on windows to avoid making a system call to retrieve the time, which would be expensive. For example, [CockroachDB calls `GetSystemTimePreciseAsFileTime`](https://github.com/cockroachdb/cockroach/pull/14597) to get a more precise time, but that is 2000x slower as of Go 1.8.
 
 Here is a simple Go program to check the clock resolution on your system:
 
