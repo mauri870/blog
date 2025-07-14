@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Lua on Mauri870&#39;s dev blog</title>
+    <link>https://blog.mauri870.com/tags/lua/</link>
+    <description>Recent content in Lua on Mauri870&#39;s dev blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 14 Jul 2025 18:00:00 -0300</lastBuildDate>
+    <atom:link href="https://blog.mauri870.com/tags/lua/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Redis and LuaJIT</title>
+      <link>https://blog.mauri870.com/posts/redis-and-luajit/</link>
+      <pubDate>Mon, 14 Jul 2025 18:00:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/posts/redis-and-luajit/</guid>
+      <description>&lt;p&gt;Redis is a very popular in-memory store and has support for Lua scripts. But how about throwing LuaJIT into the mix?&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

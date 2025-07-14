@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>Redis and LuaJIT | Mauri870&#39;s dev blog</title>
+
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">    
+<meta name="viewport" content="width=device-width,minimum-scale=1">
+<meta name="description" content="Redis is a very popular in-memory store and has support for Lua scripts. But how about throwing LuaJIT into the mix?">
+<meta name="generator" content="Hugo 0.145.0">
+
+
+  <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+  
+    
+    <link rel="stylesheet" href="https://blog.mauri870.com/css/custom.css">
+  
+
+
+<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
+
+ 
+  
+
+
+
+
+
+
+
+  </head>
+
+  <body>
+    <nav class="navigation">
+	
+		<a href="/"> <span class="arrow">←</span>Home</a>
+	
+	<a href="/posts">Archive</a>
+	<a href="/tags">Tags</a>
+	<a href="/about">About</a>
+
+	
+
+	
+		<a class="button" href="https://blog.mauri870.com/posts/redis-and-luajit/">Subscribe</a>
+	
+</nav>
+
+
+    <main class="main">
+      
+
+<section id="single">
+    <h1 class="title">Redis and LuaJIT</h1>
+
+    <div class="tip">
+        <time datetime="2025-07-14 18:00:00 -0300 -03">Jul 14, 2025</time>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          171 words
+        </span>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          1 minute read
+        </span>
+    </div>
+
+    
+    
+        
+  
+
+
+    
+
+
+    <div class="content">
+      <p>Redis is a very popular in-memory store and has support for Lua scripts. But how about throwing LuaJIT into the mix?</p>
+<hr>
+<p>This is a quick post about my most recent endeavor, adding LuaJIT support to redis.</p>
+<p>Porting the existing Lua <code>EVAL</code> command to use LuaJIT was surprisingly straightforward. You can check out the code <a href="https://github.com/redis/redis/compare/unstable...mauri870:redis:luajit" target="_blank" rel="noopener">here</a>.</p>
+<p>It&rsquo;s not production-ready, but the performance gains for compute-heavy lua code are obvious:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#080;font-style:italic"># luajit</span>
+</span></span><span style="display:flex;"><span>$ redis-benchmark -n <span style="color:#666">1000</span> EVAL <span style="color:#b44">&#34;local function fib(n)if n&lt;2 then return n end return fib(n-1)+fib(n-2)end return fib(20)&#34;</span> <span style="color:#666">0</span>
+</span></span><span style="display:flex;"><span>Summary:
+</span></span><span style="display:flex;"><span>  throughput summary: 4830.92 requests per second
+</span></span><span style="display:flex;"><span>  latency summary <span style="color:#666">(</span>msec<span style="color:#666">)</span>:
+</span></span><span style="display:flex;"><span>          avg       min       p50       p95       p99       max
+</span></span><span style="display:flex;"><span>       10.035     1.280    10.175    10.903    11.183    11.399
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#080;font-style:italic"># lua</span>
+</span></span><span style="display:flex;"><span>redis-benchmark -n <span style="color:#666">1000</span> EVAL <span style="color:#b44">&#34;local function fib(n)if n&lt;2 then return n end return fib(n-1)+fib(n-2)end return fib(20)&#34;</span>
+</span></span><span style="display:flex;"><span>Summary:
+</span></span><span style="display:flex;"><span>  throughput summary: 1904.76 requests per second
+</span></span><span style="display:flex;"><span>  latency summary <span style="color:#666">(</span>msec<span style="color:#666">)</span>:
+</span></span><span style="display:flex;"><span>          avg       min       p50       p95       p99       max
+</span></span><span style="display:flex;"><span>       25.841     3.184    25.711    27.631    28.047    28.511
+</span></span></code></pre></div><p>While this doesn&rsquo;t necessarily translate to real-world production workloads, it clearly highlights the performance improvements LuaJIT can offer over standard Lua.</p>
+    </div>
+
+    
+        <div class="tags">
+            
+                <a href="https://blog.mauri870.com/tags/redis">Redis</a>
+            
+                <a href="https://blog.mauri870.com/tags/luajit">LuaJIT</a>
+            
+                <a href="https://blog.mauri870.com/tags/lua">Lua</a>
+            
+                <a href="https://blog.mauri870.com/tags/performance">Performance</a>
+            
+        </div>
+    
+    
+    
+  <div id="comment">
+    
+    
+  </div>
+
+
+</section>
+
+
+    </main>
+    
+    <footer id="footer">
+    
+
+    <div class="copyright">
+    
+       © Copyright 
+       2025 
+       <span class="split">
+        <svg fill="#bbbbbb" width="15" height="15" version="1.1" id="heart-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">
+  <path d="M13.91,6.75c-1.17,2.25-4.3,5.31-6.07,6.94c-0.1903,0.1718-0.4797,0.1718-0.67,0C5.39,12.06,2.26,9,1.09,6.75&#xA;&#x9;C-1.48,1.8,5-1.5,7.5,3.45C10-1.5,16.48,1.8,13.91,6.75z"/>
+</svg>
+       </span>
+       Mauri de Souza Meneguzzo
+    
+    </div>
+
+    
+      <div class="powerby">
+        Powered by <a href='http://www.gohugo.io/'>Hugo</a> Theme By <a href='https://github.com/nodejh/hugo-theme-mini'>nodejh</a>
+      </div>
+    
+</footer>
+
+
+
+  </body>
+</html>
