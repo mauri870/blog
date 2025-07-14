@@ -2,28 +2,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://blog.mauri870.com/tags/javascript/</loc>
+    <lastmod>2025-07-14T18:20:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/</loc>
+    <lastmod>2025-07-14T18:20:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/performance/</loc>
+    <lastmod>2025-07-14T18:20:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/posts/</loc>
+    <lastmod>2025-07-14T18:20:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/redis/</loc>
+    <lastmod>2025-07-14T18:20:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/</loc>
+    <lastmod>2025-07-14T18:20:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/posts/writing-redis-scripts-with-javascript/</loc>
+    <lastmod>2025-07-14T18:20:00-03:00</lastmod>
+  </url><url>
     <loc>https://blog.mauri870.com/tags/lua/</loc>
     <lastmod>2025-07-14T18:00:00-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/tags/luajit/</loc>
     <lastmod>2025-07-14T18:00:00-03:00</lastmod>
   </url><url>
-    <loc>https://blog.mauri870.com/</loc>
-    <lastmod>2025-07-14T18:00:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/tags/performance/</loc>
-    <lastmod>2025-07-14T18:00:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/posts/</loc>
-    <lastmod>2025-07-14T18:00:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/tags/redis/</loc>
-    <lastmod>2025-07-14T18:00:00-03:00</lastmod>
-  </url><url>
     <loc>https://blog.mauri870.com/posts/redis-and-luajit/</loc>
-    <lastmod>2025-07-14T18:00:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/tags/</loc>
     <lastmod>2025-07-14T18:00:00-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/tags/go/</loc>

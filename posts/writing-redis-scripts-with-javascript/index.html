@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>Writing Redis Scripts with JavaScript | Mauri870&#39;s dev blog</title>
+
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">    
+<meta name="viewport" content="width=device-width,minimum-scale=1">
+<meta name="description" content="Redis already supports Lua as a scripting language, allowing users to extend the functionality of Redis commands with custom scripts. However, JavaScript is a far more popular language overall, so how about writing Redis scripts in JS instead?">
+<meta name="generator" content="Hugo 0.145.0">
+
+
+  <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+  
+    
+    <link rel="stylesheet" href="https://blog.mauri870.com/css/custom.css">
+  
+
+
+<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
+
+ 
+  
+
+
+
+
+
+
+
+  </head>
+
+  <body>
+    <nav class="navigation">
+	
+		<a href="/"> <span class="arrow">←</span>Home</a>
+	
+	<a href="/posts">Archive</a>
+	<a href="/tags">Tags</a>
+	<a href="/about">About</a>
+
+	
+
+	
+		<a class="button" href="https://blog.mauri870.com/posts/writing-redis-scripts-with-javascript/">Subscribe</a>
+	
+</nav>
+
+
+    <main class="main">
+      
+
+<section id="single">
+    <h1 class="title">Writing Redis Scripts with JavaScript</h1>
+
+    <div class="tip">
+        <time datetime="2025-07-14 18:20:00 -0300 -03">Jul 14, 2025</time>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          324 words
+        </span>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          2 minute read
+        </span>
+    </div>
+
+    
+    
+        
+  
+
+
+    
+
+
+    <div class="content">
+      <p>Redis already supports Lua as a scripting language, allowing users to extend the functionality of Redis commands with custom scripts. However, JavaScript is a far more popular language overall, so how about writing Redis scripts in JS instead?</p>
+<hr>
+<p>This is another quick post about my recent work frenzy with Redis. I wanted to see if it is possible to use JavaScript as a scripting language in Redis, and if so, how that would compare to Lua both in functionality and performance.</p>
+<p>I decided to use Rust to write a Redis extension, leveraging both <a href="https://github.com/RedisLabsModules/redismodule-rs" target="_blank" rel="noopener">redismodule-rs</a> and QuickJS to execute JavaScript code. The extension is available at <a href="https://github.com/mauri870/redis-evaljs" target="_blank" rel="noopener">mauri870/redis-evaljs</a>.</p>
+<p>Thanks to QuickJS supporting ES2023, you can use modern JavaScript features in your scripts:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ redis-cli EVALJS <span style="color:#b44">&#34;return &#39;Hello JS!&#39;&#34;</span> <span style="color:#666">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#b44">&#34;Hello JS!&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ redis-cli EVALJS <span style="color:#b44">&#34;const fib = n =&gt; n &lt;= 1 ? n : fib(n - 1) + fib(n - 2); return fib(10)&#34;</span> <span style="color:#666">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#666">(</span>integer<span style="color:#666">)</span> <span style="color:#666">55</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ redis-cli EVALJS <span style="color:#b44">&#34;return [5, 4, 3, 2, 1].toSorted()&#34;</span> <span style="color:#666">0</span>
+</span></span><span style="display:flex;"><span>1<span style="color:#666">)</span> <span style="color:#666">(</span>integer<span style="color:#666">)</span> <span style="color:#666">1</span>
+</span></span><span style="display:flex;"><span>2<span style="color:#666">)</span> <span style="color:#666">(</span>integer<span style="color:#666">)</span> <span style="color:#666">2</span>
+</span></span><span style="display:flex;"><span>3<span style="color:#666">)</span> <span style="color:#666">(</span>integer<span style="color:#666">)</span> <span style="color:#666">3</span>
+</span></span><span style="display:flex;"><span>4<span style="color:#666">)</span> <span style="color:#666">(</span>integer<span style="color:#666">)</span> <span style="color:#666">4</span>
+</span></span><span style="display:flex;"><span>5<span style="color:#666">)</span> <span style="color:#666">(</span>integer<span style="color:#666">)</span> <span style="color:#666">5</span>
+</span></span></code></pre></div><p>I further augmented the extension with the ability to invoke Redis commands from within the JavaScript code:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ redis-cli EVALJS <span style="color:#b44">&#34;return redis.call(&#39;SET&#39;, &#39;a&#39;, 42)&#34;</span> <span style="color:#666">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#b44">&#34;OK&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ redis-cli EVALJS <span style="color:#b44">&#34;return redis.call(&#39;GET&#39;, &#39;a&#39;)&#34;</span> <span style="color:#666">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#b44">&#34;42&#34;</span>
+</span></span></code></pre></div><p>Looking at the performance of simple code evaluation, it does not look too bad:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ redis-benchmark EVALJS <span style="color:#b44">&#34;return 1 + 2&#34;</span> <span style="color:#666">0</span>
+</span></span><span style="display:flex;"><span>Summary:
+</span></span><span style="display:flex;"><span>  throughput summary: 44169.61 requests per second
+</span></span><span style="display:flex;"><span>  latency summary <span style="color:#666">(</span>msec<span style="color:#666">)</span>:
+</span></span><span style="display:flex;"><span>          avg       min       p50       p95       p99       max
+</span></span><span style="display:flex;"><span>        0.919     0.240     0.871     1.423     1.671     2.367
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ redis-benchmark EVAL <span style="color:#b44">&#34;return 1 + 2&#34;</span> <span style="color:#666">0</span>
+</span></span><span style="display:flex;"><span>Summary:
+</span></span><span style="display:flex;"><span>  throughput summary: 58105.75 requests per second
+</span></span><span style="display:flex;"><span>  latency summary <span style="color:#666">(</span>msec<span style="color:#666">)</span>:
+</span></span><span style="display:flex;"><span>          avg       min       p50       p95       p99       max
+</span></span><span style="display:flex;"><span>        0.654     0.240     0.591     1.127     1.343     2.023
+</span></span></code></pre></div><p>It is not as fast as Lua, but it is the closest I could get to it. There is probably room for further optimization, but I think it is already good enough for most use cases.</p>
+    </div>
+
+    
+        <div class="tags">
+            
+                <a href="https://blog.mauri870.com/tags/redis">Redis</a>
+            
+                <a href="https://blog.mauri870.com/tags/javascript">JavaScript</a>
+            
+                <a href="https://blog.mauri870.com/tags/performance">Performance</a>
+            
+        </div>
+    
+    
+    
+  <div id="comment">
+    
+    
+  </div>
+
+
+</section>
+
+
+    </main>
+    
+    <footer id="footer">
+    
+
+    <div class="copyright">
+    
+       © Copyright 
+       2025 
+       <span class="split">
+        <svg fill="#bbbbbb" width="15" height="15" version="1.1" id="heart-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">
+  <path d="M13.91,6.75c-1.17,2.25-4.3,5.31-6.07,6.94c-0.1903,0.1718-0.4797,0.1718-0.67,0C5.39,12.06,2.26,9,1.09,6.75&#xA;&#x9;C-1.48,1.8,5-1.5,7.5,3.45C10-1.5,16.48,1.8,13.91,6.75z"/>
+</svg>
+       </span>
+       Mauri de Souza Meneguzzo
+    
+    </div>
+
+    
+      <div class="powerby">
+        Powered by <a href='http://www.gohugo.io/'>Hugo</a> Theme By <a href='https://github.com/nodejh/hugo-theme-mini'>nodejh</a>
+      </div>
+    
+</footer>
+
+
+
+  </body>
+</html>

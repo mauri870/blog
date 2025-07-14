@@ -6,8 +6,15 @@
     <description>Recent content on Mauri870&#39;s dev blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 14 Jul 2025 18:00:00 -0300</lastBuildDate>
+    <lastBuildDate>Mon, 14 Jul 2025 18:20:00 -0300</lastBuildDate>
     <atom:link href="https://blog.mauri870.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Writing Redis Scripts with JavaScript</title>
+      <link>https://blog.mauri870.com/posts/writing-redis-scripts-with-javascript/</link>
+      <pubDate>Mon, 14 Jul 2025 18:20:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/posts/writing-redis-scripts-with-javascript/</guid>
+      <description>&lt;p&gt;Redis already supports Lua as a scripting language, allowing users to extend the functionality of Redis commands with custom scripts. However, JavaScript is a far more popular language overall, so how about writing Redis scripts in JS instead?&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Redis and LuaJIT</title>
       <link>https://blog.mauri870.com/posts/redis-and-luajit/</link>
