@@ -6,8 +6,29 @@
     <description>Recent content in Tags on Mauri870&#39;s dev blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 14 Jul 2025 18:00:00 -0300</lastBuildDate>
+    <lastBuildDate>Mon, 14 Jul 2025 18:20:00 -0300</lastBuildDate>
     <atom:link href="https://blog.mauri870.com/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>JavaScript</title>
+      <link>https://blog.mauri870.com/tags/javascript/</link>
+      <pubDate>Mon, 14 Jul 2025 18:20:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/javascript/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Performance</title>
+      <link>https://blog.mauri870.com/tags/performance/</link>
+      <pubDate>Mon, 14 Jul 2025 18:20:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/performance/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Redis</title>
+      <link>https://blog.mauri870.com/tags/redis/</link>
+      <pubDate>Mon, 14 Jul 2025 18:20:00 -0300</pubDate>
+      <guid>https://blog.mauri870.com/tags/redis/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Lua</title>
       <link>https://blog.mauri870.com/tags/lua/</link>
@@ -20,20 +41,6 @@
       <link>https://blog.mauri870.com/tags/luajit/</link>
       <pubDate>Mon, 14 Jul 2025 18:00:00 -0300</pubDate>
       <guid>https://blog.mauri870.com/tags/luajit/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Performance</title>
-      <link>https://blog.mauri870.com/tags/performance/</link>
-      <pubDate>Mon, 14 Jul 2025 18:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/tags/performance/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Redis</title>
-      <link>https://blog.mauri870.com/tags/redis/</link>
-      <pubDate>Mon, 14 Jul 2025 18:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/tags/redis/</guid>
       <description></description>
     </item>
     <item>
