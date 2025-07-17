@@ -35,4 +35,6 @@ Summary:
        25.841     3.184    25.711    27.631    28.047    28.511
 ```
 
+> TL;DR: 2.5x increase in throughtput and 2.5x decrease in latency
+
 While this doesn't necessarily translate to real-world production workloads, it clearly highlights the performance improvements LuaJIT can offer over standard Lua.
