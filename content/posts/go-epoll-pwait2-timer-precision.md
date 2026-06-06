@@ -86,7 +86,7 @@ $ GOTOOLCHAIN=go1.26.3 go run .
 
 ```
 
-The floor is entirely from `epoll_wait`.
+This cluster is entirely `epoll_wait`'s rounding.
 
 ## Enter epoll_pwait2
 
@@ -154,7 +154,9 @@ $ gotip run .
 
 ```
 
-50µs sleeps are now actually ~60µs instead of 1ms, a ~16x improvement in timer resolution. This applies to any sub-millisecond timer or deadline. In theory, it can even improve latency of the scheduler, but I haven't profiled it.
+50µs sleeps are now actually ~60µs instead of 1ms, a ~16x improvement in timer resolution. This applies to any sub-millisecond timer or deadline.
+
+There is also a scheduler angle: an idle M blocks in netpoll until the next timer deadline, which epoll_wait ceils to 1ms, so timers fire late. This only matters when Ms are idle; under load, timer checks run at scheduling points regardless. This could shave latency off timer-driven wakeups, but I haven't profiled it.
 
 ## Conclusion
 
