@@ -100,7 +100,7 @@ int epoll_pwait2(int epfd, struct epoll_event *events, int maxevents,
 
 It takes a [`__kernel_timespec`](https://elixir.bootlin.com/linux/v7.0.11/source/include/uapi/linux/time_types.h#L7-L10). This new structure was added for the Y2038 problem. It's an exclusively 64-bit structure even on 32-bit platforms.
 
-We can probe for it once at startup, using a zero timeout. There could be seccomp filters in place that would also block it, so confirming it works before the runtime fully initializes and relies on it is a good idea.
+We can probe for it once at startup in [`runtime·osinit`](https://github.com/golang/go/blob/d00c67f297ef6f2cb2cd0e9aae59fa3936bb7eca/src/runtime/os_linux.go#L353), using a zero timeout. There could be seccomp filters in place that would also block it, so confirming it works before the runtime fully initializes and relies on it is a good idea.
 
 ```go
 func netpollEpollPwait2Init() {
