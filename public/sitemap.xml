@@ -1,23 +1,33 @@
+
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://blog.mauri870.com/tags/go/</loc>
+    <lastmod>2026-06-06T16:11:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/linux/</loc>
+    <lastmod>2026-06-06T16:11:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/</loc>
+    <lastmod>2026-06-06T16:11:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/performance/</loc>
+    <lastmod>2026-06-06T16:11:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/posts/</loc>
+    <lastmod>2026-06-06T16:11:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/posts/sub-millisecond-timer-precision-in-go-1.28/</loc>
+    <lastmod>2026-06-06T16:11:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/</loc>
+    <lastmod>2026-06-06T16:11:00-03:00</lastmod>
+  </url><url>
     <loc>https://blog.mauri870.com/tags/javascript/</loc>
     <lastmod>2025-07-14T18:20:00-03:00</lastmod>
   </url><url>
-    <loc>https://blog.mauri870.com/</loc>
-    <lastmod>2025-07-14T18:20:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/tags/performance/</loc>
-    <lastmod>2025-07-14T18:20:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/posts/</loc>
-    <lastmod>2025-07-14T18:20:00-03:00</lastmod>
-  </url><url>
     <loc>https://blog.mauri870.com/tags/redis/</loc>
-    <lastmod>2025-07-14T18:20:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/tags/</loc>
     <lastmod>2025-07-14T18:20:00-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/posts/writing-redis-scripts-with-javascript/</loc>
@@ -31,9 +41,6 @@
   </url><url>
     <loc>https://blog.mauri870.com/posts/redis-and-luajit/</loc>
     <lastmod>2025-07-14T18:00:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/tags/go/</loc>
-    <lastmod>2025-05-23T18:35:12-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/posts/why-time-differences-cant-be-trusted/</loc>
     <lastmod>2025-05-23T18:35:12-03:00</lastmod>
@@ -150,9 +157,6 @@
     <lastmod>2018-05-08T21:22:56-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/posts/assembly-linux-x64-part-1/</loc>
-    <lastmod>2018-05-08T21:22:56-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/tags/linux/</loc>
     <lastmod>2018-05-08T21:22:56-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/tags/x64/</loc>

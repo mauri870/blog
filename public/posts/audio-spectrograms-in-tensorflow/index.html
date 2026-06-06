@@ -7,7 +7,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">    
 <meta name="viewport" content="width=device-width,minimum-scale=1">
 <meta name="description" content="A Spectrogram is a picture of sound. A common approach for audio classification tasks is to use spectrograms as input and simply treat the audio as an image. After several tries I finally got an optimized way to integrate the spectrogram generation pipeline into the tensorflow computational graph.">
-<meta name="generator" content="Hugo 0.145.0">
+<meta name="generator" content="Hugo 0.162.1">
 
 
   <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
@@ -107,19 +107,20 @@
 <p>I mean, using Go was not a mistake, it&rsquo;s an incredible language and I love it. But serving the tensorflow model from Go (using the tensorflow CGO wrapper) use a LOT of ram after some weeks, reaching about 1GB each instance&hellip; Probably was a sort of memory leak, I tried to debug it but CGO is always on the way&hellip;</p>
 <p>To generate the spectrogram in this first release we decided to use sox, it&rsquo;s a common command line utility for audio conversion and manipulation. Basically what we did was get the audio in the API and then save on disk, run the sox on the received sample, saving the generated spectrogram and then load the image bytes into a Tensorflow Tensor that we feed into the model.</p>
 <p>Something like this:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sox audio.gsm -n spectrogram -x <span style="color:#666">128</span> -y <span style="color:#666">128</span> -A -z <span style="color:#666">50</span> -Z -20 -r -o spectrogram.png
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sox audio.gsm -n spectrogram -x <span style="color:#666">128</span> -y <span style="color:#666">128</span> -A -z <span style="color:#666">50</span> -Z -20 -r -o spectrogram.png
 </span></span></code></pre></div><p>However tests in production showed that we are hitting storage too hard. Storing and reading from disk about 2 or 3 times per request was pretty bad, so we cut out storage usage by using <a href="http://www.linfo.org/pipes.html" target="_blank" rel="noopener">pipes</a> everywhere:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span> <span style="color:#080;font-style:italic"># In Go we fill the sox stdin with a buffer containing the gsm audio bytes</span>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span> <span style="color:#080;font-style:italic"># In Go we fill the sox stdin with a buffer containing the gsm audio bytes</span>
 </span></span><span style="display:flex;"><span> <span style="color:#080;font-style:italic"># readed directly from request.</span>
 </span></span><span style="display:flex;"><span> sox -t gsm - -n spectrogram -x <span style="color:#666">128</span> -y <span style="color:#666">128</span> -A -z <span style="color:#666">50</span> -Z -20 -r -o -
 </span></span><span style="display:flex;"><span> <span style="color:#080;font-style:italic"># PNG encoded image is contained in stdout buffer.</span>
 </span></span></code></pre></div><blockquote>
-<p>We also found a known <a href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=823417" target="_blank" rel="noopener">sox bug</a> with input/output pipes on Debian, which we solve compiling from source.</p></blockquote>
+<p>We also found a known <a href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=823417" target="_blank" rel="noopener">sox bug</a> with input/output pipes on Debian, which we solve compiling from source.</p>
+</blockquote>
 <h2 id="2-improving-the-spectrogram-generation">2. Improving the spectrogram generation <a href="#2-improving-the-spectrogram-generation" class="anchor">🔗</a></h2><p>A couple of months ago I begin to refactor the project to use <a href="https://www.tensorflow.org/serving/" target="_blank" rel="noopener">Tensorflow Serving</a>. The api was also lightweight now, it talks Protobuf through gRPC to the serving service and we don&rsquo;t have more memory leaks to worry about 😅. Each serving pod uses around 50MB of ram and the api 20MB. We keep the same sox approach as described above.</p>
 <p>But sox isn&rsquo;t perfect&hellip; Segfaults happen randomly and the api cpu usage is higher bacause of the encoding / decoding operations.</p>
 <p>Reading about the tensorflow contrib package I found some interesting ops, including a <code>audio_spectrogram</code>. With some work I replaced the entire sox pipeline by using the tensorflow computations, the api no longer deal with the preprocessing stuff. The only downside is that the ffmpeg ops don&rsquo;t support gsm, however it&rsquo;s ok for us to use wav instead.</p>
 <p>Here&rsquo;s the source code for a program to test the spectrogram generation in  tensorflow 1.14:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">tensorflow</span> <span style="color:#a2f;font-weight:bold">as</span> <span style="color:#00f;font-weight:bold">tf</span>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">import</span> <span style="color:#00f;font-weight:bold">tensorflow</span> <span style="color:#a2f;font-weight:bold">as</span> <span style="color:#00f;font-weight:bold">tf</span>
 </span></span><span style="display:flex;"><span><span style="color:#080;font-style:italic"># FIXME: audio_ops.decode_wav is deprecated, use tf.audio.decode_wav</span>
 </span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">from</span> <span style="color:#00f;font-weight:bold">tensorflow.contrib.framework.python.ops</span> <span style="color:#a2f;font-weight:bold">import</span> audio_ops
 </span></span><span style="display:flex;"><span>
@@ -196,7 +197,7 @@
 </span></span><span style="display:flex;"><span>	<span style="color:#080;font-style:italic"># Encode tensor as a png image</span>
 </span></span><span style="display:flex;"><span>        <span style="color:#a2f;font-weight:bold">return</span> tf<span style="color:#666">.</span>image<span style="color:#666">.</span>encode_png(cast)
 </span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">if</span> __name__ <span style="color:#666">==</span> <span style="color:#b44">&#39;__main__&#39;</span>:
+</span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">if</span> <span style="color:#b8860b">__name__</span> <span style="color:#666">==</span> <span style="color:#b44">&#39;__main__&#39;</span>:
 </span></span><span style="display:flex;"><span>	input_file <span style="color:#666">=</span> tf<span style="color:#666">.</span>constant(<span style="color:#b44">&#39;input.wav&#39;</span>)
 </span></span><span style="display:flex;"><span>	output_file <span style="color:#666">=</span> tf<span style="color:#666">.</span>constant(<span style="color:#b44">&#39;spectrogram.png&#39;</span>)
 </span></span><span style="display:flex;"><span>
@@ -240,7 +241,7 @@
     <div class="copyright">
     
        © Copyright 
-       2025 
+       2026 
        <span class="split">
         <svg fill="#bbbbbb" width="15" height="15" version="1.1" id="heart-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">
   <path d="M13.91,6.75c-1.17,2.25-4.3,5.31-6.07,6.94c-0.1903,0.1718-0.4797,0.1718-0.67,0C5.39,12.06,2.26,9,1.09,6.75&#xA;&#x9;C-1.48,1.8,5-1.5,7.5,3.45C10-1.5,16.48,1.8,13.91,6.75z"/>

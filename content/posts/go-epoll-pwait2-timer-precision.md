@@ -98,7 +98,7 @@ int epoll_pwait2(int epfd, struct epoll_event *events, int maxevents,
                  const sigset_t *sigmask, size_t sigsetsize);
 ```
 
-It takes a [`__kernel_timespec`](https://elixir.bootlin.com/linux/v7.0.11/source/include/uapi/linux/time_types.h#L7-L10). This new structure was added for the Y2038 problem. It's a exclusively 64bit structure even on 32 bits platforms.
+It takes a [`__kernel_timespec`](https://elixir.bootlin.com/linux/v7.0.11/source/include/uapi/linux/time_types.h#L7-L10). This new structure was added for the Y2038 problem. It's an exclusively 64-bit structure even on 32-bit platforms.
 
 We can probe for it once at startup, using a zero timeout. There could be seccomp filters in place that would also block it, so confirming it works before the runtime fully initializes and relies on it is a good idea.
 
@@ -110,7 +110,7 @@ func netpollEpollPwait2Init() {
 }
 ```
 
-Pretty standard, if its available the runtime uses it, otherwise it falls back to `epoll_wait`.
+Pretty standard, if it's available the runtime uses it, otherwise it falls back to `epoll_wait`.
 
 Hot path:
 
@@ -133,8 +133,6 @@ if epollpwait2Avail {
 }
 ```
 
-A nil timeout means infinite wait.
-
 ## Results
 
 ```bash
@@ -156,11 +154,11 @@ $ gotip run .
 
 ```
 
-50µs sleeps are now actually ~60µs instead of 1ms which is a huge x16 decrease. This applies to any sub-millisecond timer or deadline. In theory, it can even improve latency of the scheduler, but I haven't profiled it.
+50µs sleeps are now actually ~60µs instead of 1ms, a ~16x improvement in timer resolution. This applies to any sub-millisecond timer or deadline. In theory, it can even improve latency of the scheduler, but I haven't profiled it.
 
 ## Conclusion
 
-Don't expect general performance gains with this if you are running tight deadlines or timers, but if you are, expected reduced latency in such workloads.
+This change won't speed up most programs. But if your workload uses sub-millisecond timers or deadlines, expect noticeably reduced latency.
 
 Link to tracking issue: https://github.com/golang/go/issues/53824.
 

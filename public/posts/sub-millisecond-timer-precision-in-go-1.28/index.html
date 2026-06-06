@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>Sub-millisecond Timer Precision in Go 1.28 | Mauri870&#39;s dev blog</title>
+
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">    
+<meta name="viewport" content="width=device-width,minimum-scale=1">
+<meta name="description" content="Quiz: time.Sleep(50 * time.Microsecond) on Linux. How long does it actually sleep?
+If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why.">
+<meta name="generator" content="Hugo 0.162.1">
+
+
+  <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+  
+    
+    <link rel="stylesheet" href="https://blog.mauri870.com/css/custom.css">
+  
+
+
+<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
+
+ 
+  
+
+
+
+
+
+
+
+  </head>
+
+  <body>
+    <nav class="navigation">
+	
+		<a href="/"> <span class="arrow">←</span>Home</a>
+	
+	<a href="/posts">Archive</a>
+	<a href="/tags">Tags</a>
+	<a href="/about">About</a>
+
+	
+
+	
+		<a class="button" href="https://blog.mauri870.com/posts/sub-millisecond-timer-precision-in-go-1.28/">Subscribe</a>
+	
+</nav>
+
+
+    <main class="main">
+      
+
+<section id="single">
+    <h1 class="title">Sub-millisecond Timer Precision in Go 1.28</h1>
+
+    <div class="tip">
+        <time datetime="2026-06-06 16:11:00 -0300 -03">Jun 6, 2026</time>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          605 words
+        </span>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          3 minute read
+        </span>
+    </div>
+
+    
+    
+        
+  
+    <aside class="toc">
+      <details>
+          <summary>Table of Contents
+          </summary>
+          <div>
+              <nav id="TableOfContents">
+  <ul>
+    <li><a href="#what-is-netpoll">What is netpoll?</a></li>
+    <li><a href="#the-problem">The problem</a></li>
+    <li><a href="#enter-epoll_pwait2">Enter epoll_pwait2</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+          </div>
+      </details>
+    </aside>
+  
+
+
+    
+
+
+    <div class="content">
+      <p>Quiz: <code>time.Sleep(50 * time.Microsecond)</code> on Linux. How long does it actually sleep?</p>
+<p>If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why.</p>
+<p>I recently submitted <a href="https://go.dev/cl/787700" target="_blank" rel="noopener">CL 787700</a>, which switches Go&rsquo;s Linux netpoller to use the <code>epoll_pwait2</code> system call when available. The change is expected to land in Go 1.28.</p>
+<h2 id="what-is-netpoll">What is netpoll? <a href="#what-is-netpoll" class="anchor">🔗</a></h2><p>Go parks goroutines on I/O using <code>epoll</code> on Linux. The runtime blocks a thread in <code>epoll_wait</code> on <a href="https://github.com/golang/go/blob/d3be949ada01d7827f8edc87665fef5268634cb3/src/runtime/netpoll_epoll.go#L99" target="_blank" rel="noopener"><code>runtime·netpoll</code></a> until file descriptors become ready, so the scheduler can wake them up.</p>
+<p>Timers (<code>time.Sleep</code>, <code>time.After</code>, <code>time.Ticker</code>) are also routed through the same mechanism by converting deadlines into epoll timeouts.</p>
+<h2 id="the-problem">The problem <a href="#the-problem" class="anchor">🔗</a></h2><p><a href="https://man7.org/linux/man-pages/man2/epoll_wait.2.html" target="_blank" rel="noopener"><code>epoll_wait(2)</code></a> only accepts timeouts in milliseconds:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#0b0;font-weight:bold">int</span> <span style="color:#00a000">epoll_wait</span>(<span style="color:#0b0;font-weight:bold">int</span> epfd, <span style="color:#a2f;font-weight:bold">struct</span> epoll_event <span style="color:#666">*</span>events, <span style="color:#0b0;font-weight:bold">int</span> maxevents, <span style="color:#0b0;font-weight:bold">int</span> timeout);
+</span></span></code></pre></div><p>That <code>timeout</code> is an <code>int</code> in milliseconds.</p>
+<p>So anything below 1ms gets rounded up in the runtime:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">var</span><span style="color:#bbb"> </span>waitms<span style="color:#bbb"> </span><span style="color:#0b0;font-weight:bold">int32</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>delay<span style="color:#bbb"> </span>&lt;<span style="color:#bbb"> </span><span style="color:#666">0</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>waitms<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span><span style="color:#666">-</span><span style="color:#666">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">else</span><span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>delay<span style="color:#bbb"> </span><span style="color:#666">==</span><span style="color:#bbb"> </span><span style="color:#666">0</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>waitms<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span><span style="color:#666">0</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">else</span><span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>delay<span style="color:#bbb"> </span>&lt;<span style="color:#bbb"> </span><span style="color:#666">1e6</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>waitms<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span><span style="color:#666">1</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">else</span><span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>delay<span style="color:#bbb"> </span>&lt;<span style="color:#bbb"> </span><span style="color:#666">1e15</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>waitms<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span><span style="color:#a2f">int32</span>(delay<span style="color:#bbb"> </span><span style="color:#666">/</span><span style="color:#bbb"> </span><span style="color:#666">1e6</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>waitms<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span><span style="color:#666">1e9</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>A <code>time.Sleep(50 * time.Microsecond)</code> or any sub-millisecond timer becomes a <strong>1ms sleep</strong>. That is the lowest granularity for Go timers on Linux.</p>
+<p>This is a neat benchmark using <a href="https://github.com/loov/hrtime" target="_blank" rel="noopener">loov/hrtime</a> that showcases this issue perfectly:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">package</span><span style="color:#bbb"> </span>main<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">import</span><span style="color:#bbb"> </span>(<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#b44">&#34;fmt&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#b44">&#34;time&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#b44">&#34;github.com/loov/hrtime&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">func</span><span style="color:#bbb"> </span><span style="color:#00a000">main</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>b<span style="color:#bbb"> </span><span style="color:#666">:=</span><span style="color:#bbb"> </span>hrtime.<span style="color:#00a000">NewBenchmark</span>(<span style="color:#666">100</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#a2f;font-weight:bold">for</span><span style="color:#bbb"> </span>b.<span style="color:#00a000">Next</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>time.<span style="color:#00a000">Sleep</span>(<span style="color:#666">50</span><span style="color:#bbb"> </span><span style="color:#666">*</span><span style="color:#bbb"> </span>time.Microsecond)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>fmt.<span style="color:#00a000">Println</span>(b.<span style="color:#00a000">Histogram</span>(<span style="color:#666">10</span>))<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ <span style="color:#b8860b">GOTOOLCHAIN</span><span style="color:#666">=</span>go1.26.3 go run .
+</span></span><span style="display:flex;"><span>  avg 1ms;  min 1ms;  p50 1ms;  max 1.01ms;
+</span></span><span style="display:flex;"><span>  p90 1ms;  p99 1.01ms;  p999 1.01ms;  p9999 1.01ms;
+</span></span><span style="display:flex;"><span>        1ms <span style="color:#666">[</span> 57<span style="color:#666">]</span> ████████████████████████████████████████
+</span></span><span style="display:flex;"><span>     1.01ms <span style="color:#666">[</span> 39<span style="color:#666">]</span> ███████████████████████████
+</span></span><span style="display:flex;"><span>     1.01ms <span style="color:#666">[</span>  1<span style="color:#666">]</span> ▌
+</span></span><span style="display:flex;"><span>     1.01ms <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
+</span></span><span style="display:flex;"><span>     1.01ms <span style="color:#666">[</span>  1<span style="color:#666">]</span> ▌
+</span></span><span style="display:flex;"><span>     1.01ms <span style="color:#666">[</span>  1<span style="color:#666">]</span> ▌
+</span></span><span style="display:flex;"><span>     1.02ms <span style="color:#666">[</span>  1<span style="color:#666">]</span> ▌
+</span></span><span style="display:flex;"><span>     1.02ms <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
+</span></span><span style="display:flex;"><span>     1.02ms <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
+</span></span><span style="display:flex;"><span>     1.02ms <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
+</span></span></code></pre></div><p>The floor is entirely from <code>epoll_wait</code>.</p>
+<h2 id="enter-epoll_pwait2">Enter epoll_pwait2 <a href="#enter-epoll_pwait2" class="anchor">🔗</a></h2><p>Linux 5.11 added <code>epoll_pwait2(2)</code>:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#0b0;font-weight:bold">int</span> <span style="color:#00a000">epoll_pwait2</span>(<span style="color:#0b0;font-weight:bold">int</span> epfd, <span style="color:#a2f;font-weight:bold">struct</span> epoll_event <span style="color:#666">*</span>events, <span style="color:#0b0;font-weight:bold">int</span> maxevents,
+</span></span><span style="display:flex;"><span>                 <span style="color:#a2f;font-weight:bold">const</span> <span style="color:#a2f;font-weight:bold">struct</span> __kernel_timespec <span style="color:#666">*</span>timeout,
+</span></span><span style="display:flex;"><span>                 <span style="color:#a2f;font-weight:bold">const</span> <span style="color:#0b0;font-weight:bold">sigset_t</span> <span style="color:#666">*</span>sigmask, <span style="color:#0b0;font-weight:bold">size_t</span> sigsetsize);
+</span></span></code></pre></div><p>It takes a <a href="https://elixir.bootlin.com/linux/v7.0.11/source/include/uapi/linux/time_types.h#L7-L10" target="_blank" rel="noopener"><code>__kernel_timespec</code></a>. This new structure was added for the Y2038 problem. It&rsquo;s an exclusively 64-bit structure even on 32-bit platforms.</p>
+<p>We can probe for it once at startup, using a zero timeout. There could be seccomp filters in place that would also block it, so confirming it works before the runtime fully initializes and relies on it is a good idea.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">func</span><span style="color:#bbb"> </span><span style="color:#00a000">netpollEpollPwait2Init</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#a2f;font-weight:bold">var</span><span style="color:#bbb"> </span>ts<span style="color:#bbb"> </span>linux.KernelTimespec<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>_,<span style="color:#bbb"> </span>errno<span style="color:#bbb"> </span><span style="color:#666">:=</span><span style="color:#bbb"> </span>linux.<span style="color:#00a000">EpollPwait2</span>(<span style="color:#666">-</span><span style="color:#666">1</span>,<span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">nil</span>,<span style="color:#bbb"> </span><span style="color:#666">0</span>,<span style="color:#bbb"> </span><span style="color:#666">&amp;</span>ts)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>epollpwait2Avail<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span>errno<span style="color:#bbb"> </span><span style="color:#666">!=</span><span style="color:#bbb"> </span>_ENOSYS<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>Pretty standard, if it&rsquo;s available the runtime uses it, otherwise it falls back to <code>epoll_wait</code>.</p>
+<p>Hot path:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>epollpwait2Avail<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#a2f;font-weight:bold">var</span><span style="color:#bbb"> </span>timeout<span style="color:#bbb"> </span>linux.KernelTimespec<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>delay<span style="color:#bbb"> </span>&gt;<span style="color:#bbb"> </span><span style="color:#666">0</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>timeout.Sec<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span>delay<span style="color:#bbb"> </span><span style="color:#666">/</span><span style="color:#bbb"> </span><span style="color:#666">1e9</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>timeout.Nsec<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span>delay<span style="color:#bbb"> </span><span style="color:#666">%</span><span style="color:#bbb"> </span><span style="color:#666">1e9</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>n,<span style="color:#bbb"> </span>errno<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span>linux.<span style="color:#00a000">EpollPwait2</span>(<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>epfd,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>events,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#a2f">int32</span>(<span style="color:#a2f">len</span>(events)),<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#666">&amp;</span>timeout,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#080;font-style:italic">// fallback to epoll_wait</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><h2 id="results">Results <a href="#results" class="anchor">🔗</a></h2><div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ go install golang.org/dl/gotip@latest
+</span></span><span style="display:flex;"><span>$ gotip download <span style="color:#666">787700</span>
+</span></span><span style="display:flex;"><span>$ gotip run .
+</span></span><span style="display:flex;"><span>  avg 53.5µs;  min 51.9µs;  p50 52.5µs;  max 62.2µs;
+</span></span><span style="display:flex;"><span>  p90 58.1µs;  p99 62.2µs;  p999 62.2µs;  p9999 62.2µs;
+</span></span><span style="display:flex;"><span>       52µs <span style="color:#666">[</span>  1<span style="color:#666">]</span> ▌
+</span></span><span style="display:flex;"><span>       52µs <span style="color:#666">[</span> 79<span style="color:#666">]</span> ████████████████████████████████████████
+</span></span><span style="display:flex;"><span>       54µs <span style="color:#666">[</span> 10<span style="color:#666">]</span> █████
+</span></span><span style="display:flex;"><span>       56µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
+</span></span><span style="display:flex;"><span>       58µs <span style="color:#666">[</span>  2<span style="color:#666">]</span> █
+</span></span><span style="display:flex;"><span>       60µs <span style="color:#666">[</span>  2<span style="color:#666">]</span> █
+</span></span><span style="display:flex;"><span>       62µs <span style="color:#666">[</span>  6<span style="color:#666">]</span> ███
+</span></span><span style="display:flex;"><span>       64µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
+</span></span><span style="display:flex;"><span>       66µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
+</span></span><span style="display:flex;"><span>       68µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
+</span></span></code></pre></div><p>50µs sleeps are now actually ~60µs instead of 1ms, a ~16x improvement in timer resolution. This applies to any sub-millisecond timer or deadline. In theory, it can even improve latency of the scheduler, but I haven&rsquo;t profiled it.</p>
+<h2 id="conclusion">Conclusion <a href="#conclusion" class="anchor">🔗</a></h2><p>This change won&rsquo;t speed up most programs. But if your workload uses sub-millisecond timers or deadlines, expect noticeably reduced latency.</p>
+<p>Link to tracking issue: <a href="https://github.com/golang/go/issues/53824" target="_blank" rel="noopener">https://github.com/golang/go/issues/53824</a>.</p>
+<p>Special thanks to <a href="https://github.com/dAdAbird" target="_blank" rel="noopener">Andrew Pogrebnoi</a> for the initial iteration on the idea!</p>
+    </div>
+
+    
+        <div class="tags">
+            
+                <a href="https://blog.mauri870.com/tags/go">Go</a>
+            
+                <a href="https://blog.mauri870.com/tags/linux">Linux</a>
+            
+                <a href="https://blog.mauri870.com/tags/performance">Performance</a>
+            
+        </div>
+    
+    
+    
+  <div id="comment">
+    
+    
+  </div>
+
+
+</section>
+
+
+    </main>
+    
+    <footer id="footer">
+    
+
+    <div class="copyright">
+    
+       © Copyright 
+       2026 
+       <span class="split">
+        <svg fill="#bbbbbb" width="15" height="15" version="1.1" id="heart-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">
+  <path d="M13.91,6.75c-1.17,2.25-4.3,5.31-6.07,6.94c-0.1903,0.1718-0.4797,0.1718-0.67,0C5.39,12.06,2.26,9,1.09,6.75&#xA;&#x9;C-1.48,1.8,5-1.5,7.5,3.45C10-1.5,16.48,1.8,13.91,6.75z"/>
+</svg>
+       </span>
+       Mauri de Souza Meneguzzo
+    
+    </div>
+
+    
+      <div class="powerby">
+        Powered by <a href='http://www.gohugo.io/'>Hugo</a> Theme By <a href='https://github.com/nodejh/hugo-theme-mini'>nodejh</a>
+      </div>
+    
+</footer>
+
+
+
+  </body>
+</html>
