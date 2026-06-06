@@ -1,117 +1,129 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Posts on Mauri870&#39;s dev blog</title>
-    <link>https://blog.mauri870.com/posts/</link>
-    <description>Recent content in Posts on Mauri870&#39;s dev blog</description>
-    <generator>Hugo</generator>
-    <language>en-us</language>
-    <lastBuildDate>Mon, 14 Jul 2025 18:20:00 -0300</lastBuildDate>
-    <atom:link href="https://blog.mauri870.com/posts/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Writing Redis Scripts with JavaScript</title>
-      <link>https://blog.mauri870.com/posts/writing-redis-scripts-with-javascript/</link>
-      <pubDate>Mon, 14 Jul 2025 18:20:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/writing-redis-scripts-with-javascript/</guid>
-      <description>&lt;p&gt;Redis already supports Lua as a scripting language, allowing users to extend the functionality of Redis commands with custom scripts. However, JavaScript is a far more popular language overall, so how about writing Redis scripts in JS instead?&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Redis and LuaJIT</title>
-      <link>https://blog.mauri870.com/posts/redis-and-luajit/</link>
-      <pubDate>Mon, 14 Jul 2025 18:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/redis-and-luajit/</guid>
-      <description>&lt;p&gt;Redis is a very popular in-memory store and has support for Lua scripts. But how about throwing LuaJIT into the mix?&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Why Time Differences Can&#39;t Be Trusted</title>
-      <link>https://blog.mauri870.com/posts/why-time-differences-cant-be-trusted/</link>
-      <pubDate>Fri, 23 May 2025 18:35:12 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/why-time-differences-cant-be-trusted/</guid>
-      <description>&lt;p&gt;Time granularity on Windows is much lower than you&amp;rsquo;d expect, and that can cause surprising bugs when measuring elapsed time.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>The Low-Background Web</title>
-      <link>https://blog.mauri870.com/posts/the-low-background-web/</link>
-      <pubDate>Sun, 06 Apr 2025 19:15:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/the-low-background-web/</guid>
-      <description>&lt;p&gt;We are generating more content than ever — but how much of it is still truly human? And how do we even know what&amp;rsquo;s real anymore? Let&amp;rsquo;s talk about the Low-Background Web.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>AMD 2.0</title>
-      <link>https://blog.mauri870.com/posts/amd-2.0/</link>
-      <pubDate>Tue, 03 Nov 2020 07:45:14 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/amd-2.0/</guid>
-      <description>&lt;p&gt;We finished the full rollout of a new version of our AMD project, let&amp;rsquo;s find out the improvements made alongside some implementation notes!&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>O(n^2) Redis memory usage with Laravel Horizon</title>
-      <link>https://blog.mauri870.com/posts/on2-redis-memory-usage-with-laravel-horizon/</link>
-      <pubDate>Fri, 06 Mar 2020 09:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/on2-redis-memory-usage-with-laravel-horizon/</guid>
-      <description>&lt;p&gt;O(n^2) again, now with Laravel Horizon memory usage.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Plan9 br-abnt2 keyboard map</title>
-      <link>https://blog.mauri870.com/posts/plan9-br-abnt2-keyboard-map/</link>
-      <pubDate>Thu, 09 May 2019 21:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/plan9-br-abnt2-keyboard-map/</guid>
-      <description>&lt;p&gt;This is a quick post about a new Plan9 keyboard map, supporting the brazilian ABNT2 layout.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Writing an Asterisk PBX module in Rust and C</title>
-      <link>https://blog.mauri870.com/posts/writing-an-asterisk-pbx-module-in-rust-and-c/</link>
-      <pubDate>Fri, 03 May 2019 13:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/writing-an-asterisk-pbx-module-in-rust-and-c/</guid>
-      <description>&lt;p&gt;Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust? Let&amp;rsquo;s find out.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Asterisk leaking resources? No, it&#39;s gsutil :&#39;(</title>
-      <link>https://blog.mauri870.com/posts/asterisk-leaking-resources-no-its-gsutil/</link>
-      <pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/asterisk-leaking-resources-no-its-gsutil/</guid>
-      <description>&lt;p&gt;This week we solved a resource leak in our asterisk images reserved for call handling. Here&amp;rsquo;s the path we follow to mitigate the issue, which we find out to be related with the gsutil command line tool.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Plan9 on raspberry pi 3</title>
-      <link>https://blog.mauri870.com/posts/plan9-on-raspberry-pi-3/</link>
-      <pubDate>Thu, 31 May 2018 20:55:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/plan9-on-raspberry-pi-3/</guid>
-      <description>&lt;p&gt;Plan9 is a research operating system from the same group who created UNIX at Bell Labs Computing Sciences Research Center (CSRC). It emerged in the 80s, and its early development coincided with continuing development of the later versions of Research UNIX. Let&amp;rsquo;s install it in the raspberry pi 3!&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Audio Spectrograms in Tensorflow</title>
-      <link>https://blog.mauri870.com/posts/audio-spectrograms-in-tensorflow/</link>
-      <pubDate>Thu, 24 May 2018 00:05:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/audio-spectrograms-in-tensorflow/</guid>
-      <description>&lt;p&gt;A Spectrogram is a picture of sound. A common approach for audio classification tasks is to use spectrograms as input and simply treat the audio as an image. After several tries I finally got an optimized way to integrate the spectrogram generation pipeline into the tensorflow computational graph.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>How to export the CIFAR10 model to Tensorflow Serving</title>
-      <link>https://blog.mauri870.com/posts/how-to-export-the-cifar10-model-to-tensorflow-serving/</link>
-      <pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/how-to-export-the-cifar10-model-to-tensorflow-serving/</guid>
-      <description>&lt;p&gt;The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. In this blog post I&amp;rsquo;ll cover how to export a trained CIFAR-10 tensorflow model to Tensorflow Serving.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Writing a Golang client for the Tensorflow Serving Inception model</title>
-      <link>https://blog.mauri870.com/posts/writing-a-golang-client-for-the-tensorflow-serving-inception-model/</link>
-      <pubDate>Sat, 19 May 2018 12:35:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/writing-a-golang-client-for-the-tensorflow-serving-inception-model/</guid>
-      <description>&lt;p&gt;Tensorflow Serving is the most optimized way to serve a Tensorflow machine learning model in production. The official tutorials only cover the python client, so lets implement a Go/Golang one.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Using Opentracing/Jaeger with Laravel</title>
-      <link>https://blog.mauri870.com/posts/using-opentracing/jaeger-with-laravel/</link>
-      <pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/using-opentracing/jaeger-with-laravel/</guid>
-      <description>&lt;p&gt;Microservices become the new standard for scalable and maintanable arquitectures. Monolithic aplications are splited into smaller pieces to keep things simple and decoupled. Tracing comes in hand when you need to aggregate the events during the request lifecycle between a single or multiple services.&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Assembly Linux x64 - Part 1</title>
-      <link>https://blog.mauri870.com/posts/assembly-linux-x64-part-1/</link>
-      <pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/assembly-linux-x64-part-1/</guid>
-      <description>&lt;p&gt;I&amp;rsquo;m a person that loves to learn new things, and assembly is one of the most recent topics I decide to dig into.&lt;/p&gt;</description>
-    </item>
-  </channel>
+	<channel>
+		<title>Posts on Mauri870&#39;s dev blog</title>
+		<link>https://blog.mauri870.com/posts/</link>
+		<description>Recent content in Posts on Mauri870&#39;s dev blog</description>
+		<generator>Hugo</generator>
+		<language>en-us</language>
+		
+		
+		
+		
+			<lastBuildDate>Sat, 06 Jun 2026 16:11:00 -0300</lastBuildDate>
+		
+			<atom:link href="https://blog.mauri870.com/posts/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Sub-millisecond Timer Precision in Go 1.28</title>
+				<link>https://blog.mauri870.com/posts/sub-millisecond-timer-precision-in-go-1.28/</link>
+				<pubDate>Sat, 06 Jun 2026 16:11:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/sub-millisecond-timer-precision-in-go-1.28/</guid>
+				<description>&lt;p&gt;Quiz: &lt;code&gt;time.Sleep(50 * time.Microsecond)&lt;/code&gt; on Linux. How long does it actually sleep?&lt;/p&gt;&#xA;&lt;p&gt;If you said 50µs, you&amp;rsquo;re wrong. Let&amp;rsquo;s see why.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Writing Redis Scripts with JavaScript</title>
+				<link>https://blog.mauri870.com/posts/writing-redis-scripts-with-javascript/</link>
+				<pubDate>Mon, 14 Jul 2025 18:20:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/writing-redis-scripts-with-javascript/</guid>
+				<description>&lt;p&gt;Redis already supports Lua as a scripting language, allowing users to extend the functionality of Redis commands with custom scripts. However, JavaScript is a far more popular language overall, so how about writing Redis scripts in JS instead?&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Redis and LuaJIT</title>
+				<link>https://blog.mauri870.com/posts/redis-and-luajit/</link>
+				<pubDate>Mon, 14 Jul 2025 18:00:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/redis-and-luajit/</guid>
+				<description>&lt;p&gt;Redis is a very popular in-memory store and has support for Lua scripts. But how about throwing LuaJIT into the mix?&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Why Time Differences Can&#39;t Be Trusted</title>
+				<link>https://blog.mauri870.com/posts/why-time-differences-cant-be-trusted/</link>
+				<pubDate>Fri, 23 May 2025 18:35:12 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/why-time-differences-cant-be-trusted/</guid>
+				<description>&lt;p&gt;Time granularity on Windows is much lower than you&amp;rsquo;d expect, and that can cause surprising bugs when measuring elapsed time.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>The Low-Background Web</title>
+				<link>https://blog.mauri870.com/posts/the-low-background-web/</link>
+				<pubDate>Sun, 06 Apr 2025 19:15:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/the-low-background-web/</guid>
+				<description>&lt;p&gt;We are generating more content than ever — but how much of it is still truly human? And how do we even know what&amp;rsquo;s real anymore? Let&amp;rsquo;s talk about the Low-Background Web.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>AMD 2.0</title>
+				<link>https://blog.mauri870.com/posts/amd-2.0/</link>
+				<pubDate>Tue, 03 Nov 2020 07:45:14 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/amd-2.0/</guid>
+				<description>&lt;p&gt;We finished the full rollout of a new version of our AMD project, let&amp;rsquo;s find out the improvements made alongside some implementation notes!&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>O(n^2) Redis memory usage with Laravel Horizon</title>
+				<link>https://blog.mauri870.com/posts/on2-redis-memory-usage-with-laravel-horizon/</link>
+				<pubDate>Fri, 06 Mar 2020 09:00:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/on2-redis-memory-usage-with-laravel-horizon/</guid>
+				<description>&lt;p&gt;O(n^2) again, now with Laravel Horizon memory usage.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Plan9 br-abnt2 keyboard map</title>
+				<link>https://blog.mauri870.com/posts/plan9-br-abnt2-keyboard-map/</link>
+				<pubDate>Thu, 09 May 2019 21:00:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/plan9-br-abnt2-keyboard-map/</guid>
+				<description>&lt;p&gt;This is a quick post about a new Plan9 keyboard map, supporting the brazilian ABNT2 layout.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Writing an Asterisk PBX module in Rust and C</title>
+				<link>https://blog.mauri870.com/posts/writing-an-asterisk-pbx-module-in-rust-and-c/</link>
+				<pubDate>Fri, 03 May 2019 13:00:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/writing-an-asterisk-pbx-module-in-rust-and-c/</guid>
+				<description>&lt;p&gt;Asterisk modules are commonly written in C, but what about writing an Asterisk module in Rust? Let&amp;rsquo;s find out.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Asterisk leaking resources? No, it&#39;s gsutil :&#39;(</title>
+				<link>https://blog.mauri870.com/posts/asterisk-leaking-resources-no-its-gsutil/</link>
+				<pubDate>Wed, 05 Dec 2018 10:00:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/asterisk-leaking-resources-no-its-gsutil/</guid>
+				<description>&lt;p&gt;This week we solved a resource leak in our asterisk images reserved for call handling. Here&amp;rsquo;s the path we follow to mitigate the issue, which we find out to be related with the gsutil command line tool.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Plan9 on raspberry pi 3</title>
+				<link>https://blog.mauri870.com/posts/plan9-on-raspberry-pi-3/</link>
+				<pubDate>Thu, 31 May 2018 20:55:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/plan9-on-raspberry-pi-3/</guid>
+				<description>&lt;p&gt;Plan9 is a research operating system from the same group who created UNIX at Bell Labs Computing Sciences Research Center (CSRC). It emerged in the 80s, and its early development coincided with continuing development of the later versions of Research UNIX. Let&amp;rsquo;s install it in the raspberry pi 3!&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Audio Spectrograms in Tensorflow</title>
+				<link>https://blog.mauri870.com/posts/audio-spectrograms-in-tensorflow/</link>
+				<pubDate>Thu, 24 May 2018 00:05:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/audio-spectrograms-in-tensorflow/</guid>
+				<description>&lt;p&gt;A Spectrogram is a picture of sound. A common approach for audio classification tasks is to use spectrograms as input and simply treat the audio as an image. After several tries I finally got an optimized way to integrate the spectrogram generation pipeline into the tensorflow computational graph.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>How to export the CIFAR10 model to Tensorflow Serving</title>
+				<link>https://blog.mauri870.com/posts/how-to-export-the-cifar10-model-to-tensorflow-serving/</link>
+				<pubDate>Mon, 21 May 2018 23:26:10 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/how-to-export-the-cifar10-model-to-tensorflow-serving/</guid>
+				<description>&lt;p&gt;The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes, with 6000 images per class. In this blog post I&amp;rsquo;ll cover how to export a trained CIFAR-10 tensorflow model to Tensorflow Serving.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Writing a Golang client for the Tensorflow Serving Inception model</title>
+				<link>https://blog.mauri870.com/posts/writing-a-golang-client-for-the-tensorflow-serving-inception-model/</link>
+				<pubDate>Sat, 19 May 2018 12:35:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/writing-a-golang-client-for-the-tensorflow-serving-inception-model/</guid>
+				<description>&lt;p&gt;Tensorflow Serving is the most optimized way to serve a Tensorflow machine learning model in production. The official tutorials only cover the python client, so lets implement a Go/Golang one.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Using Opentracing/Jaeger with Laravel</title>
+				<link>https://blog.mauri870.com/posts/using-opentracing/jaeger-with-laravel/</link>
+				<pubDate>Sun, 13 May 2018 22:26:06 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/using-opentracing/jaeger-with-laravel/</guid>
+				<description>&lt;p&gt;Microservices become the new standard for scalable and maintanable arquitectures. Monolithic aplications are splited into smaller pieces to keep things simple and decoupled. Tracing comes in hand when you need to aggregate the events during the request lifecycle between a single or multiple services.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Assembly Linux x64 - Part 1</title>
+				<link>https://blog.mauri870.com/posts/assembly-linux-x64-part-1/</link>
+				<pubDate>Tue, 08 May 2018 21:22:56 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/assembly-linux-x64-part-1/</guid>
+				<description>&lt;p&gt;I&amp;rsquo;m a person that loves to learn new things, and assembly is one of the most recent topics I decide to dig into.&lt;/p&gt;</description>
+			</item>
+	</channel>
 </rss>

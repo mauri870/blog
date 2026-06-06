@@ -7,7 +7,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">    
 <meta name="viewport" content="width=device-width,minimum-scale=1">
 <meta name="description" content="Tensorflow Serving is the most optimized way to serve a Tensorflow machine learning model in production. The official tutorials only cover the python client, so lets implement a Go/Golang one.">
-<meta name="generator" content="Hugo 0.145.0">
+<meta name="generator" content="Hugo 0.162.1">
 
 
   <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
@@ -106,14 +106,15 @@
 <h2 id="1-train-and-export-the-model">1. Train and export the model <a href="#1-train-and-export-the-model" class="anchor">🔗</a></h2><p>Since Tensorflow Serving is designed to serve Tensorflow models, we first need to train one. For the sake of simplicity, you can follow the <a href="https://www.tensorflow.org/serving/serving_inception" target="_blank" rel="noopener">tutorials</a> in order to export a pre-treined inception model. You can skip the Kubernetes part, we only need the final image with the compiled tensorflow serving server and the exported model. I&rsquo;ll probably write a post in the future about how to export a custom model.</p>
 <h2 id="2-preparing-the-proto-files">2. Preparing the proto files <a href="#2-preparing-the-proto-files" class="anchor">🔗</a></h2><p>Tensorflow Serving is written in C++, exposing a gRPC server that talks Protobuf. In order to make a Go client, we must compile the protobuf files first to generate all the boilerplate code for Go, yeah protobuf is really cool hum :smile:.</p>
 <p>First of all clone the tensorflow serving repository:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone -b r1.7 https://github.com/tensorflow/serving.git
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone -b r1.7 https://github.com/tensorflow/serving.git
 </span></span></code></pre></div><p>Since the serving proto files depends on the tensorflow ones, clone the tensorflow repo too:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone -b r1.7 https://github.com/tensorflow/tensorflow.git
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git clone -b r1.7 https://github.com/tensorflow/tensorflow.git
 </span></span></code></pre></div><blockquote>
-<p>Maybe using bazel you don&rsquo;t need to do these steps manually, but who uses bazel?? Probably only Google&hellip;</p></blockquote>
+<p>Maybe using bazel you don&rsquo;t need to do these steps manually, but who uses bazel?? Probably only Google&hellip;</p>
+</blockquote>
 <p>Then you need the protoc compiler, get it <a href="https://github.com/protocolbuffers/protobuf" target="_blank" rel="noopener">here</a>. And of course the golang protobuf plugin, <a href="https://github.com/golang/protobuf" target="_blank" rel="noopener">here</a>.</p>
 <p>Now you can compile the protos:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p vendor
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>mkdir -p vendor
 </span></span><span style="display:flex;"><span><span style="color:#b8860b">PROTOC_OPTS</span><span style="color:#666">=</span><span style="color:#b44">&#39;-I tensorflow -I serving --go_out=plugins=grpc:vendor&#39;</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span><span style="color:#a2f">eval</span> <span style="color:#b44">&#34;protoc </span><span style="color:#b8860b">$PROTOC_OPTS</span><span style="color:#b44"> serving/tensorflow_serving/apis/*.proto&#34;</span>
@@ -126,88 +127,88 @@
 </span></span><span style="display:flex;"><span><span style="color:#a2f">eval</span> <span style="color:#b44">&#34;protoc </span><span style="color:#b8860b">$PROTOC_OPTS</span><span style="color:#b44"> tensorflow/tensorflow/core/protobuf/{saver,meta_graph}.proto&#34;</span>
 </span></span></code></pre></div><p>Running this will create a directory called <code>tensorflow</code> and <code>tensorflow_serving</code> in the vendor directory.</p>
 <h2 id="3-the-inception-go-client">3. The Inception Go client <a href="#3-the-inception-go-client" class="anchor">🔗</a></h2><p>You need the protobuf wrappers and the grpc package:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>go get github.com/golang/protobuf/ptypes/wrappers google.golang.org/grpc
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>go get github.com/golang/protobuf/ptypes/wrappers google.golang.org/grpc
 </span></span></code></pre></div><p>Don&rsquo;t forget to run the serving server:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker run --rm -p 10000:10000 your_serving_image
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker run --rm -p 10000:10000 your_serving_image
 </span></span></code></pre></div><p>And here is the client code:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#080;font-style:italic">// save it as inception-client.go</span>
-</span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">package</span> main
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">import</span> (
-</span></span><span style="display:flex;"><span>	<span style="color:#b44">&#34;context&#34;</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#b44">&#34;flag&#34;</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#b44">&#34;fmt&#34;</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#b44">&#34;io/ioutil&#34;</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#b44">&#34;log&#34;</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#b44">&#34;os&#34;</span>
-</span></span><span style="display:flex;"><span>	<span style="color:#b44">&#34;path/filepath&#34;</span>
-</span></span><span style="display:flex;"><span>	tf_core_framework <span style="color:#b44">&#34;tensorflow/core/framework&#34;</span>
-</span></span><span style="display:flex;"><span>	pb <span style="color:#b44">&#34;tensorflow_serving/apis&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	google_protobuf <span style="color:#b44">&#34;github.com/golang/protobuf/ptypes/wrappers&#34;</span>
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#b44">&#34;google.golang.org/grpc&#34;</span>
-</span></span><span style="display:flex;"><span>)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">func</span> <span style="color:#00a000">main</span>() {
-</span></span><span style="display:flex;"><span>	servingAddress <span style="color:#666">:=</span> flag.<span style="color:#00a000">String</span>(<span style="color:#b44">&#34;serving-address&#34;</span>, <span style="color:#b44">&#34;localhost:10000&#34;</span>, <span style="color:#b44">&#34;The tensorflow serving address&#34;</span>)
-</span></span><span style="display:flex;"><span>	flag.<span style="color:#00a000">Parse</span>()
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	<span style="color:#a2f;font-weight:bold">if</span> flag.<span style="color:#00a000">NArg</span>() <span style="color:#666">!=</span> <span style="color:#666">1</span> {
-</span></span><span style="display:flex;"><span>    fmt.<span style="color:#00a000">Println</span>(<span style="color:#b44">&#34;Usage: &#34;</span> <span style="color:#666">+</span> os.Args[<span style="color:#666">0</span>] <span style="color:#666">+</span> <span style="color:#b44">&#34; --serving-address localhost:10000 path/to/img.png&#34;</span>)
-</span></span><span style="display:flex;"><span>		os.<span style="color:#00a000">Exit</span>(<span style="color:#666">1</span>)
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	imgPath, err <span style="color:#666">:=</span> filepath.<span style="color:#00a000">Abs</span>(flag.<span style="color:#00a000">Arg</span>(<span style="color:#666">0</span>))
-</span></span><span style="display:flex;"><span>	<span style="color:#a2f;font-weight:bold">if</span> err <span style="color:#666">!=</span> <span style="color:#a2f;font-weight:bold">nil</span> {
-</span></span><span style="display:flex;"><span>		log.<span style="color:#00a000">Fatalln</span>(err)
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	imageBytes, err <span style="color:#666">:=</span> ioutil.<span style="color:#00a000">ReadFile</span>(imgPath)
-</span></span><span style="display:flex;"><span>	<span style="color:#a2f;font-weight:bold">if</span> err <span style="color:#666">!=</span> <span style="color:#a2f;font-weight:bold">nil</span> {
-</span></span><span style="display:flex;"><span>		log.<span style="color:#00a000">Fatalln</span>(err)
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	request <span style="color:#666">:=</span> <span style="color:#666">&amp;</span>pb.PredictRequest{
-</span></span><span style="display:flex;"><span>		ModelSpec: <span style="color:#666">&amp;</span>pb.ModelSpec{
-</span></span><span style="display:flex;"><span>			Name:          <span style="color:#b44">&#34;inception&#34;</span>,
-</span></span><span style="display:flex;"><span>			SignatureName: <span style="color:#b44">&#34;predict_images&#34;</span>,
-</span></span><span style="display:flex;"><span>			Version: <span style="color:#666">&amp;</span>google_protobuf.Int64Value{
-</span></span><span style="display:flex;"><span>				Value: <span style="color:#a2f">int64</span>(<span style="color:#666">1</span>),
-</span></span><span style="display:flex;"><span>			},
-</span></span><span style="display:flex;"><span>		},
-</span></span><span style="display:flex;"><span>		Inputs: <span style="color:#a2f;font-weight:bold">map</span>[<span style="color:#0b0;font-weight:bold">string</span>]<span style="color:#666">*</span>tf_core_framework.TensorProto{
-</span></span><span style="display:flex;"><span>			<span style="color:#b44">&#34;images&#34;</span>: <span style="color:#666">&amp;</span>tf_core_framework.TensorProto{
-</span></span><span style="display:flex;"><span>				Dtype: tf_core_framework.DataType_DT_STRING,
-</span></span><span style="display:flex;"><span>				TensorShape: <span style="color:#666">&amp;</span>tf_core_framework.TensorShapeProto{
-</span></span><span style="display:flex;"><span>					Dim: []<span style="color:#666">*</span>tf_core_framework.TensorShapeProto_Dim{
-</span></span><span style="display:flex;"><span>						<span style="color:#666">&amp;</span>tf_core_framework.TensorShapeProto_Dim{
-</span></span><span style="display:flex;"><span>							Size: <span style="color:#a2f">int64</span>(<span style="color:#666">1</span>),
-</span></span><span style="display:flex;"><span>						},
-</span></span><span style="display:flex;"><span>					},
-</span></span><span style="display:flex;"><span>				},
-</span></span><span style="display:flex;"><span>				StringVal: [][]<span style="color:#0b0;font-weight:bold">byte</span>{imageBytes},
-</span></span><span style="display:flex;"><span>			},
-</span></span><span style="display:flex;"><span>		},
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	conn, err <span style="color:#666">:=</span> grpc.<span style="color:#00a000">Dial</span>(<span style="color:#666">*</span>servingAddress, grpc.<span style="color:#00a000">WithInsecure</span>())
-</span></span><span style="display:flex;"><span>	<span style="color:#a2f;font-weight:bold">if</span> err <span style="color:#666">!=</span> <span style="color:#a2f;font-weight:bold">nil</span> {
-</span></span><span style="display:flex;"><span>		log.<span style="color:#00a000">Fatalf</span>(<span style="color:#b44">&#34;Cannot connect to the grpc server: %v\n&#34;</span>, err)
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>	<span style="color:#a2f;font-weight:bold">defer</span> conn.<span style="color:#00a000">Close</span>()
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	client <span style="color:#666">:=</span> pb.<span style="color:#00a000">NewPredictionServiceClient</span>(conn)
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	resp, err <span style="color:#666">:=</span> client.<span style="color:#00a000">Predict</span>(context.<span style="color:#00a000">Background</span>(), request)
-</span></span><span style="display:flex;"><span>	<span style="color:#a2f;font-weight:bold">if</span> err <span style="color:#666">!=</span> <span style="color:#a2f;font-weight:bold">nil</span> {
-</span></span><span style="display:flex;"><span>		log.<span style="color:#00a000">Fatalln</span>(err)
-</span></span><span style="display:flex;"><span>	}
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>	log.<span style="color:#00a000">Println</span>(resp)
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>That&rsquo;s it, let&rsquo;s test:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>go build .
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-golang" data-lang="golang"><span style="display:flex;"><span><span style="color:#080;font-style:italic">// save it as inception-client.go</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">package</span><span style="color:#bbb"> </span>main<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">import</span><span style="color:#bbb"> </span>(<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#b44">&#34;context&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#b44">&#34;flag&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#b44">&#34;fmt&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#b44">&#34;io/ioutil&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#b44">&#34;log&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#b44">&#34;os&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#b44">&#34;path/filepath&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>tf_core_framework<span style="color:#bbb"> </span><span style="color:#b44">&#34;tensorflow/core/framework&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>pb<span style="color:#bbb"> </span><span style="color:#b44">&#34;tensorflow_serving/apis&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>google_protobuf<span style="color:#bbb"> </span><span style="color:#b44">&#34;github.com/golang/protobuf/ptypes/wrappers&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#b44">&#34;google.golang.org/grpc&#34;</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">func</span><span style="color:#bbb"> </span><span style="color:#00a000">main</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>servingAddress<span style="color:#bbb"> </span><span style="color:#666">:=</span><span style="color:#bbb"> </span>flag.<span style="color:#00a000">String</span>(<span style="color:#b44">&#34;serving-address&#34;</span>,<span style="color:#bbb"> </span><span style="color:#b44">&#34;localhost:10000&#34;</span>,<span style="color:#bbb"> </span><span style="color:#b44">&#34;The tensorflow serving address&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>flag.<span style="color:#00a000">Parse</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>flag.<span style="color:#00a000">NArg</span>()<span style="color:#bbb"> </span><span style="color:#666">!=</span><span style="color:#bbb"> </span><span style="color:#666">1</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>fmt.<span style="color:#00a000">Println</span>(<span style="color:#b44">&#34;Usage: &#34;</span><span style="color:#bbb"> </span><span style="color:#666">+</span><span style="color:#bbb"> </span>os.Args[<span style="color:#666">0</span>]<span style="color:#bbb"> </span><span style="color:#666">+</span><span style="color:#bbb"> </span><span style="color:#b44">&#34; --serving-address localhost:10000 path/to/img.png&#34;</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">		</span>os.<span style="color:#00a000">Exit</span>(<span style="color:#666">1</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>imgPath,<span style="color:#bbb"> </span>err<span style="color:#bbb"> </span><span style="color:#666">:=</span><span style="color:#bbb"> </span>filepath.<span style="color:#00a000">Abs</span>(flag.<span style="color:#00a000">Arg</span>(<span style="color:#666">0</span>))<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>err<span style="color:#bbb"> </span><span style="color:#666">!=</span><span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">nil</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">		</span>log.<span style="color:#00a000">Fatalln</span>(err)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>imageBytes,<span style="color:#bbb"> </span>err<span style="color:#bbb"> </span><span style="color:#666">:=</span><span style="color:#bbb"> </span>ioutil.<span style="color:#00a000">ReadFile</span>(imgPath)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>err<span style="color:#bbb"> </span><span style="color:#666">!=</span><span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">nil</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">		</span>log.<span style="color:#00a000">Fatalln</span>(err)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>request<span style="color:#bbb"> </span><span style="color:#666">:=</span><span style="color:#bbb"> </span><span style="color:#666">&amp;</span>pb.PredictRequest{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">		</span>ModelSpec:<span style="color:#bbb"> </span><span style="color:#666">&amp;</span>pb.ModelSpec{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">			</span>Name:<span style="color:#bbb">          </span><span style="color:#b44">&#34;inception&#34;</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">			</span>SignatureName:<span style="color:#bbb"> </span><span style="color:#b44">&#34;predict_images&#34;</span>,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">			</span>Version:<span style="color:#bbb"> </span><span style="color:#666">&amp;</span>google_protobuf.Int64Value{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">				</span>Value:<span style="color:#bbb"> </span><span style="color:#a2f">int64</span>(<span style="color:#666">1</span>),<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">			</span>},<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">		</span>},<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">		</span>Inputs:<span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">map</span>[<span style="color:#0b0;font-weight:bold">string</span>]<span style="color:#666">*</span>tf_core_framework.TensorProto{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">			</span><span style="color:#b44">&#34;images&#34;</span>:<span style="color:#bbb"> </span><span style="color:#666">&amp;</span>tf_core_framework.TensorProto{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">				</span>Dtype:<span style="color:#bbb"> </span>tf_core_framework.DataType_DT_STRING,<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">				</span>TensorShape:<span style="color:#bbb"> </span><span style="color:#666">&amp;</span>tf_core_framework.TensorShapeProto{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">					</span>Dim:<span style="color:#bbb"> </span>[]<span style="color:#666">*</span>tf_core_framework.TensorShapeProto_Dim{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">						</span><span style="color:#666">&amp;</span>tf_core_framework.TensorShapeProto_Dim{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">							</span>Size:<span style="color:#bbb"> </span><span style="color:#a2f">int64</span>(<span style="color:#666">1</span>),<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">						</span>},<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">					</span>},<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">				</span>},<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">				</span>StringVal:<span style="color:#bbb"> </span>[][]<span style="color:#0b0;font-weight:bold">byte</span>{imageBytes},<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">			</span>},<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">		</span>},<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>conn,<span style="color:#bbb"> </span>err<span style="color:#bbb"> </span><span style="color:#666">:=</span><span style="color:#bbb"> </span>grpc.<span style="color:#00a000">Dial</span>(<span style="color:#666">*</span>servingAddress,<span style="color:#bbb"> </span>grpc.<span style="color:#00a000">WithInsecure</span>())<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>err<span style="color:#bbb"> </span><span style="color:#666">!=</span><span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">nil</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">		</span>log.<span style="color:#00a000">Fatalf</span>(<span style="color:#b44">&#34;Cannot connect to the grpc server: %v\n&#34;</span>,<span style="color:#bbb"> </span>err)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#a2f;font-weight:bold">defer</span><span style="color:#bbb"> </span>conn.<span style="color:#00a000">Close</span>()<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>client<span style="color:#bbb"> </span><span style="color:#666">:=</span><span style="color:#bbb"> </span>pb.<span style="color:#00a000">NewPredictionServiceClient</span>(conn)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>resp,<span style="color:#bbb"> </span>err<span style="color:#bbb"> </span><span style="color:#666">:=</span><span style="color:#bbb"> </span>client.<span style="color:#00a000">Predict</span>(context.<span style="color:#00a000">Background</span>(),<span style="color:#bbb"> </span>request)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>err<span style="color:#bbb"> </span><span style="color:#666">!=</span><span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">nil</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">		</span>log.<span style="color:#00a000">Fatalln</span>(err)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">	</span>log.<span style="color:#00a000">Println</span>(resp)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><p>That&rsquo;s it, let&rsquo;s test:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>go build .
 </span></span><span style="display:flex;"><span>./inception-client --serving-address localhost:10000 path/to/image.png
 </span></span></code></pre></div><p>See you again next time 😄.</p>
     </div>
@@ -244,7 +245,7 @@
     <div class="copyright">
     
        © Copyright 
-       2025 
+       2026 
        <span class="split">
         <svg fill="#bbbbbb" width="15" height="15" version="1.1" id="heart-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">
   <path d="M13.91,6.75c-1.17,2.25-4.3,5.31-6.07,6.94c-0.1903,0.1718-0.4797,0.1718-0.67,0C5.39,12.06,2.26,9,1.09,6.75&#xA;&#x9;C-1.48,1.8,5-1.5,7.5,3.45C10-1.5,16.48,1.8,13.91,6.75z"/>

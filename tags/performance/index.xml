@@ -1,33 +1,45 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Performance on Mauri870&#39;s dev blog</title>
-    <link>https://blog.mauri870.com/tags/performance/</link>
-    <description>Recent content in Performance on Mauri870&#39;s dev blog</description>
-    <generator>Hugo</generator>
-    <language>en-us</language>
-    <lastBuildDate>Mon, 14 Jul 2025 18:20:00 -0300</lastBuildDate>
-    <atom:link href="https://blog.mauri870.com/tags/performance/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Writing Redis Scripts with JavaScript</title>
-      <link>https://blog.mauri870.com/posts/writing-redis-scripts-with-javascript/</link>
-      <pubDate>Mon, 14 Jul 2025 18:20:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/writing-redis-scripts-with-javascript/</guid>
-      <description>&lt;p&gt;Redis already supports Lua as a scripting language, allowing users to extend the functionality of Redis commands with custom scripts. However, JavaScript is a far more popular language overall, so how about writing Redis scripts in JS instead?&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Redis and LuaJIT</title>
-      <link>https://blog.mauri870.com/posts/redis-and-luajit/</link>
-      <pubDate>Mon, 14 Jul 2025 18:00:00 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/redis-and-luajit/</guid>
-      <description>&lt;p&gt;Redis is a very popular in-memory store and has support for Lua scripts. But how about throwing LuaJIT into the mix?&lt;/p&gt;</description>
-    </item>
-    <item>
-      <title>Why Time Differences Can&#39;t Be Trusted</title>
-      <link>https://blog.mauri870.com/posts/why-time-differences-cant-be-trusted/</link>
-      <pubDate>Fri, 23 May 2025 18:35:12 -0300</pubDate>
-      <guid>https://blog.mauri870.com/posts/why-time-differences-cant-be-trusted/</guid>
-      <description>&lt;p&gt;Time granularity on Windows is much lower than you&amp;rsquo;d expect, and that can cause surprising bugs when measuring elapsed time.&lt;/p&gt;</description>
-    </item>
-  </channel>
+	<channel>
+		<title>Performance on Mauri870&#39;s dev blog</title>
+		<link>https://blog.mauri870.com/tags/performance/</link>
+		<description>Recent content in Performance on Mauri870&#39;s dev blog</description>
+		<generator>Hugo</generator>
+		<language>en-us</language>
+		
+		
+		
+		
+			<lastBuildDate>Sat, 06 Jun 2026 16:11:00 -0300</lastBuildDate>
+		
+			<atom:link href="https://blog.mauri870.com/tags/performance/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>Sub-millisecond Timer Precision in Go 1.28</title>
+				<link>https://blog.mauri870.com/posts/sub-millisecond-timer-precision-in-go-1.28/</link>
+				<pubDate>Sat, 06 Jun 2026 16:11:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/sub-millisecond-timer-precision-in-go-1.28/</guid>
+				<description>&lt;p&gt;Quiz: &lt;code&gt;time.Sleep(50 * time.Microsecond)&lt;/code&gt; on Linux. How long does it actually sleep?&lt;/p&gt;&#xA;&lt;p&gt;If you said 50µs, you&amp;rsquo;re wrong. Let&amp;rsquo;s see why.&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Writing Redis Scripts with JavaScript</title>
+				<link>https://blog.mauri870.com/posts/writing-redis-scripts-with-javascript/</link>
+				<pubDate>Mon, 14 Jul 2025 18:20:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/writing-redis-scripts-with-javascript/</guid>
+				<description>&lt;p&gt;Redis already supports Lua as a scripting language, allowing users to extend the functionality of Redis commands with custom scripts. However, JavaScript is a far more popular language overall, so how about writing Redis scripts in JS instead?&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Redis and LuaJIT</title>
+				<link>https://blog.mauri870.com/posts/redis-and-luajit/</link>
+				<pubDate>Mon, 14 Jul 2025 18:00:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/redis-and-luajit/</guid>
+				<description>&lt;p&gt;Redis is a very popular in-memory store and has support for Lua scripts. But how about throwing LuaJIT into the mix?&lt;/p&gt;</description>
+			</item>
+			<item>
+				<title>Why Time Differences Can&#39;t Be Trusted</title>
+				<link>https://blog.mauri870.com/posts/why-time-differences-cant-be-trusted/</link>
+				<pubDate>Fri, 23 May 2025 18:35:12 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/why-time-differences-cant-be-trusted/</guid>
+				<description>&lt;p&gt;Time granularity on Windows is much lower than you&amp;rsquo;d expect, and that can cause surprising bugs when measuring elapsed time.&lt;/p&gt;</description>
+			</item>
+	</channel>
 </rss>
