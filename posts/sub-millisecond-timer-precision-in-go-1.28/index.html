@@ -65,13 +65,13 @@ If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why.">
           ·
         </span>
         <span>
-          605 words
+          644 words
         </span>
         <span class="split">
           ·
         </span>
         <span>
-          3 minute read
+          4 minute read
         </span>
     </div>
 
@@ -155,7 +155,7 @@ If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why.">
 </span></span><span style="display:flex;"><span>     1.02ms <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
 </span></span><span style="display:flex;"><span>     1.02ms <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
 </span></span><span style="display:flex;"><span>     1.02ms <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
-</span></span></code></pre></div><p>The floor is entirely from <code>epoll_wait</code>.</p>
+</span></span></code></pre></div><p>This cluster is entirely <code>epoll_wait</code>&rsquo;s rounding.</p>
 <h2 id="enter-epoll_pwait2">Enter epoll_pwait2 <a href="#enter-epoll_pwait2" class="anchor">🔗</a></h2><p>Linux 5.11 added <code>epoll_pwait2(2)</code>:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#0b0;font-weight:bold">int</span> <span style="color:#00a000">epoll_pwait2</span>(<span style="color:#0b0;font-weight:bold">int</span> epfd, <span style="color:#a2f;font-weight:bold">struct</span> epoll_event <span style="color:#666">*</span>events, <span style="color:#0b0;font-weight:bold">int</span> maxevents,
 </span></span><span style="display:flex;"><span>                 <span style="color:#a2f;font-weight:bold">const</span> <span style="color:#a2f;font-weight:bold">struct</span> __kernel_timespec <span style="color:#666">*</span>timeout,
@@ -200,7 +200,8 @@ If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why.">
 </span></span><span style="display:flex;"><span>       64µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
 </span></span><span style="display:flex;"><span>       66µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
 </span></span><span style="display:flex;"><span>       68µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
-</span></span></code></pre></div><p>50µs sleeps are now actually ~60µs instead of 1ms, a ~16x improvement in timer resolution. This applies to any sub-millisecond timer or deadline. In theory, it can even improve latency of the scheduler, but I haven&rsquo;t profiled it.</p>
+</span></span></code></pre></div><p>50µs sleeps are now actually ~60µs instead of 1ms, a ~16x improvement in timer resolution. This applies to any sub-millisecond timer or deadline.</p>
+<p>There is also a scheduler angle: an idle M blocks in netpoll until the next timer deadline, which epoll_wait ceils to 1ms, so timers fire late. This only matters when Ms are idle; under load, timer checks run at scheduling points regardless. This could shave latency off timer-driven wakeups, but I haven&rsquo;t profiled it.</p>
 <h2 id="conclusion">Conclusion <a href="#conclusion" class="anchor">🔗</a></h2><p>This change won&rsquo;t speed up most programs. But if your workload uses sub-millisecond timers or deadlines, expect noticeably reduced latency.</p>
 <p>Link to tracking issue: <a href="https://github.com/golang/go/issues/53824" target="_blank" rel="noopener">https://github.com/golang/go/issues/53824</a>.</p>
 <p>Special thanks to <a href="https://github.com/dAdAbird" target="_blank" rel="noopener">Andrew Pogrebnoi</a> for the initial iteration on the idea!</p>
