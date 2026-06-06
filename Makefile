@@ -11,5 +11,5 @@ build: clean
 clean:
 	@rm -r public ||:
 
-release: build
-	@git add public && git commit -m 'Build blog' && git subtree push --prefix public origin master
+release: clean build
+	@git add public && git commit -m 'Build blog' && git push origin $(git subtree split --prefix public):master --force
