@@ -7,7 +7,7 @@ draft: false
 
 Quiz: `time.Sleep(50 * time.Microsecond)` on Linux. How long does it actually sleep?
 
-If you said 50µs, you're wrong. Let's see why.
+If you said 50µs, you're wrong. Let's see why and how to fix it.
 
 <!--more-->
 

@@ -7,7 +7,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">    
 <meta name="viewport" content="width=device-width,minimum-scale=1">
 <meta name="description" content="Quiz: time.Sleep(50 * time.Microsecond) on Linux. How long does it actually sleep?
-If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why.">
+If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why and how to fix it.">
 <meta name="generator" content="Hugo 0.162.1">
 
 
@@ -65,7 +65,7 @@ If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why.">
           ·
         </span>
         <span>
-          644 words
+          649 words
         </span>
         <span class="split">
           ·
@@ -104,7 +104,7 @@ If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why.">
 
     <div class="content">
       <p>Quiz: <code>time.Sleep(50 * time.Microsecond)</code> on Linux. How long does it actually sleep?</p>
-<p>If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why.</p>
+<p>If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why and how to fix it.</p>
 <p>I recently submitted <a href="https://go.dev/cl/787700" target="_blank" rel="noopener">CL 787700</a>, which switches Go&rsquo;s Linux netpoller to use the <code>epoll_pwait2</code> system call when available. The change is expected to land in Go 1.28.</p>
 <h2 id="what-is-netpoll">What is netpoll? <a href="#what-is-netpoll" class="anchor">🔗</a></h2><p>Go parks goroutines on I/O using <code>epoll</code> on Linux. The runtime blocks a thread in <code>epoll_wait</code> on <a href="https://github.com/golang/go/blob/d3be949ada01d7827f8edc87665fef5268634cb3/src/runtime/netpoll_epoll.go#L99" target="_blank" rel="noopener"><code>runtime·netpoll</code></a> until file descriptors become ready, so the scheduler can wake them up.</p>
 <p>Timers (<code>time.Sleep</code>, <code>time.After</code>, <code>time.Ticker</code>) are also routed through the same mechanism by converting deadlines into epoll timeouts.</p>
