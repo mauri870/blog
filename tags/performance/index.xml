@@ -18,7 +18,7 @@
 				<link>https://blog.mauri870.com/posts/sub-millisecond-timer-precision-in-go-1.28/</link>
 				<pubDate>Sat, 06 Jun 2026 16:11:00 -0300</pubDate>
 				<guid>https://blog.mauri870.com/posts/sub-millisecond-timer-precision-in-go-1.28/</guid>
-				<description>&lt;p&gt;Quiz: &lt;code&gt;time.Sleep(50 * time.Microsecond)&lt;/code&gt; on Linux. How long does it actually sleep?&lt;/p&gt;&#xA;&lt;p&gt;If you said 50µs, you&amp;rsquo;re wrong. Let&amp;rsquo;s see why.&lt;/p&gt;</description>
+				<description>&lt;p&gt;Quiz: &lt;code&gt;time.Sleep(50 * time.Microsecond)&lt;/code&gt; on Linux. How long does it actually sleep?&lt;/p&gt;&#xA;&lt;p&gt;If you said 50µs, you&amp;rsquo;re wrong. Let&amp;rsquo;s see why and how to fix it.&lt;/p&gt;</description>
 			</item>
 			<item>
 				<title>Writing Redis Scripts with JavaScript</title>
