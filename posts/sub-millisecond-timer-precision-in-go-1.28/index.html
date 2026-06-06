@@ -65,7 +65,7 @@ If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why and how to fix it.">
           ·
         </span>
         <span>
-          649 words
+          650 words
         </span>
         <span class="split">
           ·
@@ -200,7 +200,7 @@ If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why and how to fix it.">
 </span></span><span style="display:flex;"><span>       64µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
 </span></span><span style="display:flex;"><span>       66µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
 </span></span><span style="display:flex;"><span>       68µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
-</span></span></code></pre></div><p>50µs sleeps are now actually ~60µs instead of 1ms, a ~16x improvement in timer resolution. This applies to any sub-millisecond timer or deadline.</p>
+</span></span></code></pre></div><p>Sub-millisecond timers finally work. A 50µs sleep now takes 53µs, just a few microseconds of overshoot. That is well within normal OS scheduling jitter.</p>
 <p>There is also a scheduler angle: an idle M blocks in netpoll until the next timer deadline, which epoll_wait ceils to 1ms, so timers fire late. This only matters when Ms are idle; under load, timer checks run at scheduling points regardless. This could shave latency off timer-driven wakeups, but I haven&rsquo;t profiled it.</p>
 <h2 id="conclusion">Conclusion <a href="#conclusion" class="anchor">🔗</a></h2><p>This change won&rsquo;t speed up most programs. But if your workload uses sub-millisecond timers or deadlines, expect noticeably reduced latency.</p>
 <p>Link to tracking issue: <a href="https://github.com/golang/go/issues/53824" target="_blank" rel="noopener">https://github.com/golang/go/issues/53824</a>.</p>
