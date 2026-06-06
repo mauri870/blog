@@ -27,11 +27,6 @@ markup:
     renderer:
       unsafe: true
 
-# Social links in footer, support github,twitter,stackoverflow,facebook
-social:
-  # e.g.
-  github: github.com/mauri870
-
 # Site parameters
 params:
   # Site Author
@@ -61,7 +56,11 @@ params:
   # To hidden post summary in home page, you could set `hiddenPostSummaryInHomePage: true`, default is `false`
   hiddenPostSummaryInHomePage: false
   # Website copyright, default: '© Copyright 2021 ❤️ {params.author}'
-  copyright: '' 
+  copyright: ''
+
+  # Social links in footer, support github,twitter,stackoverflow,facebook
+  Social:
+    github: https://github.com/mauri870
 
   # Extra links in navigation
   links:
