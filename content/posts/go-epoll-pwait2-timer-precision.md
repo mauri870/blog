@@ -154,7 +154,7 @@ $ gotip run .
 
 ```
 
-50µs sleeps are now actually ~60µs instead of 1ms, a ~16x improvement in timer resolution. This applies to any sub-millisecond timer or deadline.
+Sub-millisecond timers finally work. A 50µs sleep now takes 53µs, just a few microseconds of overshoot. That is well within normal OS scheduling jitter.
 
 There is also a scheduler angle: an idle M blocks in netpoll until the next timer deadline, which epoll_wait ceils to 1ms, so timers fire late. This only matters when Ms are idle; under load, timer checks run at scheduling points regardless. This could shave latency off timer-driven wakeups, but I haven't profiled it.
 
