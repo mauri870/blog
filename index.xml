@@ -10,9 +10,16 @@
 		
 		
 		
-			<lastBuildDate>Sat, 06 Jun 2026 16:11:00 -0300</lastBuildDate>
+			<lastBuildDate>Fri, 17 Jul 2026 00:00:00 -0300</lastBuildDate>
 		
 			<atom:link href="https://blog.mauri870.com/index.xml" rel="self" type="application/rss+xml" />
+			<item>
+				<title>I installed Factorio on my GPU</title>
+				<link>https://blog.mauri870.com/posts/i-installed-factorio-on-my-gpu/</link>
+				<pubDate>Fri, 17 Jul 2026 00:00:00 -0300</pubDate>
+				<guid>https://blog.mauri870.com/posts/i-installed-factorio-on-my-gpu/</guid>
+				<description>&lt;p&gt;What if your GPU&amp;rsquo;s VRAM was a filesystem? I built that, then ran Factorio from it.&lt;/p&gt;</description>
+			</item>
 			<item>
 				<title>Sub-millisecond Timer Precision in Go 1.28</title>
 				<link>https://blog.mauri870.com/posts/sub-millisecond-timer-precision-in-go-1.28/</link>
