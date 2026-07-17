@@ -1,27 +1,38 @@
-
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://blog.mauri870.com/tags/c&#43;&#43;/</loc>
+    <lastmod>2026-07-17T00:00:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/fuse/</loc>
+    <lastmod>2026-07-17T00:00:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/posts/i-installed-factorio-on-my-gpu/</loc>
+    <lastmod>2026-07-17T00:00:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/linux/</loc>
+    <lastmod>2026-07-17T00:00:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/</loc>
+    <lastmod>2026-07-17T00:00:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/performance/</loc>
+    <lastmod>2026-07-17T00:00:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/posts/</loc>
+    <lastmod>2026-07-17T00:00:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/</loc>
+    <lastmod>2026-07-17T00:00:00-03:00</lastmod>
+  </url><url>
+    <loc>https://blog.mauri870.com/tags/vulkan/</loc>
+    <lastmod>2026-07-17T00:00:00-03:00</lastmod>
+  </url><url>
     <loc>https://blog.mauri870.com/tags/go/</loc>
     <lastmod>2026-06-06T16:11:00-03:00</lastmod>
   </url><url>
-    <loc>https://blog.mauri870.com/tags/linux/</loc>
-    <lastmod>2026-06-06T16:11:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/</loc>
-    <lastmod>2026-06-06T16:11:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/tags/performance/</loc>
-    <lastmod>2026-06-06T16:11:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/posts/</loc>
-    <lastmod>2026-06-06T16:11:00-03:00</lastmod>
-  </url><url>
     <loc>https://blog.mauri870.com/posts/sub-millisecond-timer-precision-in-go-1.28/</loc>
-    <lastmod>2026-06-06T16:11:00-03:00</lastmod>
-  </url><url>
-    <loc>https://blog.mauri870.com/tags/</loc>
     <lastmod>2026-06-06T16:11:00-03:00</lastmod>
   </url><url>
     <loc>https://blog.mauri870.com/tags/javascript/</loc>
