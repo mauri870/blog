@@ -65,13 +65,13 @@ If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why and how to fix it.">
           ·
         </span>
         <span>
-          652 words
+          968 words
         </span>
         <span class="split">
           ·
         </span>
         <span>
-          4 minute read
+          5 minute read
         </span>
     </div>
 
@@ -89,6 +89,7 @@ If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why and how to fix it.">
     <li><a href="#what-is-netpoll">What is netpoll?</a></li>
     <li><a href="#the-problem">The problem</a></li>
     <li><a href="#enter-epoll_pwait2">Enter epoll_pwait2</a></li>
+    <li><a href="#the-coalescing-problem">The coalescing problem</a></li>
     <li><a href="#results">Results</a></li>
     <li><a href="#conclusion">Conclusion</a></li>
   </ul>
@@ -161,48 +162,62 @@ If you said 50µs, you&rsquo;re wrong. Let&rsquo;s see why and how to fix it.">
 </span></span><span style="display:flex;"><span>                 <span style="color:#a2f;font-weight:bold">const</span> <span style="color:#a2f;font-weight:bold">struct</span> __kernel_timespec <span style="color:#666">*</span>timeout,
 </span></span><span style="display:flex;"><span>                 <span style="color:#a2f;font-weight:bold">const</span> <span style="color:#0b0;font-weight:bold">sigset_t</span> <span style="color:#666">*</span>sigmask, <span style="color:#0b0;font-weight:bold">size_t</span> sigsetsize);
 </span></span></code></pre></div><p>It takes a <a href="https://elixir.bootlin.com/linux/v7.0.11/source/include/uapi/linux/time_types.h#L7-L10" target="_blank" rel="noopener"><code>__kernel_timespec</code></a>. This new structure was added for the Y2038 problem. It&rsquo;s an exclusively 64-bit structure even on 32-bit platforms.</p>
-<p>We can probe for it once at startup in <a href="https://github.com/golang/go/blob/d00c67f297ef6f2cb2cd0e9aae59fa3936bb7eca/src/runtime/os_linux.go#L353" target="_blank" rel="noopener"><code>runtime·osinit</code></a>, using a zero timeout. There could be seccomp filters in place that would also block it, so confirming it works before the runtime fully initializes and relies on it is a good idea.</p>
+<p>The feature is opt-in via <code>GODEBUG=epollpwait2=1</code>. The default retains <code>epoll_wait</code> behaviour because precise per-timer wakeups can measurably increase CPU usage for workloads with many distinct sub-millisecond timers. The coalescing section below covers why.</p>
+<p>Detection runs once at startup. It checks the kernel version first, then probes the syscall with an invalid epfd. Seccomp filters can block <code>epoll_pwait2</code> independently of kernel version, returning <code>EPERM</code> instead of <code>ENOSYS</code>, so a version check alone is not sufficient:</p>
 <div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">func</span><span style="color:#bbb"> </span><span style="color:#00a000">netpollEpollPwait2Init</span>()<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#a2f;font-weight:bold">var</span><span style="color:#bbb"> </span>ts<span style="color:#bbb"> </span>linux.KernelTimespec<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>_,<span style="color:#bbb"> </span>errno<span style="color:#bbb"> </span><span style="color:#666">:=</span><span style="color:#bbb"> </span>linux.<span style="color:#00a000">EpollPwait2</span>(<span style="color:#666">-</span><span style="color:#666">1</span>,<span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">nil</span>,<span style="color:#bbb"> </span><span style="color:#666">0</span>,<span style="color:#bbb"> </span><span style="color:#666">&amp;</span>ts)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>epollpwait2Avail<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span>errno<span style="color:#bbb"> </span><span style="color:#666">!=</span><span style="color:#bbb"> </span>_ENOSYS<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><p>Pretty standard, if it&rsquo;s available the runtime uses it, otherwise it falls back to <code>epoll_wait</code>.</p>
-<p>Hot path:</p>
-<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>epollpwait2Avail<span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#a2f;font-weight:bold">var</span><span style="color:#bbb"> </span>timeout<span style="color:#bbb"> </span>linux.KernelTimespec<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>delay<span style="color:#bbb"> </span>&gt;<span style="color:#bbb"> </span><span style="color:#666">0</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>timeout.Sec<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span>delay<span style="color:#bbb"> </span><span style="color:#666">/</span><span style="color:#bbb"> </span><span style="color:#666">1e9</span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>timeout.Nsec<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span>delay<span style="color:#bbb"> </span><span style="color:#666">%</span><span style="color:#bbb"> </span><span style="color:#666">1e9</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>debug.epollpwait2<span style="color:#bbb"> </span><span style="color:#666">==</span><span style="color:#bbb"> </span><span style="color:#666">0</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#a2f;font-weight:bold">return</span><span style="color:#bbb">
 </span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>n,<span style="color:#bbb"> </span>errno<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span>linux.<span style="color:#00a000">EpollPwait2</span>(<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>epfd,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>events,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#a2f">int32</span>(<span style="color:#a2f">len</span>(events)),<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#666">&amp;</span>timeout,<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>)<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
-</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#080;font-style:italic">// fallback to epoll_wait</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>kv,<span style="color:#bbb"> </span>ok<span style="color:#bbb"> </span><span style="color:#666">:=</span><span style="color:#bbb"> </span><span style="color:#00a000">getKernelVersion</span>();<span style="color:#bbb"> </span>ok<span style="color:#bbb"> </span><span style="color:#666">&amp;&amp;</span><span style="color:#bbb"> </span>!kv.<span style="color:#00a000">GE</span>(<span style="color:#666">5</span>,<span style="color:#bbb"> </span><span style="color:#666">11</span>)<span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#a2f;font-weight:bold">return</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>_,<span style="color:#bbb"> </span>errno<span style="color:#bbb"> </span><span style="color:#666">:=</span><span style="color:#bbb"> </span>linux.<span style="color:#00a000">EpollPwait2</span>(<span style="color:#666">-</span><span style="color:#666">1</span>,<span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">nil</span>,<span style="color:#bbb"> </span><span style="color:#666">0</span>,<span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">nil</span>)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#a2f;font-weight:bold">const</span><span style="color:#bbb"> </span>badf<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span><span style="color:#666">9</span><span style="color:#bbb"> </span><span style="color:#080;font-style:italic">// EBADF</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>epollpwait2Avail<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span>errno<span style="color:#bbb"> </span><span style="color:#666">==</span><span style="color:#bbb"> </span>badf<span style="color:#bbb">
 </span></span></span><span style="display:flex;"><span>}<span style="color:#bbb">
-</span></span></span></code></pre></div><h2 id="results">Results <a href="#results" class="anchor">🔗</a></h2><div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ go install golang.org/dl/gotip@latest
-</span></span><span style="display:flex;"><span>$ gotip download <span style="color:#666">787700</span>
-</span></span><span style="display:flex;"><span>$ gotip run .
-</span></span><span style="display:flex;"><span>  avg 53.5µs;  min 51.9µs;  p50 52.5µs;  max 62.2µs;
-</span></span><span style="display:flex;"><span>  p90 58.1µs;  p99 62.2µs;  p999 62.2µs;  p9999 62.2µs;
-</span></span><span style="display:flex;"><span>       52µs <span style="color:#666">[</span>  1<span style="color:#666">]</span> ▌
-</span></span><span style="display:flex;"><span>       52µs <span style="color:#666">[</span> 79<span style="color:#666">]</span> ████████████████████████████████████████
-</span></span><span style="display:flex;"><span>       54µs <span style="color:#666">[</span> 10<span style="color:#666">]</span> █████
-</span></span><span style="display:flex;"><span>       56µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
-</span></span><span style="display:flex;"><span>       58µs <span style="color:#666">[</span>  2<span style="color:#666">]</span> █
-</span></span><span style="display:flex;"><span>       60µs <span style="color:#666">[</span>  2<span style="color:#666">]</span> █
-</span></span><span style="display:flex;"><span>       62µs <span style="color:#666">[</span>  6<span style="color:#666">]</span> ███
-</span></span><span style="display:flex;"><span>       64µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
-</span></span><span style="display:flex;"><span>       66µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
-</span></span><span style="display:flex;"><span>       68µs <span style="color:#666">[</span>  0<span style="color:#666">]</span> 
-</span></span></code></pre></div><p>Sub-millisecond timers finally work. A 50µs sleep now takes 53µs, just a few microseconds of overshoot. That is well within normal OS scheduling jitter.</p>
-<p>There is also a scheduler angle: an idle M blocks in netpoll until the next timer deadline, which epoll_wait ceils to 1ms, so timers fire late. This only matters when Ms are idle; under load, timer checks run at scheduling points regardless. This could shave latency off timer-driven wakeups, but I haven&rsquo;t profiled it.</p>
-<h2 id="conclusion">Conclusion <a href="#conclusion" class="anchor">🔗</a></h2><p>This change won&rsquo;t speed up most programs. But if your workload uses sub-millisecond timers or deadlines, expect noticeably reduced latency.</p>
+</span></span></span></code></pre></div><p>An invalid <code>epfd</code> returns <code>EBADF</code> when the syscall is available; anything else (including <code>ENOSYS</code> or <code>EPERM</code> from seccomp) disables the feature.</p>
+<h2 id="the-coalescing-problem">The coalescing problem <a href="#the-coalescing-problem" class="anchor">🔗</a></h2><p>Nanosecond-precision timeouts exposed a subtlety. <code>epoll_wait</code>&rsquo;s 1ms floor had a side effect: timers with nearby deadlines naturally collapsed into the same wakeup. Remove the floor, and every timer wakes independently.</p>
+<p>Consider 50 goroutines sleeping 20µs, 40µs, …, 1000µs. With <code>epoll_wait</code> they all round up to 1ms and fire together in one wakeup. With <code>epoll_pwait2</code> each gets its own syscall: 50 wakeups.</p>
+<p>To recover that batching, the runtime applies graduated bucketing to the timeout before the syscall. Timers whose coalesced deadlines land in the same bucket share a single wakeup. Bucket size scales with the delay at roughly 1% of the requested duration:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>&lt; 100µs:   1µs buckets
+</span></span><span style="display:flex;"><span>&lt;   1ms:  10µs buckets
+</span></span><span style="display:flex;"><span>&lt;  10ms: 100µs buckets
+</span></span><span style="display:flex;"><span>&gt;= 10ms:   1ms buckets  (same as epoll_wait)
+</span></span></code></pre></div><p>The delay is always rounded up, so no timer fires early.</p>
+<p>Hot path:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>epollpwait2Avail<span style="color:#bbb"> </span><span style="color:#666">&amp;&amp;</span><span style="color:#bbb"> </span>delay<span style="color:#bbb"> </span><span style="color:#666">!=</span><span style="color:#bbb"> </span><span style="color:#666">0</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#a2f;font-weight:bold">var</span><span style="color:#bbb"> </span>ts<span style="color:#bbb"> </span><span style="color:#666">*</span>linux.KernelTimespec<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#a2f;font-weight:bold">if</span><span style="color:#bbb"> </span>delay<span style="color:#bbb"> </span>&gt;<span style="color:#bbb"> </span><span style="color:#666">0</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span><span style="color:#a2f;font-weight:bold">var</span><span style="color:#bbb"> </span>timeout<span style="color:#bbb"> </span>linux.KernelTimespec<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>timeout.<span style="color:#00a000">SetNsec</span>(<span style="color:#00a000">netpollCoalesceDelay</span>(delay))<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">        </span>ts<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span><span style="color:#666">&amp;</span>timeout<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>}<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#080;font-style:italic">// delay &lt; 0: ts == nil, blocks indefinitely.</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span>n,<span style="color:#bbb"> </span>errno<span style="color:#bbb"> </span>=<span style="color:#bbb"> </span>linux.<span style="color:#00a000">EpollPwait2</span>(epfd,<span style="color:#bbb"> </span>events[:],<span style="color:#bbb"> </span><span style="color:#a2f">int32</span>(<span style="color:#a2f">len</span>(events)),<span style="color:#bbb"> </span>ts)<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb"> </span><span style="color:#a2f;font-weight:bold">else</span><span style="color:#bbb"> </span>{<span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span><span style="color:#bbb">    </span><span style="color:#080;font-style:italic">// epoll_pwait2 unavailable or delay == 0 (non-blocking): use epoll_wait.</span><span style="color:#bbb">
+</span></span></span><span style="display:flex;"><span>}<span style="color:#bbb">
+</span></span></span></code></pre></div><h2 id="results">Results <a href="#results" class="anchor">🔗</a></h2><p>With <code>GODEBUG=epollpwait2=1</code> the hrtime benchmark now shows:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ <span style="color:#b8860b">GODEBUG</span><span style="color:#666">=</span><span style="color:#b8860b">epollpwait2</span><span style="color:#666">=</span><span style="color:#666">1</span> go run .
+</span></span><span style="display:flex;"><span>  avg 53.8µs;  min 51.9µs;  p50 52.7µs;  max 65.6µs;
+</span></span></code></pre></div><p>versus the default:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ go run .
+</span></span><span style="display:flex;"><span>  avg 1ms;  min 1ms;  p50 1ms;  max 1.03ms;
+</span></span></code></pre></div><p>Sub-millisecond timers finally work. A 50µs sleep now takes ~54µs, a few microseconds of overshoot well within normal OS scheduling jitter.</p>
+<p>For the CPU cost, <code>BenchmarkSpreadSubMsTimers</code> (50 goroutines sleeping at staggered 20–1000µs intervals, each deadline in its own 10µs bucket) measures the worst case.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>                     |  epoll_wait   |      epollpwait2=1         |
+</span></span><span style="display:flex;"><span>                     |    sec/op     |    sec/op       vs base    |
+</span></span><span style="display:flex;"><span>SpreadSubMsTimers-32   1.064m ± 0%    1.019m ± 0%  -4.22% (p=0.000 n=10)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                     | cpu-ns/wakeup |  cpu-ns/wakeup   vs base  |
+</span></span><span style="display:flex;"><span>SpreadSubMsTimers-32   2.089µ ± 3%    7.182µ ± 2%  +243.86% (p=0.000 n=10)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                     |  wakeups/s   |   wakeups/s      vs base   |
+</span></span><span style="display:flex;"><span>SpreadSubMsTimers-32   46.99k ± 0%   49.06k ± 0%  +4.40% (p=0.000 n=10)
+</span></span></code></pre></div><p>CPU per wakeup is 3.4 times higher because each goroutine gets its own syscall. Wall time improves by 4.22% and throughput by 4.40% because the last goroutine no longer waits for <code>epoll_wait</code>&rsquo;s 1ms ceiling. Allocations and allocs/op are flat across both runs.</p>
+<p>For timers that naturally cluster at the same deadline the cost is negligible, since they coalesce into a single wakeup just as <code>epoll_wait</code> would.</p>
+<p>There is also a scheduler angle: an idle M blocks in netpoll until the next timer deadline, which <code>epoll_wait</code> ceils to 1ms, so timers fire late. With <code>epollpwait2</code> enabled, idle Ms wake at the exact deadline. This only matters when Ms are idle; under load, timer checks run at scheduling points regardless.</p>
+<h2 id="conclusion">Conclusion <a href="#conclusion" class="anchor">🔗</a></h2><p>Enable <code>GODEBUG=epollpwait2=1</code> if your workload uses sub-millisecond timers and you&rsquo;d like to opt-in to get better latency.</p>
 <p>Link to tracking issue: <a href="https://github.com/golang/go/issues/53824" target="_blank" rel="noopener">https://github.com/golang/go/issues/53824</a>.</p>
 <p>Special thanks to <a href="https://github.com/dAdAbird" target="_blank" rel="noopener">Andrew Pogrebnoi</a> for the initial iteration on the idea!</p>
     </div>
