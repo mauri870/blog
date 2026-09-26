@@ -100,67 +100,101 @@ int epoll_pwait2(int epfd, struct epoll_event *events, int maxevents,
 
 It takes a [`__kernel_timespec`](https://elixir.bootlin.com/linux/v7.0.11/source/include/uapi/linux/time_types.h#L7-L10). This new structure was added for the Y2038 problem. It's an exclusively 64-bit structure even on 32-bit platforms.
 
-We can probe for it once at startup in [`runtime·osinit`](https://github.com/golang/go/blob/d00c67f297ef6f2cb2cd0e9aae59fa3936bb7eca/src/runtime/os_linux.go#L353), using a zero timeout. There could be seccomp filters in place that would also block it, so confirming it works before the runtime fully initializes and relies on it is a good idea.
+The feature is opt-in via `GODEBUG=epollpwait2=1`. The default retains `epoll_wait` behaviour because precise per-timer wakeups can measurably increase CPU usage for workloads with many distinct sub-millisecond timers. The coalescing section below covers why.
+
+Detection runs once at startup. It checks the kernel version first, then probes the syscall with an invalid epfd. Seccomp filters can block `epoll_pwait2` independently of kernel version, returning `EPERM` instead of `ENOSYS`, so a version check alone is not sufficient:
 
 ```go
 func netpollEpollPwait2Init() {
-    var ts linux.KernelTimespec
-    _, errno := linux.EpollPwait2(-1, nil, 0, &ts)
-    epollpwait2Avail = errno != _ENOSYS
+    if debug.epollpwait2 == 0 {
+        return
+    }
+    if kv, ok := getKernelVersion(); ok && !kv.GE(5, 11) {
+        return
+    }
+    _, errno := linux.EpollPwait2(-1, nil, 0, nil)
+    const badf = 9 // EBADF
+    epollpwait2Avail = errno == badf
 }
 ```
 
-Pretty standard, if it's available the runtime uses it, otherwise it falls back to `epoll_wait`.
+An invalid `epfd` returns `EBADF` when the syscall is available; anything else (including `ENOSYS` or `EPERM` from seccomp) disables the feature.
+
+## The coalescing problem
+
+Nanosecond-precision timeouts exposed a subtlety. `epoll_wait`'s 1ms floor had a side effect: timers with nearby deadlines naturally collapsed into the same wakeup. Remove the floor, and every timer wakes independently.
+
+Consider 50 goroutines sleeping 20µs, 40µs, …, 1000µs. With `epoll_wait` they all round up to 1ms and fire together in one wakeup. With `epoll_pwait2` each gets its own syscall: 50 wakeups.
+
+To recover that batching, the runtime applies graduated bucketing to the timeout before the syscall. Timers whose coalesced deadlines land in the same bucket share a single wakeup. Bucket size scales with the delay at roughly 1% of the requested duration:
+
+```
+< 100µs:   1µs buckets
+<   1ms:  10µs buckets
+<  10ms: 100µs buckets
+>= 10ms:   1ms buckets  (same as epoll_wait)
+```
+
+The delay is always rounded up, so no timer fires early.
 
 Hot path:
 
 ```go
-if epollpwait2Avail {
-    var timeout linux.KernelTimespec
+if epollpwait2Avail && delay != 0 {
+    var ts *linux.KernelTimespec
     if delay > 0 {
-        timeout.Sec = delay / 1e9
-        timeout.Nsec = delay % 1e9
+        var timeout linux.KernelTimespec
+        timeout.SetNsec(netpollCoalesceDelay(delay))
+        ts = &timeout
     }
-
-    n, errno = linux.EpollPwait2(
-        epfd,
-        events,
-        int32(len(events)),
-        &timeout,
-    )
+    // delay < 0: ts == nil, blocks indefinitely.
+    n, errno = linux.EpollPwait2(epfd, events[:], int32(len(events)), ts)
 } else {
-    // fallback to epoll_wait
+    // epoll_pwait2 unavailable or delay == 0 (non-blocking): use epoll_wait.
 }
 ```
 
 ## Results
 
-```bash
-$ go install golang.org/dl/gotip@latest
-$ gotip download 787700
-$ gotip run .
-  avg 53.5µs;  min 51.9µs;  p50 52.5µs;  max 62.2µs;
-  p90 58.1µs;  p99 62.2µs;  p999 62.2µs;  p9999 62.2µs;
-       52µs [  1] ▌
-       52µs [ 79] ████████████████████████████████████████
-       54µs [ 10] █████
-       56µs [  0] 
-       58µs [  2] █
-       60µs [  2] █
-       62µs [  6] ███
-       64µs [  0] 
-       66µs [  0] 
-       68µs [  0] 
+With `GODEBUG=epollpwait2=1` the hrtime benchmark now shows:
 
+```bash
+$ GODEBUG=epollpwait2=1 go run .
+  avg 53.8µs;  min 51.9µs;  p50 52.7µs;  max 65.6µs;
 ```
 
-Sub-millisecond timers finally work. A 50µs sleep now takes 53µs, just a few microseconds of overshoot. That is well within normal OS scheduling jitter.
+versus the default:
 
-There is also a scheduler angle: an idle M blocks in netpoll until the next timer deadline, which epoll_wait ceils to 1ms, so timers fire late. This only matters when Ms are idle; under load, timer checks run at scheduling points regardless. This could shave latency off timer-driven wakeups, but I haven't profiled it.
+```bash
+$ go run .
+  avg 1ms;  min 1ms;  p50 1ms;  max 1.03ms;
+```
+
+Sub-millisecond timers finally work. A 50µs sleep now takes ~54µs, a few microseconds of overshoot well within normal OS scheduling jitter.
+
+For the CPU cost, `BenchmarkSpreadSubMsTimers` (50 goroutines sleeping at staggered 20–1000µs intervals, each deadline in its own 10µs bucket) measures the worst case. 
+
+```
+                     |  epoll_wait   |      epollpwait2=1         |
+                     |    sec/op     |    sec/op       vs base    |
+SpreadSubMsTimers-32   1.064m ± 0%    1.019m ± 0%  -4.22% (p=0.000 n=10)
+
+                     | cpu-ns/wakeup |  cpu-ns/wakeup   vs base  |
+SpreadSubMsTimers-32   2.089µ ± 3%    7.182µ ± 2%  +243.86% (p=0.000 n=10)
+
+                     |  wakeups/s   |   wakeups/s      vs base   |
+SpreadSubMsTimers-32   46.99k ± 0%   49.06k ± 0%  +4.40% (p=0.000 n=10)
+```
+
+CPU per wakeup is 3.4 times higher because each goroutine gets its own syscall. Wall time improves by 4.22% and throughput by 4.40% because the last goroutine no longer waits for `epoll_wait`'s 1ms ceiling. Allocations and allocs/op are flat across both runs.
+
+For timers that naturally cluster at the same deadline the cost is negligible, since they coalesce into a single wakeup just as `epoll_wait` would.
+
+There is also a scheduler angle: an idle M blocks in netpoll until the next timer deadline, which `epoll_wait` ceils to 1ms, so timers fire late. With `epollpwait2` enabled, idle Ms wake at the exact deadline. This only matters when Ms are idle; under load, timer checks run at scheduling points regardless.
 
 ## Conclusion
 
-This change won't speed up most programs. But if your workload uses sub-millisecond timers or deadlines, expect noticeably reduced latency.
+Enable `GODEBUG=epollpwait2=1` if your workload uses sub-millisecond timers and you'd like to opt-in to get better latency.
 
 Link to tracking issue: https://github.com/golang/go/issues/53824.
 
