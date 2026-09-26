@@ -53,7 +53,7 @@ I also ran it on [gonum](https://github.com/gonum/gonum) and it found 103 vector
 
 ## Caveats
 
-I tested it on gonum's `Dsyrk` and `Dsyr2k` and got regressions of 10-30%. Those routines have triangular inner loops: the slice length shrinks from `n` down to `1` as the outer index advances. Short inner loops don't benefit much from SIMD.
+I tested it on gonum and got regressions of 10-30%. Those routines have triangular inner loops: the slice length shrinks from `n` down to `1` as the outer index advances. Short inner loops don't benefit much from SIMD, so make sure to confirm if the code really got faster.
 
 ## Compiler bug
 
