@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>loopvec: automatic SIMD rewrites for Go loops | Mauri870&#39;s dev blog</title>
+
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">    
+<meta name="viewport" content="width=device-width,minimum-scale=1">
+<meta name="description" content="Go 1.27 shipped an experimental simd package. I built a tool that automatically rewrites element-wise loops to use it.">
+<meta name="generator" content="Hugo 0.166.0">
+
+
+  <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+
+
+<link rel="stylesheet" href="/css/style.css">
+
+
+  
+    
+    <link rel="stylesheet" href="https://blog.mauri870.com/css/custom.css">
+  
+
+
+<link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
+
+ 
+  
+
+
+
+
+
+
+
+  </head>
+
+  <body>
+    <nav class="navigation">
+	
+		<a href="/"> <span class="arrow">←</span>Home</a>
+	
+	<a href="/posts">Archive</a>
+	<a href="/tags">Tags</a>
+	<a href="/about">About</a>
+
+	
+
+	
+		<a class="button" href="https://blog.mauri870.com/posts/loopvec-automatic-simd-rewrites-for-go-loops/">Subscribe</a>
+	
+</nav>
+
+
+    <main class="main">
+      
+
+<section id="single">
+    <h1 class="title">loopvec: automatic SIMD rewrites for Go loops</h1>
+
+    <div class="tip">
+        <time datetime="2026-09-25 12:00:00 -0300 -03">Sep 25, 2026</time>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          637 words
+        </span>
+        <span class="split">
+          ·
+        </span>
+        <span>
+          4 minute read
+        </span>
+    </div>
+
+    
+    
+        
+  
+    <aside class="toc">
+      <details>
+          <summary>Table of Contents
+          </summary>
+          <div>
+              <nav id="TableOfContents">
+  <ul>
+    <li><a href="#benchmarks">Benchmarks</a></li>
+    <li><a href="#caveats">Caveats</a></li>
+    <li><a href="#compiler-bug">Compiler bug</a></li>
+    <li><a href="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+          </div>
+      </details>
+    </aside>
+  
+
+
+    
+
+
+    <div class="content">
+      <p>Go 1.27 shipped an experimental <code>simd</code> package. I built a tool that automatically rewrites element-wise loops to use it.</p>
+<hr>
+<p>Go 1.27 introduced a <code>simd</code> package behind the <code>GOEXPERIMENT=simd</code> build flag. Instead of writing assembly, you use types like <code>simd.Float32s</code> and the compiler lowers them to AVX-512, AVX2, or NEON depending on the target. Writing the SIMD form by hand for every loop is tedious, so I built <a href="https://github.com/mauri870/loopvec" target="_blank" rel="noopener">loopvec</a> to do it automatically.</p>
+<p>loopvec analyzes Go packages and rewrites element-wise loops. It recognizes patterns like <code>for i := range dst { dst[i] = a[i] + b[i] }</code>, <code>for i := range dst { dst[i] *= scalar }</code>, and similar shapes, and rewrites them to use the simd package. It supports <code>int8</code> through <code>uint64</code> and both float types.</p>
+<p>The recommended workflow is <code>loopvec -split</code>, which writes the vectorized code to a new <code>_simd.go</code> file guarded by <code>//go:build goexperiment.simd</code> and adds the inverse tag to the original. Both files stay in the repository. The scalar version builds by default, and the SIMD version activates when you set the experiment flag.</p>
+<h2 id="benchmarks">Benchmarks <a href="#benchmarks" class="anchor">🔗</a></h2><p>I ran it on <a href="https://github.com/gorgonia/tensor" target="_blank" rel="noopener">gorgonia/tensor</a>, a Go library for N-dimensional array operations. Its <code>internal/execution</code> package has the arithmetic kernels: functions like <code>AddVSF32</code> (vector-scalar float32 add), <code>MulVSF64</code> (vector-scalar float64 multiply), <code>VecAddI32</code> (element-wise int32 add). Pure Go, no existing assembly. <code>loopvec -split ./internal/execution/</code> detected 94 vectorizable loops across three files.</p>
+<p>Benchmarks on AMD Ryzen 9 9950X3D (AVX-512):</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>                          │    scalar     │              simd               │
+</span></span><span style="display:flex;"><span>                          │    sec/op     │   sec/op     vs base            │
+</span></span><span style="display:flex;"><span>AddVSF32/64-32               12.315n ± 1%   3.608n ± 2%  -70.70% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>AddVSF32/4096-32              759.8n ± 2%   146.3n ± 1%  -80.75% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>AddVSF32/1048576-32          201.41µ ± 3%   37.42µ ± 2%  -81.42% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>MulVSF32/64-32               14.065n ± 2%   3.771n ± 7%  -73.19% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>MulVSF32/4096-32              843.9n ± 2%   149.2n ± 1%  -82.33% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>MulVSF32/1048576-32          219.59µ ± 3%   37.53µ ± 3%  -82.91% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>AddVSF64/64-32               12.475n ± 1%   5.716n ± 6%  -54.18% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>AddVSF64/4096-32              756.8n ± 3%   289.3n ± 2%  -61.77% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>AddVSF64/1048576-32          204.91µ ± 2%   75.05µ ± 2%  -63.37% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>MulVSF64/64-32               12.235n ± 1%   6.027n ± 2%  -50.74% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>MulVSF64/4096-32              756.1n ± 1%   286.1n ± 1%  -62.16% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>MulVSF64/1048576-32          204.16µ ± 1%   74.65µ ± 1%  -63.44% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>VecAddI32/64-32              12.040n ± 2%   4.350n ± 2%  -63.87% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>VecAddI32/4096-32             764.0n ± 3%   195.5n ± 1%  -74.41% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>VecAddI32/1048576-32         204.32µ ± 2%   63.44µ ± 3%  -68.95% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>VecMulI32/64-32              14.405n ± 1%   4.409n ± 3%  -69.40% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>VecMulI32/4096-32             948.9n ± 1%   196.1n ± 3%  -79.33% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>VecMulI32/1048576-32         249.27µ ± 1%   65.54µ ± 2%  -73.71% (p=0.002 n=6)
+</span></span><span style="display:flex;"><span>geomean                        1.302µ        373.9n       -71.28%
+</span></span></code></pre></div><p>71% geomean improvement. These functions are pure loop kernels with no existing vectorization, so the gains are real. For comparison, trivially simple loops like <code>a[i] += b[i]</code> are often already vectorized by the compiler and won&rsquo;t benefit.</p>
+<p>I also ran it on <a href="https://github.com/gonum/gonum" target="_blank" rel="noopener">gonum</a> and it found 103 vectorizable loops across 37 files, including BLAS and LAPACK kernels, optimization routines, and statistical functions.</p>
+<h2 id="caveats">Caveats <a href="#caveats" class="anchor">🔗</a></h2><p>I tested it on gonum&rsquo;s <code>Dsyrk</code> and <code>Dsyr2k</code> and got regressions of 10-30%. Those routines have triangular inner loops: the slice length shrinks from <code>n</code> down to <code>1</code> as the outer index advances. Short inner loops don&rsquo;t benefit much from SIMD.</p>
+<h2 id="compiler-bug">Compiler bug <a href="#compiler-bug" class="anchor">🔗</a></h2><p>While testing and found a compiler bug (<a href="https://github.com/golang/go/issues/80657" target="_blank" rel="noopener">golang/go#80657</a>) where <code>GOEXPERIMENT=simd</code> crashed with an internal compiler error when a simd-tagged file contained a method on a named type. loopvec for now skips any loop inside a method to work around it. I have a preliminary fix at <a href="https://go.dev/cl/839405" target="_blank" rel="noopener">go.dev/cl/839405</a>. With gotip pointing at that CL, loopvec can rewrite methods too.</p>
+<h2 id="conclusion">Conclusion <a href="#conclusion" class="anchor">🔗</a></h2><p><code>GOEXPERIMENT=simd</code> is not in a stable Go release yet, so this is not something you would use in production today. But Go&rsquo;s SIMD support is moving quickly and the results on real code look good. The source is at <a href="https://github.com/mauri870/loopvec" target="_blank" rel="noopener">github.com/mauri870/loopvec</a>.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;-webkit-text-size-adjust:none;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>go install github.com/mauri870/loopvec@latest
+</span></span></code></pre></div>
+    </div>
+
+    
+        <div class="tags">
+            
+                <a href="https://blog.mauri870.com/tags/go">Go</a>
+            
+                <a href="https://blog.mauri870.com/tags/performance">Performance</a>
+            
+                <a href="https://blog.mauri870.com/tags/simd">SIMD</a>
+            
+        </div>
+    
+    
+    
+  <div id="comment">
+    
+    
+  </div>
+
+
+</section>
+
+
+    </main>
+    
+    <footer id="footer">
+    
+        <div id="social">
+
+
+    <a class="symbol" href="https://github.com/mauri870" rel="me" target="_blank">
+        
+        <svg fill="#bbbbbb" width="28" height="28"  viewBox="0 0 72 72" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    
+    <title>Github</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Social-Icons---Rounded-Black" transform="translate(-264.000000, -939.000000)">
+            <g id="Github" transform="translate(264.000000, 939.000000)">
+                <path d="M8,72 L64,72 C68.418278,72 72,68.418278 72,64 L72,8 C72,3.581722 68.418278,-8.11624501e-16 64,0 L8,0 C3.581722,8.11624501e-16 -5.41083001e-16,3.581722 0,8 L0,64 C5.41083001e-16,68.418278 3.581722,72 8,72 Z" id="Rounded" fill="#bbbbbb"></path>
+                <path d="M35.9985,13 C22.746,13 12,23.7870921 12,37.096644 C12,47.7406712 18.876,56.7718301 28.4145,59.9584121 C29.6145,60.1797862 30.0525,59.4358488 30.0525,58.7973276 C30.0525,58.2250681 30.0315,56.7100863 30.0195,54.6996482 C23.343,56.1558981 21.9345,51.4693938 21.9345,51.4693938 C20.844,48.6864054 19.2705,47.9454799 19.2705,47.9454799 C17.091,46.4500754 19.4355,46.4801943 19.4355,46.4801943 C21.843,46.6503662 23.1105,48.9634994 23.1105,48.9634994 C25.2525,52.6455377 28.728,51.5823398 30.096,50.9649018 C30.3135,49.4077535 30.9345,48.3460615 31.62,47.7436831 C26.2905,47.1352808 20.688,45.0691228 20.688,35.8361671 C20.688,33.2052792 21.6225,31.0547881 23.1585,29.3696344 C22.911,28.7597262 22.0875,26.3110578 23.3925,22.9934585 C23.3925,22.9934585 25.4085,22.3459017 29.9925,25.4632101 C31.908,24.9285993 33.96,24.6620468 36.0015,24.6515052 C38.04,24.6620468 40.0935,24.9285993 42.0105,25.4632101 C46.5915,22.3459017 48.603,22.9934585 48.603,22.9934585 C49.9125,26.3110578 49.089,28.7597262 48.8415,29.3696344 C50.3805,31.0547881 51.309,33.2052792 51.309,35.8361671 C51.309,45.0917119 45.6975,47.1292571 40.3515,47.7256117 C41.2125,48.4695491 41.9805,49.9393525 41.9805,52.1877301 C41.9805,55.4089489 41.9505,58.0067059 41.9505,58.7973276 C41.9505,59.4418726 42.3825,60.1918338 43.6005,59.9554002 C53.13,56.7627944 60,47.7376593 60,37.096644 C60,23.7870921 49.254,13 35.9985,13" fill="#FFFFFF"></path>
+            </g>
+        </g>
+    </g>
+</svg>
+    </a>
+
+
+</div>
+
+    
+
+    <div class="copyright">
+    
+       © Copyright 
+       2026 
+       <span class="split">
+        <svg fill="#bbbbbb" width="15" height="15" version="1.1" id="heart-15" xmlns="http://www.w3.org/2000/svg" width="15px" height="15px" viewBox="0 0 15 15">
+  <path d="M13.91,6.75c-1.17,2.25-4.3,5.31-6.07,6.94c-0.1903,0.1718-0.4797,0.1718-0.67,0C5.39,12.06,2.26,9,1.09,6.75&#xA;&#x9;C-1.48,1.8,5-1.5,7.5,3.45C10-1.5,16.48,1.8,13.91,6.75z"/>
+</svg>
+       </span>
+       Mauri de Souza Meneguzzo
+    
+    </div>
+
+    
+      <div class="powerby">
+        Powered by <a href='http://www.gohugo.io/'>Hugo</a> Theme By <a href='https://github.com/nodejh/hugo-theme-mini'>nodejh</a>
+      </div>
+    
+</footer>
+
+
+
+  </body>
+</html>
